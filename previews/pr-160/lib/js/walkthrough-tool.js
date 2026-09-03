@@ -612,7 +612,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   function isSemanticWidth(v) { return isSemanticSize(v); }
   function isSemanticHeight(v) { return isSemanticSize(v); }
 
-  /** 解析 background-image 渐变字符串（linear/radial），返回 { type, angle, start, end } 或 null */
+  /** 颜色字符串（hex/rgb/rgba/hsl）归一化为 hex（不带透明度），无法解析返回原串 */
+  function normalizeColorToHex(color) {
+    const s = String(color || '').trim();
+    if (!s) return '#000000';
+    if (/^#[0-9a-fA-F]{6}$/.test(s)) return s.toLowerCase();
+    if (/^#[0-9a-fA-F]{3}$/.test(s)) {
+      return '#' + s.slice(1).split('').map(c => c + c).join('').toLowerCase();
+    }
+    const m = s.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (m) return rgbToHex(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)).toLowerCase();
+    const hm = s.match(/^hsla?\((\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)%\s*,\s*(\d+(?:\.\d+)?)%/);
+    if (hm) {
+      const rgb = hslToRgb(parseFloat(hm[1]), parseFloat(hm[2]) / 100, parseFloat(hm[3]) / 100);
+      return rgbToHex(rgb[0], rgb[1], rgb[2]).toLowerCase();
+    }
+    return s.toLowerCase();
+  }
+
+  /** 解析 background-image 渐变字符串（linear/radial），返回 { type, angle, start, end, stops } 或 null */
   function parseGradient(bg) {
     if (!bg || bg === 'none' || bg === 'initial') return null;
     const m = String(bg).match(/^(linear|radial)-gradient\((.*)\)$/);
@@ -627,28 +645,52 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const rm = inner.match(/^circle\s*(?:at\s+[^,]+)?\s*,\s*/);
       if (rm) inner = inner.slice(rm[0].length);
     }
-    const colors = inner.split(',').map(s => {
-      const c = s.trim().match(/^(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\))/);
-      return c ? c[1] : null;
+    // 按顶层逗号分割色标（括号内逗号不分割）
+    const parts = [];
+    let current = '', depth = 0;
+    for (const ch of inner) {
+      if (ch === '(') depth++;
+      if (ch === ')') depth--;
+      if (ch === ',' && depth === 0) { parts.push(current.trim()); current = ''; }
+      else current += ch;
+    }
+    if (current.trim()) parts.push(current.trim());
+    const stops = parts.map(p => {
+      const c = p.match(/^(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\))/);
+      if (!c) return null;
+      const posM = p.match(/(\d+(?:\.\d+)?)%\s*$/);
+      const position = posM ? Math.max(0, Math.min(100, parseFloat(posM[1]))) : 0;
+      return { hex: normalizeColorToHex(c[1]), opacity: 100, position };
     }).filter(Boolean);
-    const start = colors[0] || '#ffffff';
-    const end = colors[1] || colors[0] || '#000000';
-    return { type, angle, start, end };
+    if (!stops.length) return null;
+    stops.sort((a, b) => a.position - b.position);
+    const start = stops[0].hex;
+    const end = stops[stops.length - 1].hex;
+    return { type, angle, start, end, stops };
   }
 
-  /** 依据面板渐变字段构建 background-image 值（gradientEnabled 关闭时返回空串清除） */
+  /** 依据面板渐变字段构建 background-image 值（gradientEnabled 关闭时返回空串清除）
+   *  功能 4：优先使用多色标 gradientStops（2~5 个），否则回退旧双色标字段 */
   function buildGradient(d) {
     if (!d) return '';
     const enabled = d.gradientEnabled === true || d.gradientEnabled === 'true';
     if (!enabled) return '';
-    const start = d.gradientStart || '#ffffff';
-    const end = d.gradientEnd || '#000000';
-    const flip = d.gradientFlip === true || d.gradientFlip === 'true';
-    const s = flip ? end : start;
-    const e = flip ? start : end;
-    if (d.gradientType === 'radial') return `radial-gradient(circle, ${s} 0%, ${e} 100%)`;
+    let stops;
+    if (Array.isArray(d.gradientStops) && d.gradientStops.length >= 2) {
+      stops = d.gradientStops.slice(0, 5).sort((a, b) => a.position - b.position);
+    } else {
+      stops = [
+        { hex: d.gradientStart || '#ffffff', opacity: 100, position: 0 },
+        { hex: d.gradientEnd || '#000000', opacity: 100, position: 100 },
+      ];
+    }
+    const stopStr = stops
+      .map(s => `${hexOpacityToRgba(s.hex || '#000000', s.opacity != null ? s.opacity : 100)} ${Math.round(s.position)}%`)
+      .join(', ');
+    if (!stopStr) return '';
+    if (d.gradientType === 'radial') return `radial-gradient(circle, ${stopStr})`;
     const angle = (parseFloat(d.gradientAngle) || 180);
-    return `linear-gradient(${angle}deg, ${s} 0%, ${e} 100%)`;
+    return `linear-gradient(${angle}deg, ${stopStr})`;
   }
 
   /** 解析 box-shadow 字符串为图层数组 */
@@ -798,6 +840,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 字体
       fontSize: parseNumeric(cs.fontSize),
       fontWeight: cs.fontWeight,
+      // 文本渐变（background-clip:text + color transparent，功能 4）
+      colorGradient: (() => {
+        if (String(cs.backgroundClip || '').indexOf('text') === -1) return null;
+        const g = parseGradient(cs.backgroundImage);
+        if (!g || !g.stops || g.stops.length < 2) return null;
+        return { type: g.type, angle: g.angle, stops: g.stops };
+      })(),
       colorHex: color.hex,
       colorOpacity: color.opacity,
       lineHeight: cs.lineHeight === 'normal' ? 1.4 : parseNumeric(cs.lineHeight),
@@ -815,6 +864,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       gradientStart: (parseGradient(cs.backgroundImage) || { start: '#ffffff' }).start,
       gradientEnd: (parseGradient(cs.backgroundImage) || { end: '#000000' }).end,
       gradientAngle: (parseGradient(cs.backgroundImage) || { angle: 180 }).angle,
+      gradientStops: (parseGradient(cs.backgroundImage) || {}).stops || null,
       gradientFlip: false,
       // 描边
       strokeWidth: parseNumeric(cs.borderTopWidth),
@@ -837,6 +887,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** 应用单个属性到元素，返回 {property, oldValue, newValue} */
   function applyStyleProperty(el, property, value) {
     const oldValue = getComputedStyle(el)[property];
+    // 文本渐变（功能 4）：color 值含 gradient() → background-clip:text 应用；普通色 → 清除残留
+    if (property === 'color') {
+      const v = String(value || '');
+      if (v.indexOf('gradient(') !== -1) {
+        el.style.backgroundImage = v;
+        el.style.webkitBackgroundClip = 'text';
+        el.style.backgroundClip = 'text';
+        el.style.color = 'transparent';
+        return { property, oldValue, newValue: value };
+      }
+      if (el.style.backgroundClip === 'text' || el.style.webkitBackgroundClip === 'text') {
+        el.style.backgroundImage = '';
+        el.style.webkitBackgroundClip = '';
+        el.style.backgroundClip = '';
+      }
+      el.style.color = value;
+      return { property, oldValue, newValue: value };
+    }
     el.style[property] = value;
     return { property, oldValue, newValue: value };
   }
@@ -1722,6 +1790,245 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   }
 
   // ============================================================
+  // wego-wt-inspector: 悬停/选中元信息 overlay（功能 5，替代网格吸附）
+  // 四边延长线（到视口边缘）+ 元信息气泡(稳定class/tag · 宽×高)
+  // + 布局间距标注(到最近参考) + padding/margin 色块（hover/点击显示数值）
+  // z-index：页面之上、样式面板之下；rAF 跟踪元素位置
+  // ============================================================
+  class WegoWtInspector extends HTMLElement {
+    constructor() {
+      super();
+      this._shadow = this.attachShadow({ mode: 'open' });
+      this._targetEl = null;
+      this._rafId = null;
+    }
+    connectedCallback() {
+      this._render();
+    }
+    disconnectedCallback() {
+      this._stopTracking();
+    }
+    show(el) {
+      this._targetEl = el;
+      this._update();
+      this._startTracking();
+    }
+    hide() {
+      this._targetEl = null;
+      this._stopTracking();
+      this.style.display = 'none';
+      this._hideTooltip();
+    }
+    _startTracking() {
+      this._stopTracking();
+      const update = () => {
+        if (this._targetEl) {
+          this._update();
+          this._rafId = requestAnimationFrame(update);
+        }
+      };
+      this._rafId = requestAnimationFrame(update);
+    }
+    _stopTracking() {
+      if (this._rafId) {
+        cancelAnimationFrame(this._rafId);
+        this._rafId = null;
+      }
+    }
+    /** 布局间距标注：四边到最近参考（相邻兄弟边缘 / 父 content box 边缘） */
+    _layoutGaps(el, rect) {
+      const gaps = { left: null, top: null, right: null, bottom: null };
+      const parent = el.parentElement;
+      if (!parent) return gaps;
+      const pcs = getComputedStyle(parent);
+      const pr = parent.getBoundingClientRect();
+      const contentLeft = pr.left + (parseFloat(pcs.paddingLeft) || 0);
+      const contentTop = pr.top + (parseFloat(pcs.paddingTop) || 0);
+      const contentRight = pr.right - (parseFloat(pcs.paddingRight) || 0);
+      const contentBottom = pr.bottom - (parseFloat(pcs.paddingBottom) || 0);
+      let refL = null, refT = null, refR = null, refB = null;
+      Array.from(parent.children).forEach(s => {
+        if (s === el) return;
+        const sr = s.getBoundingClientRect();
+        if (sr.right <= rect.left + 0.5 && (refL === null || sr.right > refL)) refL = sr.right;
+        if (sr.left >= rect.right - 0.5 && (refR === null || sr.left < refR)) refR = sr.left;
+        if (sr.bottom <= rect.top + 0.5 && (refT === null || sr.bottom > refT)) refT = sr.bottom;
+        if (sr.top >= rect.bottom - 0.5 && (refB === null || sr.top < refB)) refB = sr.top;
+      });
+      gaps.left = { from: refL !== null ? refL : contentLeft, dist: rect.left - (refL !== null ? refL : contentLeft) };
+      gaps.top = { from: refT !== null ? refT : contentTop, dist: rect.top - (refT !== null ? refT : contentTop) };
+      gaps.right = { from: refR !== null ? refR : contentRight, dist: (refR !== null ? refR : contentRight) - rect.right };
+      gaps.bottom = { from: refB !== null ? refB : contentBottom, dist: (refB !== null ? refB : contentBottom) - rect.bottom };
+      return gaps;
+    }
+    /** 元信息气泡文案：优先稳定 class，其次 tagName + 尺寸 */
+    _elementLabel(el, rect) {
+      let name = '';
+      try { name = getFirstStableClass(el) || el.tagName.toLowerCase(); } catch (e) { name = el.tagName.toLowerCase(); }
+      return `${name} · ${Math.round(rect.width)}×${Math.round(rect.height)}`;
+    }
+    _clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    _update() {
+      const el = this._targetEl;
+      if (!el || !el.isConnected) { this.hide(); return; }
+      const rect = el.getBoundingClientRect();
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const cs = getComputedStyle(el);
+      const pad = {
+        l: parseFloat(cs.paddingLeft) || 0, r: parseFloat(cs.paddingRight) || 0,
+        t: parseFloat(cs.paddingTop) || 0, b: parseFloat(cs.paddingBottom) || 0,
+      };
+      const mar = {
+        l: parseFloat(cs.marginLeft) || 0, r: parseFloat(cs.marginRight) || 0,
+        t: parseFloat(cs.marginTop) || 0, b: parseFloat(cs.marginBottom) || 0,
+      };
+      const gaps = this._layoutGaps(el, rect);
+      const L = rect.left, T = rect.top, R = rect.right, B = rect.bottom;
+      let svg = '';
+      // 1. 四边延长线（延伸到视口边缘，半透明红虚线）
+      svg += `<line class="guide" x1="${L}" y1="0" x2="${L}" y2="${vh}"/>`;
+      svg += `<line class="guide" x1="${R}" y1="0" x2="${R}" y2="${vh}"/>`;
+      svg += `<line class="guide" x1="0" y1="${T}" x2="${vw}" y2="${T}"/>`;
+      svg += `<line class="guide" x1="0" y1="${B}" x2="${vw}" y2="${B}"/>`;
+      // 2. 间距标注线 + 数字（有参考时）
+      const num = (x, y, d) => `<text class="num" x="${x}" y="${y}" text-anchor="middle">${Math.round(d)}</text>`;
+      if (gaps.left) {
+        const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
+        svg += `<line class="sp" x1="${gaps.left.from}" y1="${gy}" x2="${L}" y2="${gy}"/>`;
+        svg += num((gaps.left.from + L) / 2, gy - 4, gaps.left.dist);
+      }
+      if (gaps.right) {
+        const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
+        svg += `<line class="sp" x1="${R}" y1="${gy}" x2="${gaps.right.from}" y2="${gy}"/>`;
+        svg += num((R + gaps.right.from) / 2, gy - 4, gaps.right.dist);
+      }
+      if (gaps.top) {
+        const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
+        svg += `<line class="sp" x1="${gx}" y1="${gaps.top.from}" x2="${gx}" y2="${T}"/>`;
+        svg += `<text class="num" x="${gx}" y="${this._clamp((gaps.top.from + T) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.top.dist)}</text>`;
+      }
+      if (gaps.bottom) {
+        const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
+        svg += `<line class="sp" x1="${gx}" y1="${B}" x2="${gx}" y2="${gaps.bottom.from}"/>`;
+        svg += `<text class="num" x="${gx}" y="${this._clamp((B + gaps.bottom.from) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.bottom.dist)}</text>`;
+      }
+      // 3. padding 色块（content box，青色）
+      const padRect = { x: L + pad.l, y: T + pad.t, w: Math.max(0, rect.width - pad.l - pad.r), h: Math.max(0, rect.height - pad.t - pad.b) };
+      if (padRect.w > 0 && padRect.h > 0 && (pad.l || pad.r || pad.t || pad.b)) {
+        svg += `<rect class="pad-r" data-kind="pad" x="${padRect.x}" y="${padRect.y}" width="${padRect.w}" height="${padRect.h}" rx="1"/>`;
+      }
+      // margin 色块（margin box 外扩，橙色）
+      if (mar.l || mar.r || mar.t || mar.b) {
+        const mx = L - mar.l, my = T - mar.t;
+        const mw = rect.width + mar.l + mar.r, mh = rect.height + mar.t + mar.b;
+        // margin 色块画在 border box 外缘（厚度即 margin 值），0 值用 2px 细条保证可见
+        const th = 2;
+        if (mar.t > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my}" width="${mw}" height="${Math.max(mar.t, th)}"/>`;
+        if (mar.b > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my + mh - Math.max(mar.b, th)}" width="${mw}" height="${Math.max(mar.b, th)}"/>`;
+        if (mar.l > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my}" width="${Math.max(mar.l, th)}" height="${mh}"/>`;
+        if (mar.r > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx + mw - Math.max(mar.r, th)}" y="${my}" width="${Math.max(mar.r, th)}" height="${mh}"/>`;
+      }
+      this._svg.innerHTML = svg;
+      // 绑定色块 hover/点击 → 显示数值
+      this._bindSwatches(pad, mar);
+      // 气泡
+      const bubble = this._shadow.querySelector('.bubble');
+      bubble.querySelector('.bubble-text').textContent = this._elementLabel(el, rect);
+      const bw = bubble.getBoundingClientRect().width || 120;
+      const bh = bubble.getBoundingClientRect().height || 24;
+      let top = T - bh - 6;
+      if (top < 40) top = B + 6;
+      let left = L + rect.width / 2 - bw / 2;
+      left = this._clamp(left, 8, vw - bw - 8);
+      bubble.style.top = top + 'px';
+      bubble.style.left = left + 'px';
+      this.style.display = 'block';
+    }
+    _bindSwatches(pad, mar) {
+      const tip = this._shadow.querySelector('.tooltip');
+      const showTip = (text, x, y) => {
+        tip.textContent = text;
+        tip.style.left = this._clamp(x + 10, 8, window.innerWidth - 140) + 'px';
+        tip.style.top = this._clamp(y + 14, 8, window.innerHeight - 30) + 'px';
+        tip.style.display = 'block';
+      };
+      const hideTip = () => this._hideTooltip();
+      const padText = `padding: ${Math.round(pad.t)}px ${Math.round(pad.r)}px ${Math.round(pad.b)}px ${Math.round(pad.l)}px`;
+      const marText = `margin: ${Math.round(mar.t)}px ${Math.round(mar.r)}px ${Math.round(mar.b)}px ${Math.round(mar.l)}px`;
+      const self = this;
+      this._svg.querySelectorAll('rect.pad-r').forEach(r => {
+        r.onmouseenter = (e) => showTip(padText, e.clientX, e.clientY);
+        r.onmouseleave = hideTip;
+        r.onclick = (e) => showTip(padText, e.clientX, e.clientY);
+      });
+      this._svg.querySelectorAll('rect.mar-r').forEach(r => {
+        r.onmouseenter = (e) => showTip(marText, e.clientX, e.clientY);
+        r.onmouseleave = hideTip;
+        r.onclick = (e) => showTip(marText, e.clientX, e.clientY);
+      });
+    }
+    _hideTooltip() {
+      const tip = this._shadow.querySelector('.tooltip');
+      if (tip) tip.style.display = 'none';
+    }
+    _render() {
+      this._shadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            inset: 0;
+            z-index: 9545;
+            pointer-events: none;
+            display: none;
+          }
+          svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+          .guide { stroke: rgba(255,77,79,0.45); stroke-width: 1; stroke-dasharray: 4 5; }
+          .sp { stroke: rgba(255,77,79,0.9); stroke-width: 1; }
+          .num {
+            fill: #ff4d4f; font-size: 11px; font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round;
+          }
+          .pad-r { fill: rgba(64,158,255,0.16); stroke: rgba(64,158,255,0.7); stroke-width: 1; pointer-events: auto; cursor: default; }
+          .pad-r:hover { fill: rgba(64,158,255,0.34); }
+          .mar-r { fill: rgba(255,170,0,0.16); stroke: rgba(255,170,0,0.7); stroke-width: 1; pointer-events: auto; cursor: default; }
+          .mar-r:hover { fill: rgba(255,170,0,0.34); }
+          .bubble {
+            position: absolute;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(30, 30, 30, 0.88);
+            color: #fff;
+            font-size: 11px;
+            line-height: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            white-space: nowrap;
+            pointer-events: none;
+          }
+          .tooltip {
+            position: fixed;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #111;
+            color: #fff;
+            font-size: 11px;
+            line-height: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            white-space: nowrap;
+            pointer-events: none;
+            display: none;
+            z-index: 2;
+          }
+        </style>
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="bubble"><span class="bubble-text"></span></div>
+        <div class="tooltip"></div>
+      `;
+      this._svg = this._shadow.getElementById('svg');
+    }
+  }
+
+  // ============================================================
   // wego-wt-color-picker: 颜色选择器
   // ============================================================
   class WegoWtColorPicker extends HTMLElement {
@@ -1731,14 +2038,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._callback = null;
       this._hex = '#000000';
       this._opacity = 100;
-      this._hsv = { h: 0, s: 0, v: 0 };
-      this._format = 'hex'; // hex | rgb | hsb
+      this._hsl = { h: 0, s: 0, l: 0 };
+      this._format = 'hex'; // hex | rgb | hsl
+      // 渐变模式状态（功能 4：渐变融入颜色选择器）
+      this._mode = 'solid';      // solid | gradient
+      this._allowGradient = false; // 填充/文本色支持，描边不支持
+      this._gradType = 'linear'; // linear | radial
+      this._angle = 180;
+      this._stops = [
+        { hex: '#ffffff', opacity: 100, position: 0 },
+        { hex: '#000000', opacity: 100, position: 100 },
+      ];
+      this._activeStop = 0;
       this._dragType = null;
     }
     connectedCallback() {
       this._render();
     }
-    open(triggerEl, hex, opacity, callback) {
+    open(triggerEl, hex, opacity, callback, opts) {
       // token 值（var(--xxx)）需要解析成实际 hex
       let resolvedHex = hex || '#000000';
       if (isTokenValue(resolvedHex)) {
@@ -1752,7 +2069,35 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       this._hex = resolvedHex;
       this._opacity = opacity !== undefined ? opacity : 100;
-      this._hsv = this._hexToHsv(this._hex);
+      // 渐变状态初始化（功能 4：渐变融入颜色选择器）
+      this._allowGradient = !!(opts && opts.allowGradient);
+      if (opts && opts.mode === 'gradient' && opts.stops && opts.stops.length >= 2) {
+        this._mode = 'gradient';
+        this._gradType = opts.gradType === 'radial' ? 'radial' : 'linear';
+        this._angle = opts.angle != null ? Math.round(Number(opts.angle)) : 180;
+        this._stops = opts.stops
+          .map(s => ({
+            hex: String(s.hex || '#000000').toLowerCase(),
+            opacity: s.opacity != null ? Math.round(Number(s.opacity)) : 100,
+            position: Math.max(0, Math.min(100, s.position != null ? Math.round(Number(s.position)) : 0)),
+          }))
+          .slice(0, 5)
+          .sort((a, b) => a.position - b.position);
+        while (this._stops.length < 2) this._stops.push({ hex: '#000000', opacity: 100, position: 100 });
+        this._activeStop = 0;
+        this._hex = this._stops[0].hex;
+        this._opacity = this._stops[0].opacity;
+      } else {
+        this._mode = 'solid';
+        this._gradType = 'linear';
+        this._angle = 180;
+        this._stops = [
+          { hex: '#ffffff', opacity: 100, position: 0 },
+          { hex: '#000000', opacity: 100, position: 100 },
+        ];
+        this._activeStop = 0;
+      }
+      this._hsl = this._hexToHsl(this._hex);
       this._callback = callback;
       // 先关闭旧实例，移除上一轮 document mousedown/touchstart 监听器，避免累积泄漏
       this.close();
@@ -1792,18 +2137,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     }
 
-    // ── 颜色转换（HSV 模型） ─────────────────────────────
-    _hexToHsv(hex) {
+    // ── 颜色转换（HSL 模型） ─────────────────────────────
+    _hexToHsl(hex) {
       const r = parseInt(hex.slice(1, 3), 16) / 255;
       const g = parseInt(hex.slice(3, 5), 16) / 255;
       const b = parseInt(hex.slice(5, 7), 16) / 255;
       const max = Math.max(r, g, b), min = Math.min(r, g, b);
       const d = max - min;
-      let h, s, v = max;
-      s = max === 0 ? 0 : d / max;
+      let h, s, l = (max + min) / 2;
       if (max === min) {
         h = 0;
+        s = 0;
       } else {
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
           case r: h = (g - b) / d + (g < b ? 6 : 0); break;
           case g: h = (b - r) / d + 2; break;
@@ -1811,29 +2157,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         h /= 6;
       }
-      return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(v * 100) };
+      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
     }
-    _hsvToHex(h, s, v) {
-      h /= 360; s /= 100; v /= 100;
-      const i = Math.floor(h * 6);
-      const f = h * 6 - i;
-      const p = v * (1 - s);
-      const q = v * (1 - f * s);
-      const t = v * (1 - (1 - f) * s);
-      let r, g, b;
-      switch (i % 6) {
-        case 0: r = v; g = t; b = p; break;
-        case 1: r = q; g = v; b = p; break;
-        case 2: r = p; g = v; b = t; break;
-        case 3: r = p; g = q; b = v; break;
-        case 4: r = t; g = p; b = v; break;
-        case 5: r = v; g = p; b = q; break;
-      }
+    _hslToHex(h, s, l) {
+      h = (((h % 360) + 360) % 360) / 360; s /= 100; l /= 100;
+      const a = s * Math.min(l, 1 - l);
+      const f = (n) => {
+        const k = (n + h * 12) % 12;
+        return l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+      };
       const toHex = x => {
-        const val = Math.round(x * 255).toString(16);
+        const val = Math.round(f(x) * 255).toString(16);
         return val.length === 1 ? '0' + val : val;
       };
-      return '#' + toHex(r) + toHex(g) + toHex(b);
+      return '#' + toHex(0) + toHex(8) + toHex(4);
     }
     _hexToRgb(hex) {
       return {
@@ -1850,20 +2187,23 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       return '#' + toHex(r) + toHex(g) + toHex(b);
     }
     _getFormatValue() {
-      const { h, s, v } = this._hsv;
+      const { h, s, l } = this._hsl;
       const rgb = this._hexToRgb(this._hex);
       switch (this._format) {
         case 'rgb': return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
-        case 'hsb': return `${h}, ${s}%, ${v}%`;
+        case 'hsl': return `${h}, ${s}%, ${l}%`;
         default: return this._hex.toUpperCase();
       }
     }
 
     // ── 渲染 ──────────────────────────────────────────────
     _render() {
-      const { h } = this._hsv;
-      const formatValue = this._getFormatValue();
+      const { h, s, l } = this._hsl;
+      const rgb = this._hexToRgb(this._hex);
       const hasEyedropper = typeof window !== 'undefined' && 'EyeDropper' in window;
+      const channelInputs = this._renderChannelInputs(h, s, l, rgb);
+      // 渐变预览 CSS（色标条背景）
+      const gradientCss = this._gradientCss();
 
       this._shadow.innerHTML = `
         <style>
@@ -1918,6 +2258,74 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           .close-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
 
+          /* 实色/渐变切换（功能 4） */
+          .segmented {
+            display: flex; border: 1px solid var(--border-color);
+            border-radius: 8px; overflow: hidden; flex-shrink: 0;
+          }
+          .seg-btn {
+            flex: 1; padding: 5px 0; border: none; background: transparent;
+            color: var(--text-secondary); font-size: 11px; cursor: pointer;
+          }
+          .seg-btn.active { background: var(--text-brand); color: #fff; }
+          .seg-btn + .seg-btn { border-left: 1px solid var(--border-color); }
+
+          /* 渐变编辑器（功能 4） */
+          .gradient-editor {
+            display: flex; flex-direction: column; gap: 6px;
+            padding: 8px; border: 1px solid var(--border-color);
+            border-radius: 8px; background: var(--bg-subtle);
+          }
+          .gradient-angle-row {
+            display: flex; align-items: center; gap: 6px;
+          }
+          .angle-btn {
+            flex-shrink: 0; padding: 3px 6px; border: 1px solid var(--border-color);
+            border-radius: 6px; background: transparent; color: var(--text-secondary);
+            font-size: 11px; cursor: pointer;
+          }
+          .angle-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
+          .gradient-angle-slider {
+            flex: 1; min-width: 0; height: 4px; appearance: none; -webkit-appearance: none;
+            background: linear-gradient(to right, transparent, #fff); border-radius: 2px;
+            outline: none; cursor: pointer;
+          }
+          .gradient-angle-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%;
+            background: #fff; border: 1px solid rgba(0,0,0,0.4); cursor: pointer;
+          }
+          .gradient-angle-value {
+            flex-shrink: 0; width: 34px; text-align: center;
+            font-size: 11px; color: var(--text-secondary);
+            font-family: "SF Mono", Menlo, monospace;
+          }
+          .gradient-toolbar { display: flex; align-items: center; gap: 6px; }
+          .gradient-tool-btn {
+            flex-shrink: 0; padding: 3px 8px; border: 1px solid var(--border-color);
+            border-radius: 6px; background: transparent; color: var(--text-secondary);
+            font-size: 11px; cursor: pointer;
+          }
+          .gradient-tool-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-default); }
+          .gradient-tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+          .gradient-stopbar {
+            position: relative; height: 26px; border-radius: 6px;
+            background: var(--bg-surface); overflow: hidden;
+            cursor: copy; user-select: none; -webkit-user-select: none;
+          }
+          .stopbar-preview {
+            position: absolute; inset: 0; pointer-events: none;
+          }
+          .stop-dot {
+            position: absolute; top: 50%; width: 14px; height: 14px;
+            border-radius: 50%; border: 2px solid #fff;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
+            cursor: grab; box-sizing: border-box;
+          }
+          .stop-dot.active {
+            box-shadow: 0 0 0 2px var(--text-brand), 0 0 0 3px rgba(255,255,255,0.6);
+          }
+
           /* SV 二维取色面板 — 裁剪超出圆角的内容 */
           .sv-panel {
             position: relative; width: 100%; height: 150px;
@@ -1955,16 +2363,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             pointer-events: none;
           }
 
-          /* 不透明度 — 不裁剪，选点可超出边缘 */
-          .opacity-wrap { display: flex; flex-direction: column; gap: 4px; }
-          .opacity-label {
-            display: flex; align-items: center; justify-content: space-between;
-            font-size: 11px; color: var(--text-tertiary);
+          /* 滑块组：吸管 | 色相 | 透明度（水平并排） */
+          .slider-group {
+            display: flex; align-items: center; gap: 6px;
           }
-          .opacity-num-wrap { display: flex; align-items: center; gap: 2px; }
+          .slider-group .hue-slider,
+          .slider-group .opacity-slider {
+            flex: 1; min-width: 0;
+          }
+          .opacity-num-wrap { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
           .opacity-num {
-            width: 34px; height: 20px; padding: 0 4px;
-            border: 1px solid var(--border-color); border-radius: 5px;
+            width: 36px; height: 28px; padding: 0 4px;
+            border: 1px solid var(--border-color); border-radius: 7px;
             background: var(--bg-subtle); color: var(--text-default);
             font-size: 11px; text-align: center; outline: none;
             box-sizing: border-box;
@@ -1998,7 +2408,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             pointer-events: none;
           }
 
-          /* 格式行 */
+          /* 格式行：格式切换 + 通道输入 + 透明度 */
           .format-row {
             display: flex; align-items: center; gap: 6px;
           }
@@ -2016,15 +2426,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             transform: translateY(-50%); font-size: 9px;
             color: var(--text-tertiary); pointer-events: none;
           }
-          .format-input {
-            flex: 1; height: 28px; padding: 0 8px;
+          .channel-inputs {
+            flex: 1; min-width: 0;
+            display: flex; align-items: center; gap: 3px;
+          }
+          .channel-label {
+            font-size: 10px; font-family: "SF Mono", Menlo, monospace;
+            color: var(--text-tertiary); flex-shrink: 0;
+          }
+          .channel-input {
+            flex: 1; min-width: 0; height: 28px; padding: 0 4px;
             border: 1px solid var(--border-color); border-radius: 7px;
             background: var(--bg-subtle); color: var(--text-default);
             font-size: 12px; font-family: "SF Mono", Menlo, monospace;
-            outline: none; text-transform: uppercase; box-sizing: border-box;
-            min-width: 0;
+            outline: none; text-align: center; box-sizing: border-box;
           }
-          .format-input:focus { border-color: var(--text-brand); }
+          .channel-input:focus { border-color: var(--text-brand); }
           .eyedropper-btn {
             width: 28px; height: 28px; flex-shrink: 0;
             border: 1px solid var(--border-color); border-radius: 7px;
@@ -2041,26 +2458,52 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
 
-          <!-- SV 二维取色面板 -->
+          <!-- 实色/渐变切换（填充/文本色支持，描边不支持） -->
+          ${this._allowGradient ? `
+          <div class="segmented">
+            <button class="seg-btn ${this._mode === 'solid' ? 'active' : ''}" type="button" data-mode="solid">实色</button>
+            <button class="seg-btn ${this._mode === 'gradient' ? 'active' : ''}" type="button" data-mode="gradient">渐变</button>
+          </div>` : ''}
+
+          <!-- 渐变编辑器（渐变模式下） -->
+          ${this._mode === 'gradient' ? `
+          <div class="gradient-editor" data-gradient-editor>
+            <div class="gradient-angle-row" data-grad-linear-row style="${this._gradType === 'radial' ? 'display:none' : ''}">
+              <button class="angle-btn" type="button" data-angle-btn="-45" title="角度减 45°">−45°</button>
+              <input class="gradient-angle-slider" type="range" min="0" max="360" step="1" value="${this._angle}" data-angle-slider />
+              <span class="gradient-angle-value" data-angle-value>${this._angle}°</span>
+              <button class="angle-btn" type="button" data-angle-btn="45" title="角度加 45°">+45°</button>
+            </div>
+            <div class="gradient-toolbar">
+              <button class="gradient-tool-btn" type="button" data-grad-type title="${this._gradType === 'linear' ? '切换为径向渐变' : '切换为线性渐变'}">
+                ${this._gradType === 'linear' ? '线性' : '径向'}
+              </button>
+              <button class="gradient-tool-btn" type="button" data-stop-flip title="调转渐变方向">⇄ 调转</button>
+              <button class="gradient-tool-btn" type="button" data-stop-delete title="删除当前色标" ${this._stops.length <= 2 ? 'disabled' : ''}>− 删除</button>
+            </div>
+            <div class="gradient-stopbar" data-stopbar title="点击空白处添加色标，拖动圆点调整位置">
+              <div class="stopbar-preview" data-stopbar-preview style="background:${gradientCss};"></div>
+              ${this._stops.map((st, i) => `
+                <div class="stop-dot ${i === this._activeStop ? 'active' : ''}" data-stop-dot="${i}" style="left:${st.position}%;background:${hexOpacityToRgba(st.hex, st.opacity)};" title="色标 ${i + 1}"></div>
+              `).join('')}
+            </div>
+          </div>` : ''}
+
+          <!-- SV 二维取色面板（S 横轴 / L 纵轴） -->
           <div class="sv-panel" data-sv-panel style="background:hsl(${h},100%,50%);">
             <div class="sv-layer sv-white"></div>
             <div class="sv-layer sv-black"></div>
-            <div class="sv-cursor" data-sv-cursor style="left:${this._hsv.s}%;top:${100 - this._hsv.v}%;"></div>
+            <div class="sv-cursor" data-sv-cursor style="left:${s}%;top:${100 - l}%;"></div>
           </div>
 
-          <!-- 色相条 -->
-          <div class="hue-slider" data-hue-slider>
-            <div class="hue-cursor" data-hue-cursor style="left:${h / 360 * 100}%;"></div>
-          </div>
-
-          <!-- 不透明度 -->
-          <div class="opacity-wrap">
-            <div class="opacity-label">
-              <span>不透明度</span>
-              <span class="opacity-num-wrap">
-                <input class="opacity-num" type="text" value="${this._opacity}" data-opacity-num inputmode="numeric" />
-                <span class="opacity-unit">%</span>
-              </span>
+          <!-- 滑块组：吸管 | 色相 | 透明度 -->
+          <div class="slider-group">
+            ${hasEyedropper ? `
+            <button class="eyedropper-btn" type="button" data-eyedropper title="从页面取色">
+              ${ICONS.eyedropper}
+            </button>` : ''}
+            <div class="hue-slider" data-hue-slider>
+              <div class="hue-cursor" data-hue-cursor style="left:${h / 360 * 100}%;"></div>
             </div>
             <div class="opacity-slider" data-opacity-slider>
               <div class="opacity-checker"></div>
@@ -2069,24 +2512,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             </div>
           </div>
 
-          <!-- 格式切换 + 输入 + 吸管 -->
+          <!-- 格式切换 + 通道输入 + 透明度 -->
           <div class="format-row">
             <div class="format-select-wrap">
               <select class="format-select" data-format-select>
                 <option value="hex" ${this._format === 'hex' ? 'selected' : ''}>HEX</option>
                 <option value="rgb" ${this._format === 'rgb' ? 'selected' : ''}>RGB</option>
-                <option value="hsb" ${this._format === 'hsb' ? 'selected' : ''}>HSB</option>
+                <option value="hsl" ${this._format === 'hsl' ? 'selected' : ''}>HSL</option>
               </select>
             </div>
-            <input class="format-input" type="text" value="${formatValue}" data-format-input spellcheck="false" />
-            ${hasEyedropper ? `
-            <button class="eyedropper-btn" type="button" data-eyedropper title="从页面取色">
-              ${ICONS.eyedropper}
-            </button>` : ''}
+            <div class="channel-inputs">${channelInputs}</div>
+            <span class="opacity-num-wrap">
+              <input class="opacity-num" type="text" value="${this._opacity}" data-opacity-num inputmode="numeric" />
+              <span class="opacity-unit">%</span>
+            </span>
           </div>
         </div>
       `;
       this._bindEvents();
+    }
+
+    // 通道输入组渲染：hex 单框 / rgb 三框 / hsl 三框
+    _renderChannelInputs(h, s, l, rgb) {
+      if (this._format === 'hex') {
+        return `<input class="channel-input" type="text" value="${this._hex.toUpperCase()}" data-channel="hex" spellcheck="false" />`;
+      }
+      if (this._format === 'rgb') {
+        return [
+          `<span class="channel-label">R</span><input class="channel-input" type="text" inputmode="numeric" value="${rgb.r}" data-channel="r" />`,
+          `<span class="channel-label">G</span><input class="channel-input" type="text" inputmode="numeric" value="${rgb.g}" data-channel="g" />`,
+          `<span class="channel-label">B</span><input class="channel-input" type="text" inputmode="numeric" value="${rgb.b}" data-channel="b" />`,
+        ].join('');
+      }
+      return [
+        `<span class="channel-label">H</span><input class="channel-input" type="text" inputmode="numeric" value="${h}" data-channel="h" />`,
+        `<span class="channel-label">S</span><input class="channel-input" type="text" inputmode="numeric" value="${s}" data-channel="s" />`,
+        `<span class="channel-label">L</span><input class="channel-input" type="text" inputmode="numeric" value="${l}" data-channel="l" />`,
+      ].join('');
     }
 
     // ── 事件绑定 ──────────────────────────────────────────
@@ -2097,19 +2559,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._setupDrag(this._shadow.querySelector('[data-sv-panel]'), 'sv', (clientX, clientY, rect) => {
         const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
         const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-        this._hsv.s = Math.round(x * 100);
-        this._hsv.v = Math.round((1 - y) * 100);
-        this._hex = this._hsvToHex(this._hsv.h, this._hsv.s, this._hsv.v);
-        this._syncFromHsv();
+        this._hsl.s = Math.round(x * 100);
+        this._hsl.l = Math.round((1 - y) * 100);
+        this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
+        this._syncFromHsl();
         this._emitChange();
       });
 
       // 色相条拖动
       this._setupDrag(this._shadow.querySelector('[data-hue-slider]'), 'hue', (clientX, clientY, rect) => {
         const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        this._hsv.h = Math.round(x * 360);
-        this._hex = this._hsvToHex(this._hsv.h, this._hsv.s, this._hsv.v);
-        this._syncFromHsv();
+        this._hsl.h = Math.round(x * 360);
+        this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
+        this._syncFromHsl();
         this._emitChange();
       });
 
@@ -2135,17 +2597,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
       });
 
-      // 格式切换
+      // 格式切换（重渲染以切换通道输入组结构）
       this._shadow.querySelector('[data-format-select]').addEventListener('change', (e) => {
         this._format = e.target.value;
-        this._updateFormatInput();
+        this._render();
       });
 
-      // 格式输入
-      const formatInput = this._shadow.querySelector('[data-format-input]');
-      formatInput.addEventListener('change', (e) => this._parseFormatInput(e.target.value));
-      formatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+      // 通道输入（hex 单框 / rgb、hsl 各通道独立框）
+      this._shadow.querySelectorAll('[data-channel]').forEach(input => {
+        input.addEventListener('change', (e) => this._parseChannelInput(e.target.dataset.channel, e.target.value));
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+        });
       });
 
       // 吸管
@@ -2157,13 +2620,116 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const result = await eyeDropper.open();
             if (result && result.sRGBHex) {
               this._hex = result.sRGBHex.toUpperCase();
-              this._hsv = this._hexToHsv(this._hex);
-              this._syncFromHsv();
+              this._hsl = this._hexToHsl(this._hex);
+              this._syncFromHsl();
               this._emitChange();
             }
           } catch (err) { /* 用户取消取色 */ }
         });
       }
+
+      // ── 渐变模式交互（功能 4） ───────────────────────────
+      // 实色/渐变切换
+      this._shadow.querySelectorAll('[data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const next = btn.dataset.mode;
+          if (next === this._mode) return;
+          if (next === 'gradient' && this._mode === 'solid') {
+            // 实色→渐变：首色标继承实色颜色，但透明度封底 100
+            //（透明背景的 fillOpacity=0 不应成为透明渐变首色标，视觉上不可见）
+            this._stops[0] = { hex: this._hex, opacity: 100, position: this._stops[0] ? this._stops[0].position : 0 };
+            this._opacity = 100;
+          }
+          this._mode = next;
+          this._render();
+          this._emitChange();
+        });
+      });
+
+      // 角度 ±45 按钮
+      this._shadow.querySelectorAll('[data-angle-btn]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this._angle = Math.max(0, Math.min(360, this._angle + parseInt(btn.dataset.angleBtn, 10)));
+          this._render();
+          this._emitChange();
+        });
+      });
+
+      // 角度滑块（渐变预览实时更新，不重建 DOM）
+      const angleSlider = this._shadow.querySelector('[data-angle-slider]');
+      if (angleSlider) {
+        angleSlider.addEventListener('input', () => {
+          this._angle = Math.round(Number(angleSlider.value));
+          const val = this._shadow.querySelector('[data-angle-value]');
+          if (val) val.textContent = this._angle + '°';
+          const preview = this._shadow.querySelector('[data-stopbar-preview]');
+          if (preview) preview.style.background = this._gradientCss();
+          this._emitChange();
+        });
+      }
+
+      // 线性/径向切换
+      const gradTypeBtn = this._shadow.querySelector('[data-grad-type]');
+      if (gradTypeBtn) {
+        gradTypeBtn.addEventListener('click', () => {
+          this._gradType = this._gradType === 'linear' ? 'radial' : 'linear';
+          this._render();
+          this._emitChange();
+        });
+      }
+
+      // 调转渐变方向
+      const flipBtn = this._shadow.querySelector('[data-stop-flip]');
+      if (flipBtn) flipBtn.addEventListener('click', () => this._flipStops());
+
+      // 删除当前色标
+      const delBtn = this._shadow.querySelector('[data-stop-delete]');
+      if (delBtn) delBtn.addEventListener('click', () => this._deleteStop());
+
+      // 色标条：点击空白处添加色标（继承激活色标色）
+      const stopbar = this._shadow.querySelector('[data-stopbar]');
+      if (stopbar) {
+        stopbar.addEventListener('click', (e) => {
+          if (e.target.closest('[data-stop-dot]')) return;
+          const rect = stopbar.getBoundingClientRect();
+          const pos = (e.clientX - rect.left) / rect.width * 100;
+          this._addStop(pos);
+        });
+      }
+
+      // 色标圆点：点击激活 + 拖动调整位置
+      this._shadow.querySelectorAll('[data-stop-dot]').forEach(dot => {
+        dot.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const i = parseInt(dot.dataset.stopDot, 10);
+          const stopRef = this._stops[i];
+          this._activateStop(i);
+          const bar = this._shadow.querySelector('[data-stopbar]');
+          const barRect = bar.getBoundingClientRect();
+          const move = (ev) => {
+            const x = Math.max(0, Math.min(100, (ev.clientX - barRect.left) / barRect.width * 100));
+            stopRef.position = Math.round(x);
+            dot.style.left = stopRef.position + '%';
+            const preview = this._shadow.querySelector('[data-stopbar-preview]');
+            if (preview) preview.style.background = this._gradientCss();
+            this._emitChange();
+          };
+          const up = () => {
+            document.removeEventListener('pointermove', move);
+            document.removeEventListener('pointerup', up);
+            document.removeEventListener('pointercancel', up);
+            // 拖动结束按位置排序，激活被拖色标
+            this._stops.sort((a, b) => a.position - b.position);
+            this._activeStop = this._stops.indexOf(stopRef);
+            this._render();
+            this._emitChange();
+          };
+          document.addEventListener('pointermove', move);
+          document.addEventListener('pointerup', up);
+          document.addEventListener('pointercancel', up);
+        });
+      });
     }
 
     _setupDrag(el, type, onMove) {
@@ -2191,43 +2757,43 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       el.addEventListener('pointerdown', onPointerDown);
     }
 
-    // ── 格式输入解析 ──────────────────────────────────────
-    _parseFormatInput(val) {
+    // ── 通道输入解析 ──────────────────────────────────────
+    _parseChannelInput(channel, val) {
       val = (val || '').trim();
       try {
-        if (this._format === 'hex') {
+        if (channel === 'hex') {
           if (!val.startsWith('#')) val = '#' + val;
           if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
             this._hex = val.toUpperCase();
-            this._hsv = this._hexToHsv(this._hex);
-            this._syncFromHsv();
+            this._hsl = this._hexToHsl(this._hex);
+            this._syncFromHsl();
             this._emitChange();
             return;
           }
         } else if (this._format === 'rgb') {
-          const m = val.match(/(\d+)\s*[, ]\s*(\d+)\s*[, ]\s*(\d+)/);
-          if (m) {
-            const r = Math.max(0, Math.min(255, parseInt(m[1], 10)));
-            const g = Math.max(0, Math.min(255, parseInt(m[2], 10)));
-            const b = Math.max(0, Math.min(255, parseInt(m[3], 10)));
-            this._hex = this._rgbToHex(r, g, b);
-            this._hsv = this._hexToHsv(this._hex);
-            this._syncFromHsv();
-            this._emitChange();
-            return;
+          const num = parseInt(val, 10);
+          if (isNaN(num)) throw new Error('invalid');
+          const rgb = this._hexToRgb(this._hex);
+          rgb[channel] = Math.max(0, Math.min(255, num));
+          this._hex = this._rgbToHex(rgb.r, rgb.g, rgb.b);
+          this._hsl = this._hexToHsl(this._hex);
+          this._syncFromHsl();
+          this._emitChange();
+          return;
+        } else if (this._format === 'hsl') {
+          const num = parseInt(val, 10);
+          if (isNaN(num)) throw new Error('invalid');
+          const hsl = { ...this._hsl };
+          if (channel === 'h') {
+            hsl.h = Math.max(0, Math.min(360, num));
+          } else {
+            hsl[channel] = Math.max(0, Math.min(100, num));
           }
-        } else if (this._format === 'hsb') {
-          const m = val.match(/(\d+)\s*[, ]\s*(\d+)%?\s*[, ]\s*(\d+)%?/);
-          if (m) {
-            const h = Math.max(0, Math.min(360, parseInt(m[1], 10)));
-            const s = Math.max(0, Math.min(100, parseInt(m[2], 10)));
-            const v = Math.max(0, Math.min(100, parseInt(m[3], 10)));
-            this._hsv = { h, s, v };
-            this._hex = this._hsvToHex(h, s, v);
-            this._syncFromHsv();
-            this._emitChange();
-            return;
-          }
+          this._hsl = hsl;
+          this._hex = this._hslToHex(hsl.h, hsl.s, hsl.l);
+          this._syncFromHsl();
+          this._emitChange();
+          return;
         }
       } catch (e) { /* ignore */ }
       // 解析失败，恢复当前值
@@ -2235,22 +2801,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     // ── UI 同步 ───────────────────────────────────────────
-    _syncFromHsv() {
+    _syncFromHsl() {
       // SV 面板背景（色相）
       const svPanel = this._shadow.querySelector('[data-sv-panel]');
-      if (svPanel) svPanel.style.background = `hsl(${this._hsv.h},100%,50%)`;
-      // SV 选点 — X=饱和度, Y=100-明度
+      if (svPanel) svPanel.style.background = `hsl(${this._hsl.h},100%,50%)`;
+      // SV 选点 — X=饱和度, Y=100-明度（L）
       const svCursor = this._shadow.querySelector('[data-sv-cursor]');
       if (svCursor) {
-        svCursor.style.left = this._hsv.s + '%';
-        svCursor.style.top = (100 - this._hsv.v) + '%';
+        svCursor.style.left = this._hsl.s + '%';
+        svCursor.style.top = (100 - this._hsl.l) + '%';
       }
       // 色相选点
       const hueCursor = this._shadow.querySelector('[data-hue-cursor]');
-      if (hueCursor) hueCursor.style.left = (this._hsv.h / 360 * 100) + '%';
+      if (hueCursor) hueCursor.style.left = (this._hsl.h / 360 * 100) + '%';
       // 不透明度填充条颜色
       this._updateOpacityFill();
-      // 格式输入
+      // 通道输入
       this._updateFormatInput();
     }
     _syncOpacity() {
@@ -2264,14 +2830,116 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (fill) fill.style.background = `linear-gradient(to right, transparent, ${this._hex})`;
     }
     _updateFormatInput() {
-      const input = this._shadow.querySelector('[data-format-input]');
-      if (input && document.activeElement !== input) {
-        input.value = this._getFormatValue();
+      // hex 单框
+      const hexInput = this._shadow.querySelector('[data-channel="hex"]');
+      if (hexInput) {
+        if (document.activeElement !== hexInput) hexInput.value = this._hex.toUpperCase();
+        return;
       }
+      // rgb / hsl 各通道框（编辑中的框不刷新，避免打断输入）
+      const rgb = this._hexToRgb(this._hex);
+      const { h, s, l } = this._hsl;
+      this._shadow.querySelectorAll('[data-channel]').forEach(inp => {
+        if (document.activeElement === inp) return;
+        const ch = inp.dataset.channel;
+        let v;
+        if (this._format === 'rgb') v = rgb[ch];
+        else if (ch === 'h') v = h;
+        else if (ch === 's') v = s;
+        else if (ch === 'l') v = l;
+        if (v !== undefined) inp.value = v;
+      });
+    }
+    // 渐变预览 CSS（linear/radial 多色标）
+    _gradientCss() {
+      const stopStr = this._stops
+        .map(s => `${hexOpacityToRgba(s.hex, s.opacity)} ${s.position}%`)
+        .join(', ');
+      if (!stopStr) return 'none';
+      if (this._gradType === 'radial') return `radial-gradient(circle, ${stopStr})`;
+      return `linear-gradient(${this._angle}deg, ${stopStr})`;
+    }
+    // 激活色标：把当前编辑色同步回原激活色标，再加载新色标颜色（轻量更新，不重建 DOM）
+    _activateStop(i) {
+      const s = this._stops[i];
+      if (!s) return;
+      const old = this._stops[this._activeStop];
+      if (old && this._activeStop !== i) {
+        old.hex = this._hex;
+        old.opacity = this._opacity;
+      }
+      this._activeStop = i;
+      this._hex = s.hex;
+      this._opacity = s.opacity;
+      this._hsl = this._hexToHsl(this._hex);
+      this._shadow.querySelectorAll('[data-stop-dot]').forEach((d, idx) => {
+        d.classList.toggle('active', idx === i);
+      });
+      this._syncFromHsl();
+      this._syncOpacity();
+      this._emitChange();
+    }
+    // 点击色标条空白添加色标（继承激活色标颜色，位置取点击位置）
+    _addStop(position) {
+      if (this._stops.length >= 5) return;
+      const src = this._stops[this._activeStop] || this._stops[0];
+      const stop = {
+        hex: src.hex,
+        opacity: src.opacity,
+        position: Math.max(0, Math.min(100, Math.round(position))),
+      };
+      this._stops.push(stop);
+      this._stops.sort((a, b) => a.position - b.position);
+      this._activeStop = this._stops.indexOf(stop);
+      this._hex = stop.hex;
+      this._opacity = stop.opacity;
+      this._hsl = this._hexToHsl(stop.hex);
+      this._render();
+      this._emitChange();
+    }
+    _deleteStop() {
+      if (this._stops.length <= 2) return;
+      this._stops.splice(this._activeStop, 1);
+      const next = Math.min(this._activeStop, this._stops.length - 1);
+      const s = this._stops[next];
+      this._activeStop = next;
+      this._hex = s.hex;
+      this._opacity = s.opacity;
+      this._hsl = this._hexToHsl(s.hex);
+      this._render();
+      this._emitChange();
+    }
+    // 调转渐变方向：反转色标顺序（位置镜像），保持位置递增
+    _flipStops() {
+      this._stops = this._stops
+        .map(s => ({ ...s, position: 100 - s.position }))
+        .sort((a, b) => a.position - b.position);
+      this._activeStop = this._stops.length - 1 - this._activeStop;
+      const s = this._stops[this._activeStop];
+      this._hex = s.hex;
+      this._opacity = s.opacity;
+      this._hsl = this._hexToHsl(s.hex);
+      this._render();
+      this._emitChange();
     }
     _emitChange() {
-      if (this._callback) {
-        this._callback(this._hex, this._opacity);
+      if (this._mode === 'gradient') {
+        // 渐变模式下把当前编辑色同步回激活色标
+        const s = this._stops[this._activeStop];
+        if (s) {
+          s.hex = this._hex;
+          s.opacity = this._opacity;
+        }
+      }
+      if (!this._callback) return;
+      if (this._mode === 'gradient') {
+        this._callback(null, null, {
+          type: this._gradType,
+          angle: this._angle,
+          stops: this._stops.map(x => ({ hex: x.hex, opacity: x.opacity, position: x.position })),
+        });
+      } else {
+        this._callback(this._hex, this._opacity, null);
       }
     }
   }
@@ -2903,8 +3571,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
+      // reorder 变更（功能 4）单独成列，不混入 CSS 属性组。
+      const reorderInfos = [];
       const groups = {};
       changes.forEach(c => {
+        if (c.type === 'reorder') { reorderInfos.push(c); return; }
         const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
         const gkey = c.sharedKey ? componentClass : c.selector;
         if (!groups[gkey]) {
@@ -2997,6 +3668,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const noteOnlyGroups = pureAnnotations;
       if (styleGroups.length) {
         lines.push(`### 样式变更（${styleGroups.length} 组）`);
+        lines.push('');
+      }
+      // 元素顺序调整（功能 4 reorder 变更）
+      if (reorderInfos.length) {
+        lines.push(`### 元素顺序调整（${reorderInfos.length} 处）`);
+        lines.push('');
+        reorderInfos.forEach((c, ri) => {
+          const anchor = (c.elementText || '').replace(/\s+/g, ' ').trim();
+          const containerLabel = anchor ? `（${anchor.slice(0, 16)}）` : '';
+          lines.push(`${ri + 1}. 容器 ${c.selector}${containerLabel} 内 ${c.order.length} 个子元素顺序已调整`);
+          fullSelectors.push({ idx: '顺序' + (ri + 1), classAnchor: '', selector: c.selector });
+        });
         lines.push('');
       }
       styleGroups.forEach((g, i) => {
@@ -3964,6 +4647,37 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       return html;
     }
 
+    /** 渐变数据 {type, angle, stops} → CSS 渐变字符串（功能 4：swatch/文本渐变共用） */
+    _colorGradientCss(g) {
+      if (!g || !Array.isArray(g.stops) || g.stops.length < 2) return 'none';
+      const stopStr = g.stops
+        .map(s => `${hexOpacityToRgba(s.hex || '#000000', s.opacity != null ? s.opacity : 100)} ${Math.round(s.position)}%`)
+        .join(', ');
+      if (g.type === 'radial') return `radial-gradient(circle, ${stopStr})`;
+      return `linear-gradient(${(g.angle || 180)}deg, ${stopStr})`;
+    }
+
+    /** 轻量更新颜色 swatch 与输入框（渐变模式内部编辑时避免重建整个面板） */
+    _updateColorSwatches(field, gradient) {
+      const swatch = this._shadow.querySelector(`[data-field="${field}"].color-button .swatch`);
+      if (swatch) {
+        if (gradient) {
+          swatch.style.background = field === 'fillHex' ? buildGradient(this._data) : this._colorGradientCss(gradient);
+        } else if (field === 'fillHex') {
+          swatch.style.background = this._data.fillHex && this._data.fillOpacity > 0
+            ? hexOpacityToRgba(this._data.fillHex || '#FFFFFF', this._data.fillOpacity ?? 0)
+            : 'transparent';
+        } else {
+          swatch.style.background = hexOpacityToRgba(this._data.colorHex || '#000000', this._data.colorOpacity ?? 100);
+        }
+      }
+      // 同步颜色输入框
+      const input = this._shadow.querySelector(`[data-field="${field}"]`);
+      if (input && gradient && gradient.stops && gradient.stops[0]) {
+        input.value = gradient.stops[0].hex;
+      }
+    }
+
     _render() {
       const d = this._data || {};
       const tag = this._targetEl ? this._targetEl.tagName.toLowerCase() : '';
@@ -3975,9 +4689,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const colorTokenVal = this._tokenValueOf('colorHex');
       const colorIsToken = !!colorTokenVal;
       const colorTokenName = this._tokenNameOf('colorHex');
-      const colorSwatchBg = colorIsToken
-        ? (resolveCssValue(colorTokenVal, 'color') || 'transparent')
-        : hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100);
+      const colorSwatchBg = d.colorGradient
+        ? this._colorGradientCss(d.colorGradient)
+        : (colorIsToken
+          ? (resolveCssValue(colorTokenVal, 'color') || 'transparent')
+          : hexOpacityToRgba(d.colorHex || '#000000', d.colorOpacity ?? 100));
       // 填充/描边/投影 token 模式判断
       const fillIsToken = this._isTokenField('fillHex');
       const fillTokenName = this._tokenNameOf('fillHex');
@@ -4295,9 +5011,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             color: rgba(255, 255, 255, 0.35);
           }
           .text-input:focus {
-            outline: 1px solid var(--text-brand, #00b96b);
-            outline-offset: -1px;
-            border-radius: 4px;
+            /* 数值字段拖动调值：去掉 focus 视觉状态，聚焦仅体现为全选 */
+            outline: none;
           }
           .text-input.opacity-input {
             flex: 0 0 48px;
@@ -4307,6 +5022,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .text-input:disabled {
             opacity: 0.35;
             cursor: not-allowed;
+          }
+          /* 数值字段拖动调值：桌面端按住光标 ew-resize */
+          .text-input.drag-num {
+            cursor: ew-resize;
           }
           .token-btn {
             flex-shrink: 0;
@@ -4955,7 +5674,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <p class="section-title">填充</p>
             <div class="field-row">
               <button class="color-button" type="button" data-field="fillHex" data-color-trigger>
-                <span class="swatch" style="background:${fillIsToken ? (resolveCssValue(d.fillHex, 'color') || 'transparent') : hexOpacityToRgba(d.fillHex || '#FFFFFF', d.fillOpacity ?? 0)}"></span>
+                <span class="swatch" style="background:${d.gradientEnabled ? (buildGradient(d) || 'transparent') : (fillIsToken ? (resolveCssValue(d.fillHex, 'color') || 'transparent') : hexOpacityToRgba(d.fillHex || '#FFFFFF', d.fillOpacity ?? 0))}"></span>
               </button>
               <input class="text-input" type="text" value="${d.fillHex || ''}" data-field="fillHex" />
               <input class="text-input opacity-input" type="text" value="${d.fillOpacity ?? 0}" data-field="fillOpacity" inputmode="numeric" ${fillIsToken ? 'disabled' : ''} />
@@ -5204,6 +5923,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           });
         }
       });
+      // 数值字段拖动调值（功能 3）：按住水平拖动调值（右增左减），Shift×5 / Alt 微调，
+      // 拖动中实时预览（不进撤销栈），松手统一提交一次；点击聚焦自动全选
+      this._shadow.querySelectorAll('input.text-input[data-field]').forEach(input => {
+        this._bindNumberDrag(input, input.dataset.field);
+      });
       // 渐变填充：开关（toggle）
       const gradToggle = this._shadow.querySelector('[data-grad-toggle]');
       if (gradToggle) {
@@ -5350,7 +6074,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._onFieldChange('alignItems', ai);
         });
       });
-      // 颜色按钮 → 打开自定义颜色选择器
+      // 颜色按钮 → 打开自定义颜色选择器（功能 4：填充/文本色支持渐变模式，描边不支持）
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -5358,13 +6082,79 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const opacityField = field.replace('Hex', 'Opacity');
           const hex = this._data[field] || '#000000';
           const opacity = this._data[opacityField] ?? 100;
+          // 渐变参数（仅 fillHex / colorHex 支持）
+          let gradOpts = {};
+          if (field === 'fillHex' && (this._data.gradientEnabled === true || this._data.gradientEnabled === 'true')) {
+            gradOpts = {
+              allowGradient: true,
+              mode: 'gradient',
+              gradType: this._data.gradientType,
+              angle: this._data.gradientAngle,
+              stops: (Array.isArray(this._data.gradientStops) && this._data.gradientStops.length >= 2)
+                ? this._data.gradientStops
+                : [
+                    { hex: this._data.gradientStart || '#ffffff', opacity: 100, position: 0 },
+                    { hex: this._data.gradientEnd || '#000000', opacity: 100, position: 100 },
+                  ],
+            };
+          } else if (field === 'colorHex' && this._data.colorGradient) {
+            gradOpts = {
+              allowGradient: true,
+              mode: 'gradient',
+              gradType: this._data.colorGradient.type,
+              angle: this._data.colorGradient.angle,
+              stops: this._data.colorGradient.stops,
+            };
+          } else if (field === 'fillHex' || field === 'colorHex') {
+            gradOpts = { allowGradient: true };
+          }
           bus.emit('open-color-picker', {
             trigger: btn,
             hex,
             opacity,
-            callback: (newHex, newOpacity) => {
+            ...gradOpts,
+            callback: (newHex, newOpacity, gradient) => {
+              if (gradient) {
+                // 渐变结果：写入渐变状态并应用
+                if (field === 'fillHex') {
+                  const wasGradient = this._data.gradientEnabled === true || this._data.gradientEnabled === 'true';
+                  this._data.gradientStops = gradient.stops;
+                  this._data.gradientType = gradient.type;
+                  this._data.gradientAngle = gradient.angle;
+                  this._data.gradientEnabled = true;
+                  this._data.fillHex = gradient.stops[0].hex;
+                  this._data.fillOpacity = gradient.stops[0].opacity;
+                  this._onFieldChange('gradientEnabled', 'true');
+                  if (!wasGradient) { this._render(); this._bindEvents(); return; }
+                  this._updateColorSwatches('fillHex', gradient);
+                } else if (field === 'colorHex') {
+                  const wasGradient = !!this._data.colorGradient;
+                  this._data.colorGradient = { type: gradient.type, angle: gradient.angle, stops: gradient.stops };
+                  this._data.colorHex = gradient.stops[0].hex;
+                  this._data.colorOpacity = gradient.stops[0].opacity;
+                  this._onFieldChange('colorGradient', this._data.colorGradient);
+                  if (!wasGradient) { this._render(); this._bindEvents(); return; }
+                  this._updateColorSwatches('colorHex', gradient);
+                }
+                return;
+              }
+              // 实色：关闭渐变状态
+              if (field === 'fillHex') {
+                const wasGradient = this._data.gradientEnabled === true || this._data.gradientEnabled === 'true';
+                this._data.gradientEnabled = false;
+                this._onFieldChange('gradientEnabled', 'false');
+                if (wasGradient) { this._render(); this._bindEvents(); return; }
+              } else if (field === 'colorHex') {
+                const wasGradient = !!this._data.colorGradient;
+                this._data.colorGradient = null;
+                if (wasGradient) {
+                  this._onFieldChange('colorGradient', null);
+                  this._render(); this._bindEvents(); return;
+                }
+              }
               this._onFieldChange(field, newHex);
               this._onFieldChange(opacityField, String(newOpacity));
+              this._updateColorSwatches(field, null);
             },
           });
         });
@@ -5460,8 +6250,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._scheduleSharedSync(result);
     }
 
-    _onFieldChange(field, value) {
+    _onFieldChange(field, value, opts) {
       if (!this._targetEl || !this._data) return;
+      opts = opts || {};
       // auto 是「左右对齐」模式下的间距显示态，不作为可提交的间距值（忽略，避免误提交/误报）
       if (field === 'layoutGap' && value === 'auto') return;
       // 输入守门：拦截负数尺寸、非 flex 容器布局方向等非法操作（伪元素与普通元素路径统一），
@@ -5508,10 +6299,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 应用到元素（本体）
       const result = this._applyField(field, value);
       if (result) {
+        // 拖动调值预览（功能 3）：样式已应用，不记录、不触发共享同步；松手时统一提交一次
+        if (opts.preview) {
+          this._updateActiveStates();
+          return;
+        }
         // 无效果守卫：目标新值与当前计算值归一化相等 → 本次改动无视觉差异，撤销已写入 inline，
         // 不记录、不触发共享同步，避免空元素/默认值被共享同步写成无效果的脏施工单。
         // layoutMode 附带 display:flex 副作用：仅当元素已处于 flex/grid 时才真正无效果。
-        const _noopSame = normalizeCssValue(result.oldValue) === normalizeCssValue(result.newValue);
+        // 拖动提交（fromDragStart）时以拖动起始值作为 oldValue，保证拖动可整体撤销
+        const _baseOld = (opts.fromDragStart != null && opts.fromDragStart !== '')
+          ? opts.fromDragStart : result.oldValue;
+        const _noopSame = normalizeCssValue(_baseOld) === normalizeCssValue(result.newValue);
         const _noop = _noopSame && (result.property !== 'flex-direction' || (() => {
           const d = getComputedStyle(this._targetEl).display;
           return d === 'flex' || d === 'grid';
@@ -5528,7 +6327,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementClass: getFirstStableClass(this._targetEl),
             elementClasses: getStableClasses(this._targetEl),
             property: result.property,
-            oldValue: result.oldValue,
+            oldValue: _baseOld,
             newValue: result.newValue,
             el: this._targetEl,
             shared: false,
@@ -5892,6 +6691,111 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
     }
 
+    // ── 数值字段拖动调值（功能 3） ─────────────────────────────
+    /** 可拖动的数值字段集合（尺寸/间距/定位/字号/行高/圆角/阴影等） */
+    _numberDragFields() {
+      return new Set([
+        'top', 'right', 'bottom', 'left', 'zIndex',
+        'width', 'height', 'layoutGap',
+        'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom',
+        'marginLeft', 'marginRight', 'marginTop', 'marginBottom',
+        'fontSize', 'lineHeight', 'borderRadiusAll',
+        'shadowX', 'shadowY', 'shadowBlur', 'shadowSpread',
+        'gradientAngle',
+      ]);
+    }
+    /** 拖动值边界 clamp（透明度 0-100、角度 0-360、尺寸/间距 ≥0；定位负值字段允许负数） */
+    _clampDragValue(field, v) {
+      if (/Opacity$/.test(field)) return Math.max(0, Math.min(100, v));
+      if (field === 'gradientAngle') return ((v % 360) + 360) % 360;
+      if (/^(width|height|fontSize|layoutGap|paddingLeft|paddingRight|paddingTop|paddingBottom|marginLeft|marginRight|marginTop|marginBottom|borderRadiusAll|shadowBlur|shadowSpread)$/.test(field)) {
+        return Math.max(0, v);
+      }
+      return v;
+    }
+    /** 拖动值显示格式：整数字段去小数点，非整数保留至多 2 位小数 */
+    _formatDragValue(field, v) {
+      const r = Math.round(v * 100) / 100;
+      return String(r);
+    }
+    /**
+     * 数值字段拖动调值：按住水平拖动（右增左减）。
+     * - 步长：整数字段 = 1（每 px 变 1），非整数字段 = 8（每 8px 变 1，更平稳）
+     * - 修饰键：Shift ×5 加速、Alt 微调（步长 ÷8）
+     * - 方向判定：水平 >8px 锁定调值；垂直 >8px 判定为滚动面板，不响应
+     * - 拖动中实时预览（_applyField 应用、不进撤销栈）；松手统一提交一次（oldValue=拖动起始值）
+     * - 非拖动点击 → 聚焦 + 全选，可直接输入覆盖
+     */
+    _bindNumberDrag(input, field) {
+      if (!this._numberDragFields().has(field)) return;
+      input.classList.add('drag-num');
+      let drag = null;
+      input.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (input.disabled || input.readOnly) return;
+        const text = input.value.trim();
+        const m = String(text).match(/-?\d+(\.\d+)?/);
+        if (!m) return; // 非数值（token/auto/空/语义值）不进入拖动
+        const startVal = parseFloat(m[0]);
+        drag = {
+          startX: e.clientX, startY: e.clientY,
+          startVal, startText: text,
+          locked: null, moved: false, lastVal: startVal,
+          baseStep: Number.isInteger(startVal) ? 1 : 8,
+        };
+        const onMove = (ev) => {
+          if (!drag) return;
+          const dx = ev.clientX - drag.startX;
+          const dy = ev.clientY - drag.startY;
+          if (!drag.locked) {
+            if (Math.abs(dx) > 8) drag.locked = 'h';
+            else if (Math.abs(dy) > 8) { drag.locked = 'v'; return; }
+            else return;
+          }
+          if (drag.locked !== 'h') return;
+          drag.moved = true;
+          ev.preventDefault();
+          let mod = 1;
+          if (ev.shiftKey) mod = 5;
+          else if (ev.altKey) mod = 1 / 8;
+          const raw = drag.startVal + (dx / drag.baseStep) * mod;
+          let next = Number.isInteger(drag.startVal) ? Math.round(raw) : Math.round(raw * 100) / 100;
+          next = this._clampDragValue(field, next);
+          if (next === drag.lastVal) return;
+          drag.lastVal = next;
+          const display = this._formatDragValue(field, next);
+          input.value = display;
+          this._data[field] = String(next);
+          this._applyField(field, String(next));
+        };
+        const onUp = (ev) => {
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onUp);
+          document.removeEventListener('pointercancel', onUp);
+          const d = drag;
+          drag = null;
+          if (!d) return;
+          const wasDrag = d.locked === 'h' && d.moved;
+          const curText = input.value.trim();
+          if (wasDrag) {
+            // 松手统一提交一次（oldValue = 拖动起始值，拖动整体作为一个撤销单元）
+            this._onFieldChange(field, curText, { fromDragStart: d.startText });
+          } else {
+            // 非拖动：视为点击 → 聚焦 + 全选
+            input.focus();
+            input.select();
+          }
+        };
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+        document.addEventListener('pointercancel', onUp);
+      });
+      // 聚焦即全选（设计：去掉 focus 视觉状态，聚焦仅体现为全选）
+      input.addEventListener('focus', () => {
+        try { input.select(); } catch (e) {}
+      });
+    }
+
     /** 输入守门：拦截会污染施工单的非法操作 */
     _validateFieldValue(field, value) {
       // Token 值（var(--xxx)）跳过数值验证
@@ -6158,17 +7062,76 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'colorHex':
         case 'colorOpacity': {
           const oldValue = cs().color;
+          // 文本渐变模式（colorGradient 存在）：background-clip:text + transparent（功能 4）
+          const grad = this._data.colorGradient;
+          if (grad) {
+            const stopStr = grad.stops
+              .map(s => `${hexOpacityToRgba(s.hex || '#000000', s.opacity != null ? s.opacity : 100)} ${Math.round(s.position)}%`)
+              .join(', ');
+            const bg = grad.type === 'radial'
+              ? `radial-gradient(circle, ${stopStr})`
+              : `linear-gradient(${(grad.angle || 180)}deg, ${stopStr})`;
+            el.style.backgroundImage = bg;
+            el.style.webkitBackgroundClip = 'text';
+            el.style.backgroundClip = 'text';
+            el.style.color = 'transparent';
+            if (normalizeCssValue(oldValue) === 'transparent') return null;
+            return { property: 'color', oldValue, newValue: 'transparent' };
+          }
+          // 非渐变：若元素残留文本渐变痕迹（background-clip:text）则清除
+          if (el.style.backgroundClip === 'text' || el.style.webkitBackgroundClip === 'text') {
+            el.style.backgroundImage = '';
+            el.style.webkitBackgroundClip = '';
+            el.style.backgroundClip = '';
+          }
           const hex = this._data.colorHex || '#000000';
           const isTok = isTokenValue(hex);
           // Token 模式：直接应用 var(--xxx)，忽略 opacity
           if (isTok) {
             el.style.color = hex;
+            // 无实际变化守卫：颜色已为目标值（colorHex/colorOpacity 联动二次提交时），
+            // 返回 null 跳过记录/撤销，避免把上一步已写入的 inline 颜色撤销掉
+            if (normalizeCssValue(oldValue) === normalizeCssValue(hex)) return null;
             return { property: 'color', oldValue, newValue: hex };
           }
           const opacity = this._data.colorOpacity ?? 100;
           const rgba = hexOpacityToRgba(hex, opacity);
           el.style.color = rgba;
+          if (normalizeCssValue(oldValue) === normalizeCssValue(rgba)) return null;
           return { property: 'color', oldValue, newValue: rgba };
+        }
+        // 文本渐变整体切换（功能 4）：渐变开 → background-clip:text；渐变关 → 清除并回实色
+        // 记录语义：property='color'，oldValue/newValue 中渐变用 background-image 渐变串标识，
+        // 撤销/重做在 _applyPropertyValue 对含 gradient() 的 color 值做文本渐变还原。
+        case 'colorGradient': {
+          const oldColor = cs().color;
+          const oldBg = cs().backgroundImage;
+          const g = this._data.colorGradient;
+          if (g) {
+            const stopStr = g.stops
+              .map(s => `${hexOpacityToRgba(s.hex || '#000000', s.opacity != null ? s.opacity : 100)} ${Math.round(s.position)}%`)
+              .join(', ');
+            const bg = g.type === 'radial'
+              ? `radial-gradient(circle, ${stopStr})`
+              : `linear-gradient(${(g.angle || 180)}deg, ${stopStr})`;
+            el.style.backgroundImage = bg;
+            el.style.webkitBackgroundClip = 'text';
+            el.style.backgroundClip = 'text';
+            el.style.color = 'transparent';
+            // 变化判定以 background-image 为准（color 恒为 transparent，避免二次提交误判 noop 撤销）
+            const ref = normalizeCssValue(oldColor) === 'transparent' ? oldBg : oldColor;
+            if (normalizeCssValue(ref) === normalizeCssValue(bg)) return null;
+            return { property: 'color', oldValue: ref, newValue: bg };
+          }
+          el.style.backgroundImage = '';
+          el.style.webkitBackgroundClip = '';
+          el.style.backgroundClip = '';
+          const hex = this._data.colorHex || '#000000';
+          const opacity = this._data.colorOpacity ?? 100;
+          const rgba = isTokenValue(hex) ? hex : hexOpacityToRgba(hex, opacity);
+          el.style.color = rgba;
+          if (normalizeCssValue(oldBg) === normalizeCssValue(rgba)) return null;
+          return { property: 'color', oldValue: normalizeCssValue(oldBg) === 'none' ? oldColor : oldBg, newValue: rgba };
         }
         case 'lineHeight': {
           const oldValue = cs().lineHeight;
@@ -6206,6 +7169,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           // 保持追加渐变层与基础渐变的 background-image 一致
           const mergedImg = this._mergedBackgroundImage();
           if (mergedImg !== 'none') el.style.backgroundImage = mergedImg;
+          // 无实际变化守卫：fillHex/fillOpacity 联动二次提交时避免撤销上一步已写入的 inline
+          if (normalizeCssValue(oldValue) === normalizeCssValue(newVal)) return null;
           return { property: 'background-color', oldValue, newValue: newVal };
         }
         case 'strokeHex':
@@ -6224,14 +7189,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             el.style.borderWidth = widthVal;
             el.style.borderStyle = widthPx > 0 ? 'solid' : '';
             el.style.borderColor = hex;
-            return { property: 'border', oldValue, newValue: widthPx > 0 ? `${widthVal} solid ${hex}` : '' };
+            const nv = widthPx > 0 ? `${widthVal} solid ${hex}` : '';
+            if (normalizeCssValue(oldValue) === normalizeCssValue(nv)) return null;
+            return { property: 'border', oldValue, newValue: nv };
           }
           const opacity = this._data.strokeOpacity ?? 0;
           const color = opacity > 0 && widthPx > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
           el.style.borderWidth = widthVal;
           el.style.borderStyle = widthPx > 0 ? 'solid' : '';
           el.style.borderColor = color;
-          return { property: 'border', oldValue, newValue: widthPx > 0 ? `${widthVal} solid ${color}` : '' };
+          const nv2 = widthPx > 0 ? `${widthVal} solid ${color}` : '';
+          if (normalizeCssValue(oldValue) === normalizeCssValue(nv2)) return null;
+          return { property: 'border', oldValue, newValue: nv2 };
         }
         case 'strokePosition':
         case 'shadowHex':
@@ -6252,6 +7221,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'gradientType':
         case 'gradientStart':
         case 'gradientEnd':
+        case 'gradientStops':
         case 'gradientAngle':
         case 'gradientFlip': {
           const oldValue = cs().backgroundImage;
@@ -7050,16 +8020,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .annotation-bubble--sheet .annotation-bubble-input { font-size: 16px; min-height: 96px; }
           .annotation-bubble[hidden] { display: none; }
           .count-bubble[hidden] { display: none; }
-          /* 网格辅助线（计划 3.6：半透明网格，8px 基准，配合拖拽吸附） */
-          .grid-overlay {
-            position: fixed; inset: 0; z-index: 9539;
-            pointer-events: none;
-            background-image:
-              linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
-            background-size: 8px 8px;
-          }
-          .grid-overlay[hidden] { display: none; }
           .annotation-bubble-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
           .annotation-bubble-title { color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; line-height: 18px; }
           .annotation-bubble-close {
@@ -7135,9 +8095,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <button class="tool-btn" data-tool="measure" data-active="false" title="测量模式">
                 ${ICONS.measure}
               </button>
-              <button class="tool-btn" data-tool="grid" data-active="false" title="网格辅助线">
-                ${ICONS.grid}
-              </button>
               <button class="tool-btn" data-tool="annotation" data-active="false" title="批注模式">
                 ${ICONS.annotation}
               </button>
@@ -7204,7 +8161,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <!-- 子组件（走查模式相关） -->
         <wego-wt-highlight hidden></wego-wt-highlight>
         <wego-wt-measure hidden></wego-wt-measure>
-        <div class="grid-overlay" data-grid-overlay hidden></div>
+        <wego-wt-inspector hidden></wego-wt-inspector>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-overview-panel hidden></wego-wt-overview-panel>
@@ -7238,6 +8195,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _initComponents() {
       this._components.highlight = this._shadow.querySelector('wego-wt-highlight');
       this._components.measure = this._shadow.querySelector('wego-wt-measure');
+      this._components.inspector = this._shadow.querySelector('wego-wt-inspector');
       this._components.stylePanel = this._shadow.querySelector('wego-wt-style-panel');
       this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
       this._components.overviewPanel = this._shadow.querySelector('wego-wt-overview-panel');
@@ -7372,8 +8330,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
       // 事件总线
       bus.on('style-change', (change) => this._recordChange(change));
-      bus.on('open-color-picker', ({ trigger, hex, opacity, callback }) => {
-        this._components.colorPicker.open(trigger, hex, opacity, callback);
+      bus.on('open-color-picker', (payload) => {
+        const { trigger, hex, opacity, callback } = payload;
+        // 渐变参数透传（功能 4：填充/文本色打开颜色选择器支持渐变模式）
+        const { allowGradient, mode, gradType, angle, stops } = payload;
+        this._components.colorPicker.open(trigger, hex, opacity, callback, { allowGradient, mode, gradType, angle, stops });
       });
       bus.on('close-color-picker', () => {
         this._components.colorPicker.close();
@@ -7445,12 +8406,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'm' || e.key === 'M') && !inInput) {
         e.preventDefault();
         this._toggleMeasureMode();
-        return;
-      }
-      // G：切换网格辅助线
-      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'g' || e.key === 'G') && !inInput) {
-        e.preventDefault();
-        this._toggleGridMode();
         return;
       }
       // 方向键：选中元素后微调位置（±1px，Shift ±10px，走查模式生效）
@@ -7779,9 +8734,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           break;
         case 'measure':
           this._toggleMeasureMode();
-          break;
-        case 'grid':
-          this._toggleGridMode();
           break;
         case 'annotation':
           this._closeAllPanels();
@@ -8392,8 +9344,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 测量模式：两点横/纵距离（对齐计划 3.5）
       this._measureMode = false;
       this._measureAnchor = null;
-      // 网格辅助线（对齐计划 3.6）
-      this._gridMode = false;
       // 长按拖拽移动：500ms 长按触发，拖拽中 transform 平移 + 偏移气泡
       this._longPressTimer = null;
       this._dragging = null;
@@ -8427,6 +9377,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._measureTap(e.clientX, e.clientY);
         return;
       }
+      // 选中即拖（功能 4）：按下已选中元素 → 立即进入拖拽（无 500ms 定住）
+      if (state.selectedElement && this._hitTargetInSelected(e.target, state.selectedElement)) {
+        this._pointerActive = true;
+        this._ptStartX = e.clientX;
+        this._ptStartY = e.clientY;
+        this._isSwiping = false;
+        this._startElementDrag(state.selectedElement, e.clientX, e.clientY);
+        return;
+      }
       this._pointerActive = true;
       this._ptStartX = e.clientX;
       this._ptStartY = e.clientY;
@@ -8437,28 +9396,34 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._longPressTimer = setTimeout(() => this._startLongPressDrag(), 500);
     };
     _onPointerMove = (e) => {
-      // 拖拽进行中：跟随指针平移元素
+      // 拖拽进行中：跟随指针平移元素（功能 4：增量位移 + 容器内 clamp + 中心越界换位）
       if (this._dragging) {
-        let dx = e.clientX - this._dragging.startX;
-        let dy = e.clientY - this._dragging.startY;
-        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) this._dragging.moved = true;
-        let tx = Math.round(dx);
-        let ty = Math.round(dy);
-        let snapLines = null;
-        // 网格开启时吸附到 8px 网格线
-        if (this._gridMode) {
-          const snapped = this._snapDragToGrid(tx, ty);
-          tx = Math.round(snapped.dx);
-          ty = Math.round(snapped.dy);
-          snapLines = snapped.snapLines;
-          if (snapLines.length && navigator.vibrate) navigator.vibrate(15); // 轻震动反馈
+        const drag = this._dragging;
+        const dx = e.clientX - drag.lastClientX;
+        const dy = e.clientY - drag.lastClientY;
+        drag.lastClientX = e.clientX;
+        drag.lastClientY = e.clientY;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) drag.moved = true;
+        // 累计位移（换位后由 _swapSiblings 重设基准）
+        let ax = drag.accumDx + dx;
+        let ay = drag.accumDy + dy;
+        // 位移 clamp 在父容器 content box 内（功能 4：左上角锚点不越界）
+        if (drag.container) {
+          const clamped = this._clampDragToContainer(drag, ax, ay);
+          ax = clamped.tx; ay = clamped.ty;
         }
-        // 记录最终（含吸附后）位移，松手提交时使用，保证「拖拽中吸附位置 = 提交后位置」
-        this._dragging.snapTx = tx;
-        this._dragging.snapTy = ty;
-        this._dragging.el.style.transform = `${this._dragOrigTransform ? this._dragOrigTransform + ' ' : ''}translate(${tx}px, ${ty}px)`;
-        this._components.highlight.showForElement(this._dragging.el, `+${tx}, +${ty}`);
-        this._showSnapLines(snapLines);
+        drag.accumDx = ax; drag.accumDy = ay;
+        let tx = Math.round(ax);
+        let ty = Math.round(ay);
+        // 记录最终位移，松手提交时使用，保证「拖拽中位置 = 提交后位置」
+        drag.snapTx = tx;
+        drag.snapTy = ty;
+        drag.el.style.transform = `${this._dragOrigTransform ? this._dragOrigTransform + ' ' : ''}translate(${tx}px, ${ty}px)`;
+        // 换位检测：A 中心越过兄弟中心 → DOM 交换 + FLIP（功能 4）
+        if (!drag.skipReorder && drag.container) {
+          this._detectReorder(drag);
+        }
+        this._components.highlight.showForElement(drag.el, `+${tx}, +${ty}`);
         e.preventDefault();
         e.stopPropagation();
         return;
@@ -8499,22 +9464,310 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!el || this._isSelectionRoot(el)) return;
       if (state.selectedElement !== el) this._selectElement(el);
       const target = state.selectedElement || el;
-      this._dragOrigTransform = target.style.transform || '';
-      this._dragging = { el: target, startX: this._ptStartX, startY: this._ptStartY, moved: false };
-      target.style.transition = 'none';
-      target.style.opacity = '0.8';
-      target.style.cursor = 'move';
-      this._components.highlight.setMode('selected');
-      this._components.highlight.setHandles(false);
-      this._components.highlight.showForElement(target, '拖动中');
+      this._startElementDrag(target, this._ptStartX, this._ptStartY);
     }
 
-    /** 松手结束拖拽：发生位移则记录 transform 变更，否则还原 */
+    /** 功能 4：元素拖拽核心启动（选中即拖 / 长按拖拽共用）
+     *  - 位移 clamp 在父容器 content box 内
+     *  - 中心越过兄弟中心 → DOM 换位 + FLIP
+     *  - 松手统一提交（位移 + 换位合并为一条 reorder 变更） */
+    _startElementDrag(el, startX, startY) {
+      if (!el || this._isSelectionRoot(el)) return;
+      const container = el.parentElement;
+      this._dragOrigTransform = el.style.transform || '';
+      // 有初始 transform 的元素仅允许位移，不参与换位（避免 transform 基准冲突）
+      const skipReorder = !!this._dragOrigTransform;
+      const originRect = el.getBoundingClientRect();
+      this._dragging = {
+        el,
+        container,
+        startX, startY,
+        lastClientX: startX, lastClientY: startY,
+        accumDx: 0, accumDy: 0,
+        originRect,
+        originCenterX: originRect.left + originRect.width / 2,
+        originCenterY: originRect.top + originRect.height / 2,
+        moved: false,
+        orderDirty: false,
+        oldOrder: null,
+        skipReorder,
+        lastSwapAt: 0,
+      };
+      // 记录初始顺序快照（换位后提交用）
+      if (!skipReorder && container && this._canReorderIn(container)) {
+        this._dragging.oldOrder = this._orderSnapshot(container);
+      }
+      el.style.transition = 'none';
+      el.style.opacity = '0.8';
+      el.style.cursor = 'move';
+      this._components.highlight.setMode('selected');
+      this._components.highlight.setHandles(false);
+      this._components.highlight.showForElement(el, '拖动中');
+    }
+
+    /** 命中判定：目标等于选中元素或是其后代（e.target 可能命中子元素） */
+    _hitTargetInSelected(target, selected) {
+      if (!target || !selected) return false;
+      return target === selected || (typeof selected.contains === 'function' && selected.contains(target));
+    }
+
+    /** 容器是否可参与换位：非 body/html、至少两个可换位子元素 */
+    _canReorderIn(container) {
+      if (!container || container === document.body || container === document.documentElement) return false;
+      if (isWalkthroughElement(container)) return false;
+      const kids = Array.from(container.children).filter(k => this._isReorderable(k));
+      return kids.length >= 2;
+    }
+
+    /** 元素是否可参与换位：排除 body/html/工具 UI/SVG 子元素 */
+    _isReorderable(el) {
+      if (!el || !el.parentElement) return false;
+      if (el === document.body || el === document.documentElement) return false;
+      if (isWalkthroughElement(el)) return false;
+      if (typeof SVGElement !== 'undefined' && el instanceof SVGElement) return false;
+      return true;
+    }
+
+    /** 元素稳定身份签名（换位前后一致）：优先图片 src → 文本 → 类名+序号兜底。
+     *  reorder 的 order/oldOrder 用该签名而非 nth-of-type 选择器（后者随位置漂移） */
+    _elementIdentity(el) {
+      if (!el) return '';
+      const tag = el.tagName.toLowerCase();
+      const cls = getFirstStableClass(el) || '';
+      const img = el.tagName === 'IMG' ? el : (el.querySelector ? el.querySelector('img') : null);
+      if (img && img.currentSrc) return `${tag}#${cls}#${img.currentSrc}`;
+      if (img && img.src) return `${tag}#${cls}#${img.src}`;
+      const text = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+      if (text) return `${tag}#${cls}#${text}`;
+      // 无内容特征兜底：类名 + 兄弟序号（换位后序号可能漂移，仅极端场景）
+      const parent = el.parentElement;
+      const idx = parent ? Array.from(parent.children).indexOf(el) : 0;
+      return `${tag}#${cls}#nth${idx}`;
+    }
+
+    /** 容器内可换位子元素的稳定身份顺序快照（换位前后元素身份一致） */
+    _orderSnapshot(container) {
+      return Array.from(container.children)
+        .filter(el => this._isReorderable(el))
+        .map(el => this._elementIdentity(el));
+    }
+
+    /** 容器主轴方向：flex row→'row'、column→'column'、grid→'both'、block→'column' */
+    _containerDirection(container) {
+      const cs = getComputedStyle(container);
+      const d = cs.display;
+      if (d === 'flex' || d === 'inline-flex') {
+        return (cs.flexDirection || 'row').indexOf('column') === 0 ? 'column' : 'row';
+      }
+      if (d === 'grid' || d === 'inline-grid') return 'both';
+      return 'column';
+    }
+
+    /** 功能 4：拖拽位移 clamp 在父容器 content box（padding 内）边界内。
+     *  元素小于容器：左上角限制在 [left, right-w]；大于容器：左上角锚点不越界（本体可超出）。 */
+    _clampDragToContainer(drag, ax, ay) {
+      const el = drag.el, container = drag.container;
+      if (!container || !container.isConnected) return { tx: ax, ty: ay };
+      const o = drag.originRect;
+      const cr = container.getBoundingClientRect();
+      const cs = getComputedStyle(container);
+      const padL = parseFloat(cs.paddingLeft) || 0;
+      const padT = parseFloat(cs.paddingTop) || 0;
+      const padR = parseFloat(cs.paddingRight) || 0;
+      const padB = parseFloat(cs.paddingBottom) || 0;
+      const left = cr.left + padL, top = cr.top + padT;
+      const right = cr.right - padR, bottom = cr.bottom - padB;
+      const cw = Math.max(0, cr.width - padL - padR);
+      const ch = Math.max(0, cr.height - padT - padB);
+      const minTx = left - o.left;
+      const maxTx = (right - Math.min(o.width, cw)) - o.left;
+      const minTy = top - o.top;
+      const maxTy = (bottom - Math.min(o.height, ch)) - o.top;
+      let tx = ax, ty = ay;
+      if (minTx <= maxTx) tx = Math.min(Math.max(ax, minTx), maxTx);
+      if (minTy <= maxTy) ty = Math.min(Math.max(ay, minTy), maxTy);
+      return { tx, ty };
+    }
+
+    /** 功能 4：中心越过兄弟中心 → 与该兄弟 DOM 换位 + FLIP（250ms 防抖锁）
+     *  row 看水平、column 看垂直、grid(both) 两者皆可；
+     *  "越过" = A 中心从初始侧跨过兄弟中心线（避免相邻初始即误换位） */
+    _detectReorder(drag) {
+      const el = drag.el, container = drag.container;
+      if (!container || !container.isConnected) return null;
+      if (Date.now() - (drag.lastSwapAt || 0) < 250) return null;
+      const siblings = Array.from(container.children).filter(s => s !== el && this._isReorderable(s));
+      if (!siblings.length) return null;
+      const er = el.getBoundingClientRect();
+      const ecx = er.left + er.width / 2, ecy = er.top + er.height / 2;
+      const ocx = drag.originCenterX, ocy = drag.originCenterY;
+      const dir = this._containerDirection(container);
+      let target = null;
+      if (dir === 'row' || dir === 'both') {
+        let best = null, bestDist = Infinity;
+        for (const sib of siblings) {
+          const sr = sib.getBoundingClientRect();
+          const scx = sr.left + sr.width / 2;
+          const crossedX = (ocx < scx && ecx > scx) || (ocx > scx && ecx < scx);
+          if (!crossedX) continue;
+          const dist = Math.abs(ecx - scx);
+          if (dist < bestDist) { bestDist = dist; best = sib; }
+        }
+        target = best;
+      }
+      if (!target && (dir === 'column' || dir === 'both')) {
+        let best = null, bestDist = Infinity;
+        for (const sib of siblings) {
+          const sr = sib.getBoundingClientRect();
+          const scy = sr.top + sr.height / 2;
+          const crossedY = (ocy < scy && ecy > scy) || (ocy > scy && ecy < scy);
+          if (!crossedY) continue;
+          const dist = Math.abs(ecy - scy);
+          if (dist < bestDist) { bestDist = dist; best = sib; }
+        }
+        target = best;
+      }
+      if (target) {
+        this._swapSiblings(container, el, target, drag);
+        drag.lastSwapAt = Date.now();
+        drag.orderDirty = true;
+        return target;
+      }
+      return null;
+    }
+
+    /** 功能 4：三节点 DOM 交换 + FLIP 动画。
+     *  - 被让位兄弟 FLIP 流动到新位置
+     *  - 拖动元素视觉连续：transform 调整回换位前视觉位置，并重置拖拽位移基准 */
+    _swapSiblings(container, a, b, drag) {
+      if (a === b) return;
+      const aVisual = a.getBoundingClientRect();
+      const firstB = b.getBoundingClientRect();
+      // DOM 三节点交换（A、B 互换，其余顺序不变）
+      const bNext = b.nextSibling;
+      if (a.nextSibling === b) {
+        container.insertBefore(b, a);
+      } else {
+        container.insertBefore(b, a);
+        container.insertBefore(a, bNext);
+      }
+      // a 的纯 DOM 位置（临时清 transform 求值）
+      const aPrevTransform = a.style.transform;
+      a.style.transform = '';
+      const domA = a.getBoundingClientRect();
+      a.style.transform = aPrevTransform;
+      const lastB = b.getBoundingClientRect();
+      // 拖动元素视觉连续：transform 调整到换位前视觉位置（继续跟手）
+      const fixDx = aVisual.left - domA.left;
+      const fixDy = aVisual.top - domA.top;
+      a.style.transition = 'none';
+      a.style.transform = `translate(${fixDx}px, ${fixDy}px)`;
+      // 被让位兄弟 FLIP：从 firstB 流动到 lastB
+      const invDx = firstB.left - lastB.left;
+      const invDy = firstB.top - lastB.top;
+      b.style.transition = 'none';
+      b.style.transform = `translate(${invDx}px, ${invDy}px)`;
+      void b.getBoundingClientRect(); // force reflow
+      b.style.transition = 'transform 250ms cubic-bezier(0.22, 0.9, 0.32, 1)';
+      b.style.transform = '';
+      // 重置拖拽位移基准（换位后 a 以此 transform 为基准继续增量跟手）
+      if (drag) {
+        drag.accumDx = fixDx;
+        drag.accumDy = fixDy;
+      }
+    }
+
+    /** 功能 4：记录一条 reorder 变更（位移 + 顺序合并，撤销整体还原） */
+    _recordReorder(drag) {
+      const container = drag.container;
+      if (!container) return;
+      const order = this._orderSnapshot(container);
+      const oldOrder = drag.oldOrder || [];
+      if (JSON.stringify(order) === JSON.stringify(oldOrder)) return; // 无实际顺序变化
+      const containerSel = this._resolveCanonicalSelector(container, generateSelector(container));
+      const rec = {
+        id: 'reorder-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'reorder',
+        selector: containerSel,
+        property: 'reorder',
+        newValue: 'reorder',
+        oldValue: '',
+        order,
+        oldOrder,
+        timestamp: Date.now(),
+      };
+      // 附带位移（如有）；identity/containerSel 用于换位后按身份定位（nth 选择器已漂移）
+      if (drag.moved && (drag.snapTx || drag.snapTy)) {
+        rec.move = {
+          identity: this._elementIdentity(drag.el),
+          containerSel: this._resolveCanonicalSelector(container, generateSelector(container)),
+          selector: this._resolveCanonicalSelector(drag.el, generateSelector(drag.el)),
+          oldValue: this._dragOrigTransform || '',
+          newValue: `translate(${drag.snapTx}px, ${drag.snapTy}px)`,
+        };
+      }
+      state.changes.push(rec);
+      state.undoStack.push({
+        id: rec.id,
+        type: 'reorder',
+        selector: containerSel,
+        target: '',
+        property: 'reorder',
+        rec: JSON.parse(JSON.stringify(rec)),
+      });
+      if (state.undoStack.length > 100) state.undoStack.shift();
+      state.redoStack = [];
+      this._syncAfterRecordsChanged();
+      this._updateUndoRedoUI();
+    }
+
+    /** 功能 4：按身份顺序快照重排容器子元素（重放/还原用，appendChild 移动已有节点）。
+     *  身份签名相同的元素按容器当前相对顺序放置，不会错乱 */
+    _applyReorder(selector, order) {
+      try {
+        const container = queryTargetEl(selector);
+        if (!container || !Array.isArray(order)) return;
+        const children = Array.from(container.children).filter(el => this._isReorderable(el));
+        const byIdent = {};
+        children.forEach(el => {
+          const id = this._elementIdentity(el);
+          if (!byIdent[id]) byIdent[id] = [];
+          byIdent[id].push(el);
+        });
+        const placed = new Set();
+        order.forEach(id => {
+          const bucket = byIdent[id];
+          if (!bucket) return;
+          const el = bucket.find(e => !placed.has(e));
+          if (el) { container.appendChild(el); placed.add(el); }
+        });
+        // 未匹配子元素保持原相对顺序追加末尾（防御脏数据/内容变化）
+        children.forEach(el => {
+          if (!placed.has(el)) container.appendChild(el);
+        });
+      } catch (e) {}
+    }
+
+    /** 按身份签名在容器内定位 reorder 附带位移的元素（换位后 nth 选择器漂移，优先身份匹配） */
+    _queryMoveTarget(move) {
+      if (!move) return null;
+      if (move.containerSel && move.identity) {
+        try {
+          const container = queryTargetEl(move.containerSel);
+          if (container) {
+            const found = Array.from(container.children).find(el => this._elementIdentity(el) === move.identity);
+            if (found) return found;
+          }
+        } catch (e) {}
+      }
+      try { return queryTargetEl(move.selector); } catch (e) { return null; }
+    }
+
+    /** 松手结束拖拽：发生位移则记录 transform 变更，否则还原（功能 4：位移+换位合并为一条 reorder 变更） */
     _endLongPressDrag(e) {
       const drag = this._dragging;
       this._dragging = null;
       this._pointerActive = false;
-      this._showSnapLines(null); // 清除吸附辅助线
       if (!drag) return;
       const el = drag.el;
       el.style.transition = '';
@@ -8522,10 +9775,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       el.style.cursor = '';
       const dx = Math.round(e.clientX - drag.startX);
       const dy = Math.round(e.clientY - drag.startY);
-      // 网格吸附：提交时使用拖拽中记录的吸附后位移，保证拖拽中吸附位置与松手后一致
+      // 提交时使用拖拽中记录的位移，保证拖拽中位置与松手后一致
       const fdx = (drag.snapTx !== undefined) ? drag.snapTx : dx;
       const fdy = (drag.snapTy !== undefined) ? drag.snapTy : dy;
-      if (drag.moved && (fdx !== 0 || fdy !== 0)) {
+      const didMove = drag.moved && (fdx !== 0 || fdy !== 0);
+      const didReorder = drag.orderDirty;
+      if (didReorder && drag.container && drag.oldOrder) {
+        // 换位 + 位移合并为一条 reorder 变更（撤销整体还原）
+        el.style.transform = didMove ? `translate(${fdx}px, ${fdy}px)` : (this._dragOrigTransform || '');
+        this._recordReorder(drag);
+        this._showToast(didMove ? '已移动并调整顺序' : '已调整元素顺序');
+      } else if (didMove) {
         const newValue = `translate(${fdx}px, ${fdy}px)`;
         el.style.transform = newValue;
         bus.emit('style-change', {
@@ -8567,6 +9827,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._components.highlight.setMode('hover');
       this._components.highlight.removeAttribute('hidden');
       this._components.highlight.showForElement(el);
+      // 功能 5：悬停元信息（四边延长线 + 气泡 + 间距标注 + padding/margin 色块）
+      if (this._components.inspector) this._components.inspector.show(el);
     }
 
     _clearHover() {
@@ -8576,6 +9838,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._components.highlight.hide();
           this._components.highlight.setAttribute('hidden', '');
         }
+        // 功能 5：无选中时隐藏元信息
+        if (!state.selectedElement && this._components.inspector) this._components.inspector.hide();
       }
     }
 
@@ -8711,67 +9975,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._selectElement(el);
     }
 
-    /** 网格辅助线开关（计划 3.6：覆盖半透明网格线，配合拖拽吸附） */
-    _toggleGridMode() {
-      this._gridMode = !this._gridMode;
-      const ov = this._shadow.querySelector('[data-grid-overlay]');
-      if (ov) ov.toggleAttribute('hidden', !this._gridMode);
-      this._updateToolbarState();
-      this._showToast(this._gridMode ? '已开启网格辅助线（8px）' : '已关闭网格辅助线');
-    }
-
-    /** 拖拽吸附：元素边缘接近网格线时吸附（阈值 4px），返回修正后的位移与吸附线 */
-    _snapDragToGrid(dx, dy) {
-      const el = this._dragging.el;
-      const rect = el.getBoundingClientRect();
-      const LEFT = rect.left + dx;
-      const TOP = rect.top + dy;
-      const RIGHT = LEFT + rect.width;
-      const BOTTOM = TOP + rect.height;
-      const GRID = 8;
-      const TH = 4;
-      let ndx = dx;
-      let ndy = dy;
-      const snapLines = [];
-      // 垂直对齐：优先左边缘，其次右边缘
-      const lNear = Math.round(LEFT / GRID) * GRID;
-      if (Math.abs(LEFT - lNear) <= TH) {
-        ndx = dx - (LEFT - lNear);
-        snapLines.push({ orient: 'v', x: lNear, y1: TOP, y2: BOTTOM });
-      } else {
-        const rNear = Math.round(RIGHT / GRID) * GRID;
-        if (Math.abs(RIGHT - rNear) <= TH) {
-          ndx = dx - (RIGHT - rNear);
-          snapLines.push({ orient: 'v', x: rNear, y1: TOP, y2: BOTTOM });
-        }
-      }
-      // 水平对齐：优先上边缘，其次下边缘
-      const tNear = Math.round(TOP / GRID) * GRID;
-      if (Math.abs(TOP - tNear) <= TH) {
-        ndy = dy - (TOP - tNear);
-        snapLines.push({ orient: 'h', y: tNear, x1: LEFT, x2: RIGHT });
-      } else {
-        const bNear = Math.round(BOTTOM / GRID) * GRID;
-        if (Math.abs(BOTTOM - bNear) <= TH) {
-          ndy = dy - (BOTTOM - bNear);
-          snapLines.push({ orient: 'h', y: bNear, x1: LEFT, x2: RIGHT });
-        }
-      }
-      return { dx: ndx, dy: ndy, snapLines };
-    }
-
-    /** 显示/隐藏吸附辅助线（红色虚线，复用测量 overlay 图层） */
-    _showSnapLines(lines) {
-      const measure = this._components.measure;
-      if (!measure) return;
-      if (!lines || lines.length === 0) {
-        if (!this._measureAnchor) measure.clear();
-        return;
-      }
-      if (typeof measure.showSnap !== 'function') return;
-      measure.showSnap(lines);
-    }
-
     /** 测量模式开关（对齐计划 3.5：切换/点空白/切走查退出） */
     _toggleMeasureMode() {
       this._closeAllPanels();
@@ -8834,6 +10037,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._components.highlight.setMode('selected');
       this._components.highlight.removeAttribute('hidden');
       this._components.highlight.showForElement(el);
+      // 功能 5：选中元信息（选中态持续显示，移动端亦生效）
+      if (this._components.inspector) this._components.inspector.show(el);
       const selector = this._resolveCanonicalSelector(el, generateSelector(el));
       state.selectedSelector = selector;
       state.selectedTarget = '';
@@ -8868,6 +10073,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._components.highlight.hide();
         this._components.highlight.setAttribute('hidden', '');
       }
+      if (this._components.inspector) this._components.inspector.hide();
       state.selectedSelector = '';
       state.selectedTarget = '';
       bus.emit('element-deselected');
@@ -9090,6 +10296,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     /** 还原单条变更（本体=清 inline；伪元素=清注入规则；文本=恢复原文） */
     _revertChange(change) {
+      // 功能 4：reorder 变更 → 重放原顺序 + 还原附带位移
+      if (change.type === 'reorder') {
+        this._applyReorder(change.selector, change.oldOrder);
+        if (change.move) {
+          const mel = this._queryMoveTarget(change.move);
+          if (mel) mel.style.transform = change.move.oldValue || '';
+        }
+        return;
+      }
       if (change.target) {
         applyPseudoStyle(change.selector, change.target, change.property, '');
         return;
@@ -9109,7 +10324,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         let el = changeElRefs.get(change.id);
         if (!el || !el.isConnected) el = queryTargetEl(change.selector);
         // 用 setProperty 兼容 kebab-case 属性名（如 flex-direction）
-        if (el) el.style.setProperty(change.property, '');
+        if (el) {
+          el.style.setProperty(change.property, '');
+          // 文本渐变记录（功能 4）：color 清空时一并清除 background-clip:text 残留痕迹
+          if (change.property === 'color') {
+            el.style.backgroundImage = '';
+            el.style.webkitBackgroundClip = '';
+            el.style.backgroundClip = '';
+          }
+        }
       } catch (e) {}
       changeElRefs.delete(change.id);
     }
@@ -9127,7 +10350,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           return;
         }
         const el = queryTargetEl(selector);
-        if (el) el.style.setProperty(property, value);
+        if (!el) return;
+        // 文本渐变（功能 4）：color 值为渐变串 → 应用 background-clip:text；普通色 → 清除文本渐变痕迹
+        if (property === 'color') {
+          const v = String(value || '');
+          if (v.indexOf('gradient(') !== -1) {
+            el.style.backgroundImage = v;
+            el.style.webkitBackgroundClip = 'text';
+            el.style.backgroundClip = 'text';
+            el.style.color = 'transparent';
+          } else {
+            if (el.style.backgroundClip === 'text' || el.style.webkitBackgroundClip === 'text') {
+              el.style.backgroundImage = '';
+              el.style.webkitBackgroundClip = '';
+              el.style.backgroundClip = '';
+            }
+            el.style.color = v;
+          }
+          return;
+        }
+        el.style.setProperty(property, value);
       } catch (e) {}
     }
 
@@ -9147,6 +10389,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!item) {
         this._showToast('没有可撤销的修改');
         return false;
+      }
+      // 功能 4：reorder 撤销（还原 oldOrder 顺序 + 附带位移）
+      if (item.type === 'reorder' && item.rec) {
+        const rec = item.rec;
+        this._applyReorder(rec.selector, rec.oldOrder);
+        if (rec.move) {
+          const mel = this._queryMoveTarget(rec.move);
+          if (mel) mel.style.transform = rec.move.oldValue || '';
+        }
+        state.changes = state.changes.filter(c => c.id !== rec.id);
+        state.redoStack.push(item);
+        this._syncAfterRecordsChanged();
+        this._updateUndoRedoUI();
+        this._showToast('已撤销（元素顺序还原）');
+        return true;
       }
       const existing = state.changes.find(c =>
         c.selector === item.selector && (c.target || '') === item.target && c.property === item.property);
@@ -9195,6 +10452,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!item) {
         this._showToast('没有可重做的修改');
         return false;
+      }
+      // 功能 4：reorder 重做（重放 order 顺序 + 附带位移）
+      if (item.type === 'reorder' && item.rec) {
+        const rec = item.rec;
+        this._applyReorder(rec.selector, rec.order);
+        if (rec.move) {
+          const mel = this._queryMoveTarget(rec.move);
+          if (mel) mel.style.transform = rec.move.newValue || '';
+        }
+        state.changes.push(rec);
+        state.undoStack.push(item);
+        this._syncAfterRecordsChanged();
+        this._updateUndoRedoUI();
+        this._showToast('已重做（元素顺序恢复）');
+        return true;
       }
       // 共享组重做：按快照恢复全部同步元素的样式与记录
       if (item.groupRecords && item.groupRecords.length) {
@@ -9304,6 +10576,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _buildAnnotationsForJson() {
       const map = {};
       state.changes.forEach(c => {
+        if (c.type === 'reorder') {
+          // reorder 变更（功能 4）单独承载顺序快照，不进 CSS 配置列表
+          const rkey = c.selector + '||';
+          if (!map[rkey]) map[rkey] = { elements: [c.selector], configs: [], comments: [], text: '' };
+          map[rkey].reorder = { order: c.order, oldOrder: c.oldOrder, move: c.move || null };
+          return;
+        }
         const key = c.selector + '||' + (c.target || '');
         if (!map[key]) map[key] = { elements: [c.selector], configs: [], comments: [], text: c.elementText || '' };
         map[key].configs.push({
@@ -9540,8 +10819,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     /** 把普通元素变更回放到页面 DOM；场景为异步渲染（骨架屏→真实内容），未命中时短重试 */
     _replayInlineChanges(round) {
       round = round || 0;
+      // 功能 4：reorder 变更重放（重排容器顺序 + 附带位移）
+      const reorders = state.changes.filter(c => c.type === 'reorder');
+      let reorderMatched = 0;
+      reorders.forEach(c => {
+        const container = queryTargetEl(c.selector);
+        if (!container || !container.isConnected) return;
+        reorderMatched++;
+        this._applyReorder(c.selector, c.order);
+        if (c.move) {
+          const mel = this._queryMoveTarget(c.move);
+          if (mel) mel.style.transform = c.move.newValue || '';
+        }
+      });
       const pending = state.changes.filter(c =>
-        !c.target && c.property && c.newValue !== '' && c.newValue != null && !c.skipCss
+        c.type !== 'reorder' && !c.target && c.property && c.newValue !== '' && c.newValue != null && !c.skipCss
       );
       let matched = 0;
       pending.forEach(c => {
@@ -9564,7 +10856,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._syncAnnotationMarkers();
       }
       // 最多重试 10 次（约 2s），覆盖场景脚本异步渲染完成的时机
-      if ((matched < pending.length || annMatched < state.annotations.length) && round < 10) {
+      if ((matched < pending.length || reorderMatched < reorders.length || annMatched < state.annotations.length) && round < 10) {
         if (this._replayTimer) clearTimeout(this._replayTimer);
         this._replayTimer = setTimeout(() => this._replayInlineChanges(round + 1), 200);
       }
@@ -9676,9 +10968,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 测量模式按钮激活态
       const msBtn = this._shadow.querySelector('[data-tool="measure"]');
       if (msBtn) msBtn.setAttribute('data-active', String(this._measureMode));
-      // 网格辅助线按钮激活态
-      const gridBtn = this._shadow.querySelector('[data-tool="grid"]');
-      if (gridBtn) gridBtn.setAttribute('data-active', String(this._gridMode));
       // 批注模式按钮激活态
       const annBtn = this._shadow.querySelector('[data-tool="annotation"]');
       if (annBtn) annBtn.setAttribute('data-active', String(this._annotationMode));
@@ -9705,6 +10994,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
     if (!customElements.get('wego-wt-highlight')) customElements.define('wego-wt-highlight', WegoWtHighlight);
     if (!customElements.get('wego-wt-measure')) customElements.define('wego-wt-measure', WegoWtMeasure);
+    if (!customElements.get('wego-wt-inspector')) customElements.define('wego-wt-inspector', WegoWtInspector);
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
     if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
     if (!customElements.get('wego-wt-overview-panel')) customElements.define('wego-wt-overview-panel', WegoWtOverviewPanel);
