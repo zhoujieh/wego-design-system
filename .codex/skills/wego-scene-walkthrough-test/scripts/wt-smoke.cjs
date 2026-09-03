@@ -53,7 +53,8 @@ function check(name, ok, detail = '') {
       const isr = ins.shadowRoot;
       return {
         guides: isr.querySelectorAll('line.guide').length,
-        pline: isr.querySelectorAll('line.pline').length,
+        padbg: isr.querySelectorAll('rect.pad-bg').length,
+        gapbg: isr.querySelectorAll('rect.gap-bg').length,
         pnum: Array.from(isr.querySelectorAll('text.pnum')).map(t => t.textContent),
         nums: Array.from(isr.querySelectorAll('text.num')).map(t => t.textContent),
         noBubble: !isr.querySelector('.bubble-text'),
@@ -61,7 +62,7 @@ function check(name, ok, detail = '') {
       };
     });
     check('⑤ 悬停四边延长线', insp && insp.display === 'block' && insp.guides === 4, insp ? `guides=${insp.guides}` : '无 inspector');
-    check('⑤ padding 蓝色标注线+数字', insp && insp.pline >= 1 && insp.pnum.length >= 1, `pline=${insp ? insp.pline : 0} pnum=${insp ? insp.pnum.length : 0}`);
+    check('⑤ 容器 padding 蓝底 + gap 洋红底', insp && insp.padbg >= 1 && insp.gapbg >= 1 && insp.pnum.length >= 1, `padbg=${insp ? insp.padbg : 0} gapbg=${insp ? insp.gapbg : 0} pnum=${insp ? insp.pnum.length : 0}`);
     check('⑤ 元素信息气泡已去除', insp && insp.noBubble, `noBubble=${insp ? insp.noBubble : 0}`);
 
     // 选中 head（点击中心 + 连点，head 中心命中 publisher 上移到 head）

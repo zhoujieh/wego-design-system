@@ -1846,7 +1846,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._rafId = null;
       }
     }
-    /** 布局间距标注：四边到父容器 content box 边缘（当前容器） */
+    /** 是否容器（可见子元素 ≥ 2）→ 背景色标注；否则叶子元素 → 间距线标注 */
+    _isContainer(el) {
+      if (!el.children || !el.children.length) return false;
+      let vis = 0;
+      for (const ch of el.children) {
+        const r = ch.getBoundingClientRect();
+        if (r.width > 1 && r.height > 1 && ++vis >= 2) return true;
+      }
+      return false;
+    }
+    /** 布局间距标注：优先最近相邻兄弟元素边缘，无则父容器 content box 边缘 */
     _layoutGaps(el, rect) {
       const gaps = { left: null, top: null, right: null, bottom: null };
       const parent = el.parentElement;
@@ -1857,10 +1867,103 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const contentTop = pr.top + (parseFloat(pcs.paddingTop) || 0);
       const contentRight = pr.right - (parseFloat(pcs.paddingRight) || 0);
       const contentBottom = pr.bottom - (parseFloat(pcs.paddingBottom) || 0);
-      gaps.left = { from: contentLeft, dist: rect.left - contentLeft };
-      gaps.top = { from: contentTop, dist: rect.top - contentTop };
-      gaps.right = { from: contentRight, dist: contentRight - rect.right };
-      gaps.bottom = { from: contentBottom, dist: contentBottom - rect.bottom };
+      const siblings = Array.from(parent.children)
+        .filter(ch => ch !== el && ch.getBoundingClientRect().width > 0 && ch.getBoundingClientRect().height > 0);
+      // 每方向：最近相邻兄弟边缘优先（距离更近则取兄弟），否则父容器 content 边缘
+      let left = rect.left - contentLeft;
+      for (const s of siblings) {
+        const sr = s.getBoundingClientRect();
+        if (sr.right <= rect.left + 0.5) { const d = rect.left - sr.right; if (d >= -0.5 && d < left) left = d; }
+      }
+      let right = contentRight - rect.right;
+      for (const s of siblings) {
+        const sr = s.getBoundingClientRect();
+        if (sr.left >= rect.right - 0.5) { const d = sr.left - rect.right; if (d >= -0.5 && d < right) right = d; }
+      }
+      let top = rect.top - contentTop;
+      for (const s of siblings) {
+        const sr = s.getBoundingClientRect();
+        if (sr.bottom <= rect.top + 0.5) { const d = rect.top - sr.bottom; if (d >= -0.5 && d < top) top = d; }
+      }
+      let bottom = contentBottom - rect.bottom;
+      for (const s of siblings) {
+        const sr = s.getBoundingClientRect();
+        if (sr.top >= rect.bottom - 0.5) { const d = sr.top - rect.bottom; if (d >= -0.5 && d < bottom) bottom = d; }
+      }
+      gaps.left = { from: rect.left - left, dist: left };
+      gaps.right = { from: rect.right + right, dist: right };
+      gaps.top = { from: rect.top - top, dist: top };
+      gaps.bottom = { from: rect.bottom + bottom, dist: bottom };
+      return gaps;
+    }
+    /** 数值文本（垂直居中，白描边避开线/背景） */
+    _numText(x, y, v, cls) {
+      return `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle">${Math.round(v)}</text>`;
+    }
+    /** 容器内相邻子元素之间的间隙（gap，洋红背景）。兼容 flex 行/列与多行多列 grid */
+    _computeChildGaps(el) {
+      const children = Array.from(el.children)
+        .filter(ch => { const r = ch.getBoundingClientRect(); return r.width > 0 && r.height > 0; });
+      const rects = children.map(c => c.getBoundingClientRect());
+      const N = children.length;
+      // 收集原始间隙段（成对判断 + 中间无其他元素阻挡）
+      const hSegs = [], vSegs = [];
+      for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+          if (i === j) continue;
+          const a = rects[i], b = rects[j];
+          // 水平间隙：a 在左 b 在右，垂直带重叠，且中间无其他元素
+          if (a.right <= b.left) {
+            const bandTop = Math.max(a.top, b.top), bandBot = Math.min(a.bottom, b.bottom);
+            if (bandBot - bandTop <= 0.5) continue;
+            let blocked = false;
+            for (let k = 0; k < N; k++) {
+              if (k === i || k === j) continue;
+              const c = rects[k];
+              if (c.right > a.right + 0.5 && c.left < b.left - 0.5 && c.bottom > bandTop && c.top < bandBot) { blocked = true; break; }
+            }
+            if (blocked) continue;
+            const w = b.left - a.right;
+            if (w > 0.5) hSegs.push({ x: a.right, y: bandTop, w, bot: bandBot });
+          }
+          // 垂直间隙：a 在上 b 在下，水平带重叠，且中间无其他元素
+          if (a.bottom <= b.top) {
+            const bandLeft = Math.max(a.left, b.left), bandRight = Math.min(a.right, b.right);
+            if (bandRight - bandLeft <= 0.5) continue;
+            let blocked = false;
+            for (let k = 0; k < N; k++) {
+              if (k === i || k === j) continue;
+              const c = rects[k];
+              if (c.bottom > a.bottom + 0.5 && c.top < b.top - 0.5 && c.right > bandLeft && c.left < bandRight) { blocked = true; break; }
+            }
+            if (blocked) continue;
+            const h = b.top - a.bottom;
+            if (h > 0.5) vSegs.push({ y: a.bottom, x: bandLeft, h, right: bandRight });
+          }
+        }
+      }
+      // 合并同一列/同一行间隙段为一条完整间隙
+      const gaps = [];
+      const hMap = new Map(); // key x,w → 竖条
+      for (const g of hSegs) {
+        const key = Math.round(g.x) + ',' + Math.round(g.w);
+        if (hMap.has(key)) { const e = hMap.get(key); e.top = Math.min(e.top, g.y); e.bot = Math.max(e.bot, g.bot); }
+        else hMap.set(key, { x: g.x, w: g.w, top: g.y, bot: g.bot });
+      }
+      for (const e of hMap.values()) {
+        const h = e.bot - e.top;
+        gaps.push({ x: e.x, y: e.top, w: e.w, h, dist: e.w, tx: e.x + e.w / 2, ty: e.top + h / 2 });
+      }
+      const vMap = new Map(); // key y,h → 横条
+      for (const g of vSegs) {
+        const key = Math.round(g.y) + ',' + Math.round(g.h);
+        if (vMap.has(key)) { const e = vMap.get(key); e.left = Math.min(e.left, g.x); e.right = Math.max(e.right, g.right); }
+        else vMap.set(key, { y: g.y, h: g.h, left: g.x, right: g.right });
+      }
+      for (const e of vMap.values()) {
+        const w = e.right - e.left;
+        gaps.push({ x: e.left, y: e.y, w, h: e.h, dist: e.h, tx: e.left + w / 2, ty: e.y + e.h / 2 });
+      }
       return gaps;
     }
     /** 元信息气泡文案：优先稳定 class，其次 tagName + 尺寸 */
@@ -1884,7 +1987,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         l: parseFloat(cs.marginLeft) || 0, r: parseFloat(cs.marginRight) || 0,
         t: parseFloat(cs.marginTop) || 0, b: parseFloat(cs.marginBottom) || 0,
       };
-      const gaps = this._layoutGaps(el, rect);
       const L = rect.left, T = rect.top, R = rect.right, B = rect.bottom;
       let svg = '';
       // 1. 四边延长线（延伸到视口边缘，半透明红虚线）
@@ -1892,74 +1994,104 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       svg += `<line class="guide" x1="${R}" y1="0" x2="${R}" y2="${vh}"/>`;
       svg += `<line class="guide" x1="0" y1="${T}" x2="${vw}" y2="${T}"/>`;
       svg += `<line class="guide" x1="0" y1="${B}" x2="${vw}" y2="${B}"/>`;
-      // 2. 间距标注线 + 数字（仅绘制有值间距；贴边/0 不显示）
+      // 2. 容器（flex/grid 有子元素）→ 背景色标注；叶子 → 间距线标注
+      svg += this._isContainer(el)
+        ? this._renderContainerOverlay(el, rect, pad, mar, vw, vh)
+        : this._renderLeafOverlay(el, rect, pad, mar, vw, vh);
+      this._svg.innerHTML = svg;
+      this.style.display = 'block';
+    }
+    /** 容器模式：padding 蓝底 / gap 洋红底 / margin 绿底（背景色标注） */
+    _renderContainerOverlay(el, rect, pad, mar, vw, vh) {
+      const L = rect.left, T = rect.top, R = rect.right, B = rect.bottom;
+      const W = rect.width, H = rect.height;
+      let s = '';
+      // padding 蓝色背景 + 数字（覆盖 padding 区域）
+      if (pad.l > 0) { s += `<rect class="pad-bg" x="${L}" y="${T}" width="${pad.l}" height="${H}"/>`; s += this._numText(L + pad.l / 2, T + H / 2, pad.l, 'pnum'); }
+      if (pad.r > 0) { s += `<rect class="pad-bg" x="${R - pad.r}" y="${T}" width="${pad.r}" height="${H}"/>`; s += this._numText(R - pad.r / 2, T + H / 2, pad.r, 'pnum'); }
+      if (pad.t > 0) { s += `<rect class="pad-bg" x="${L}" y="${T}" width="${W}" height="${pad.t}"/>`; s += this._numText(L + W / 2, T + pad.t / 2, pad.t, 'pnum'); }
+      if (pad.b > 0) { s += `<rect class="pad-bg" x="${L}" y="${B - pad.b}" width="${W}" height="${pad.b}"/>`; s += this._numText(L + W / 2, B - pad.b / 2, pad.b, 'pnum'); }
+      // margin 绿色背景 + 数字（覆盖 margin 区域）
+      if (mar.l > 0) { s += `<rect class="mar-bg" x="${L - mar.l}" y="${T - mar.t}" width="${mar.l}" height="${H + mar.t + mar.b}"/>`; s += this._numText(L - mar.l / 2, T + H / 2, mar.l, 'mnum'); }
+      if (mar.r > 0) { s += `<rect class="mar-bg" x="${R}" y="${T - mar.t}" width="${mar.r}" height="${H + mar.t + mar.b}"/>`; s += this._numText(R + mar.r / 2, T + H / 2, mar.r, 'mnum'); }
+      if (mar.t > 0) { s += `<rect class="mar-bg" x="${L - mar.l}" y="${T - mar.t}" width="${W + mar.l + mar.r}" height="${mar.t}"/>`; s += this._numText(L + W / 2, T - mar.t / 2, mar.t, 'mnum'); }
+      if (mar.b > 0) { s += `<rect class="mar-bg" x="${L - mar.l}" y="${B}" width="${W + mar.l + mar.r}" height="${mar.b}"/>`; s += this._numText(L + W / 2, B + mar.b / 2, mar.b, 'mnum'); }
+      // gap 洋红背景（子元素之间间隙）+ 数字
+      for (const g of this._computeChildGaps(el)) {
+        s += `<rect class="gap-bg" x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}"/>`;
+        s += this._numText(g.tx, g.ty, g.dist, 'num');
+      }
+      return s;
+    }
+    /** 叶子模式：gap 洋红间距线 + padding 蓝色线 + margin 绿色线（数字避开线） */
+    _renderLeafOverlay(el, rect, pad, mar, vw, vh) {
+      const L = rect.left, T = rect.top, R = rect.right, B = rect.bottom;
+      const gaps = this._layoutGaps(el, rect);
+      let s = '';
       const num = (x, y, d) => `<text class="num" x="${x}" y="${y}" text-anchor="middle">${Math.round(d)}</text>`;
       if (gaps.left && Math.abs(gaps.left.dist) > 0.5) {
         const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
-        svg += `<line class="sp" x1="${gaps.left.from}" y1="${gy}" x2="${L}" y2="${gy}"/>`;
-        svg += num((gaps.left.from + L) / 2, gy - 4, gaps.left.dist);
+        s += `<line class="sp" x1="${gaps.left.from}" y1="${gy}" x2="${L}" y2="${gy}"/>`;
+        s += num((gaps.left.from + L) / 2, gy - 4, gaps.left.dist);
       }
       if (gaps.right && Math.abs(gaps.right.dist) > 0.5) {
         const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
-        svg += `<line class="sp" x1="${R}" y1="${gy}" x2="${gaps.right.from}" y2="${gy}"/>`;
-        svg += num((R + gaps.right.from) / 2, gy - 4, gaps.right.dist);
+        s += `<line class="sp" x1="${R}" y1="${gy}" x2="${gaps.right.from}" y2="${gy}"/>`;
+        s += num((R + gaps.right.from) / 2, gy - 4, gaps.right.dist);
       }
       if (gaps.top && Math.abs(gaps.top.dist) > 0.5) {
         const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
-        svg += `<line class="sp" x1="${gx}" y1="${gaps.top.from}" x2="${gx}" y2="${T}"/>`;
-        svg += `<text class="num" x="${gx}" y="${this._clamp((gaps.top.from + T) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.top.dist)}</text>`;
+        s += `<line class="sp" x1="${gx}" y1="${gaps.top.from}" x2="${gx}" y2="${T}"/>`;
+        s += `<text class="num" x="${gx}" y="${this._clamp((gaps.top.from + T) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.top.dist)}</text>`;
       }
       if (gaps.bottom && Math.abs(gaps.bottom.dist) > 0.5) {
         const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
-        svg += `<line class="sp" x1="${gx}" y1="${B}" x2="${gx}" y2="${gaps.bottom.from}"/>`;
-        svg += `<text class="num" x="${gx}" y="${this._clamp((B + gaps.bottom.from) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.bottom.dist)}</text>`;
+        s += `<line class="sp" x1="${gx}" y1="${B}" x2="${gx}" y2="${gaps.bottom.from}"/>`;
+        s += `<text class="num" x="${gx}" y="${this._clamp((B + gaps.bottom.from) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.bottom.dist)}</text>`;
       }
-      // 3. padding 蓝色标注线 + 数字（标记各方向 padding 厚度，数字放在线旁避开线）
-      const numAt = (x, y, val, cls) =>
-        `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle">${Math.round(val)}</text>`;
+      // padding 蓝色标注线 + 数字
       if (pad.l > 0) {
         const cy = this._clamp(T + rect.height / 2, 16, vh - 10);
-        svg += `<line class="pline" x1="${L}" y1="${cy}" x2="${L + pad.l}" y2="${cy}"/>`;
-        svg += numAt(L + pad.l / 2, cy - 4, pad.l, 'pnum');
+        s += `<line class="pline" x1="${L}" y1="${cy}" x2="${L + pad.l}" y2="${cy}"/>`;
+        s += this._numText(L + pad.l / 2, cy - 4, pad.l, 'pnum');
       }
       if (pad.r > 0) {
         const cy = this._clamp(T + rect.height / 2, 16, vh - 10);
-        svg += `<line class="pline" x1="${R - pad.r}" y1="${cy}" x2="${R}" y2="${cy}"/>`;
-        svg += numAt(R - pad.r / 2, cy - 4, pad.r, 'pnum');
+        s += `<line class="pline" x1="${R - pad.r}" y1="${cy}" x2="${R}" y2="${cy}"/>`;
+        s += this._numText(R - pad.r / 2, cy - 4, pad.r, 'pnum');
       }
       if (pad.t > 0) {
         const cx = this._clamp(L + rect.width / 2, 24, vw - 24);
-        svg += `<line class="pline" x1="${cx}" y1="${T}" x2="${cx}" y2="${T + pad.t}"/>`;
-        svg += numAt(cx + 6, T + pad.t / 2 + 4, pad.t, 'pnum');
+        s += `<line class="pline" x1="${cx}" y1="${T}" x2="${cx}" y2="${T + pad.t}"/>`;
+        s += this._numText(cx + 6, T + pad.t / 2 + 4, pad.t, 'pnum');
       }
       if (pad.b > 0) {
         const cx = this._clamp(L + rect.width / 2, 24, vw - 24);
-        svg += `<line class="pline" x1="${cx}" y1="${B - pad.b}" x2="${cx}" y2="${B}"/>`;
-        svg += numAt(cx + 6, B - pad.b / 2 + 4, pad.b, 'pnum');
+        s += `<line class="pline" x1="${cx}" y1="${B - pad.b}" x2="${cx}" y2="${B}"/>`;
+        s += this._numText(cx + 6, B - pad.b / 2 + 4, pad.b, 'pnum');
       }
-      // 4. margin 绿色标注线 + 数字（有 margin 才显示，标在元素外部对应边缘）
+      // margin 绿色标注线 + 数字
       if (mar.l > 0) {
         const cy = this._clamp(T + rect.height / 2, 16, vh - 10);
-        svg += `<line class="mline" x1="${L - mar.l}" y1="${cy}" x2="${L}" y2="${cy}"/>`;
-        svg += numAt(L - mar.l / 2, cy - 4, mar.l, 'mnum');
+        s += `<line class="mline" x1="${L - mar.l}" y1="${cy}" x2="${L}" y2="${cy}"/>`;
+        s += this._numText(L - mar.l / 2, cy - 4, mar.l, 'mnum');
       }
       if (mar.r > 0) {
         const cy = this._clamp(T + rect.height / 2, 16, vh - 10);
-        svg += `<line class="mline" x1="${R}" y1="${cy}" x2="${R + mar.r}" y2="${cy}"/>`;
-        svg += numAt(R + mar.r / 2, cy - 4, mar.r, 'mnum');
+        s += `<line class="mline" x1="${R}" y1="${cy}" x2="${R + mar.r}" y2="${cy}"/>`;
+        s += this._numText(R + mar.r / 2, cy - 4, mar.r, 'mnum');
       }
       if (mar.t > 0) {
         const cx = this._clamp(L + rect.width / 2, 24, vw - 24);
-        svg += `<line class="mline" x1="${cx}" y1="${T - mar.t}" x2="${cx}" y2="${T}"/>`;
-        svg += numAt(cx + 6, T - mar.t / 2 + 4, mar.t, 'mnum');
+        s += `<line class="mline" x1="${cx}" y1="${T - mar.t}" x2="${cx}" y2="${T}"/>`;
+        s += this._numText(cx + 6, T - mar.t / 2 + 4, mar.t, 'mnum');
       }
       if (mar.b > 0) {
         const cx = this._clamp(L + rect.width / 2, 24, vw - 24);
-        svg += `<line class="mline" x1="${cx}" y1="${B}" x2="${cx}" y2="${B + mar.b}"/>`;
-        svg += numAt(cx + 6, B + mar.b / 2 + 4, mar.b, 'mnum');
+        s += `<line class="mline" x1="${cx}" y1="${B}" x2="${cx}" y2="${B + mar.b}"/>`;
+        s += this._numText(cx + 6, B + mar.b / 2 + 4, mar.b, 'mnum');
       }
-      this._svg.innerHTML = svg;
-      this.style.display = 'block';
+      return s;
     }
     _render() {
       this._shadow.innerHTML = `
@@ -1994,6 +2126,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
             paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round;
           }
+          /* 容器模式背景色：padding 蓝底 / gap 洋红底 / margin 绿底 */
+          .pad-bg { fill: rgba(76,141,255,0.18); }
+          .gap-bg { fill: rgba(255,0,255,0.16); }
+          .mar-bg { fill: rgba(0,181,120,0.16); }
         </style>
         <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
       `;
