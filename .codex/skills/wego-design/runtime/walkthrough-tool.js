@@ -1790,6 +1790,245 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   }
 
   // ============================================================
+  // wego-wt-inspector: 悬停/选中元信息 overlay（功能 5，替代网格吸附）
+  // 四边延长线（到视口边缘）+ 元信息气泡(稳定class/tag · 宽×高)
+  // + 布局间距标注(到最近参考) + padding/margin 色块（hover/点击显示数值）
+  // z-index：页面之上、样式面板之下；rAF 跟踪元素位置
+  // ============================================================
+  class WegoWtInspector extends HTMLElement {
+    constructor() {
+      super();
+      this._shadow = this.attachShadow({ mode: 'open' });
+      this._targetEl = null;
+      this._rafId = null;
+    }
+    connectedCallback() {
+      this._render();
+    }
+    disconnectedCallback() {
+      this._stopTracking();
+    }
+    show(el) {
+      this._targetEl = el;
+      this._update();
+      this._startTracking();
+    }
+    hide() {
+      this._targetEl = null;
+      this._stopTracking();
+      this.style.display = 'none';
+      this._hideTooltip();
+    }
+    _startTracking() {
+      this._stopTracking();
+      const update = () => {
+        if (this._targetEl) {
+          this._update();
+          this._rafId = requestAnimationFrame(update);
+        }
+      };
+      this._rafId = requestAnimationFrame(update);
+    }
+    _stopTracking() {
+      if (this._rafId) {
+        cancelAnimationFrame(this._rafId);
+        this._rafId = null;
+      }
+    }
+    /** 布局间距标注：四边到最近参考（相邻兄弟边缘 / 父 content box 边缘） */
+    _layoutGaps(el, rect) {
+      const gaps = { left: null, top: null, right: null, bottom: null };
+      const parent = el.parentElement;
+      if (!parent) return gaps;
+      const pcs = getComputedStyle(parent);
+      const pr = parent.getBoundingClientRect();
+      const contentLeft = pr.left + (parseFloat(pcs.paddingLeft) || 0);
+      const contentTop = pr.top + (parseFloat(pcs.paddingTop) || 0);
+      const contentRight = pr.right - (parseFloat(pcs.paddingRight) || 0);
+      const contentBottom = pr.bottom - (parseFloat(pcs.paddingBottom) || 0);
+      let refL = null, refT = null, refR = null, refB = null;
+      Array.from(parent.children).forEach(s => {
+        if (s === el) return;
+        const sr = s.getBoundingClientRect();
+        if (sr.right <= rect.left + 0.5 && (refL === null || sr.right > refL)) refL = sr.right;
+        if (sr.left >= rect.right - 0.5 && (refR === null || sr.left < refR)) refR = sr.left;
+        if (sr.bottom <= rect.top + 0.5 && (refT === null || sr.bottom > refT)) refT = sr.bottom;
+        if (sr.top >= rect.bottom - 0.5 && (refB === null || sr.top < refB)) refB = sr.top;
+      });
+      gaps.left = { from: refL !== null ? refL : contentLeft, dist: rect.left - (refL !== null ? refL : contentLeft) };
+      gaps.top = { from: refT !== null ? refT : contentTop, dist: rect.top - (refT !== null ? refT : contentTop) };
+      gaps.right = { from: refR !== null ? refR : contentRight, dist: (refR !== null ? refR : contentRight) - rect.right };
+      gaps.bottom = { from: refB !== null ? refB : contentBottom, dist: (refB !== null ? refB : contentBottom) - rect.bottom };
+      return gaps;
+    }
+    /** 元信息气泡文案：优先稳定 class，其次 tagName + 尺寸 */
+    _elementLabel(el, rect) {
+      let name = '';
+      try { name = getFirstStableClass(el) || el.tagName.toLowerCase(); } catch (e) { name = el.tagName.toLowerCase(); }
+      return `${name} · ${Math.round(rect.width)}×${Math.round(rect.height)}`;
+    }
+    _clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    _update() {
+      const el = this._targetEl;
+      if (!el || !el.isConnected) { this.hide(); return; }
+      const rect = el.getBoundingClientRect();
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const cs = getComputedStyle(el);
+      const pad = {
+        l: parseFloat(cs.paddingLeft) || 0, r: parseFloat(cs.paddingRight) || 0,
+        t: parseFloat(cs.paddingTop) || 0, b: parseFloat(cs.paddingBottom) || 0,
+      };
+      const mar = {
+        l: parseFloat(cs.marginLeft) || 0, r: parseFloat(cs.marginRight) || 0,
+        t: parseFloat(cs.marginTop) || 0, b: parseFloat(cs.marginBottom) || 0,
+      };
+      const gaps = this._layoutGaps(el, rect);
+      const L = rect.left, T = rect.top, R = rect.right, B = rect.bottom;
+      let svg = '';
+      // 1. 四边延长线（延伸到视口边缘，半透明红虚线）
+      svg += `<line class="guide" x1="${L}" y1="0" x2="${L}" y2="${vh}"/>`;
+      svg += `<line class="guide" x1="${R}" y1="0" x2="${R}" y2="${vh}"/>`;
+      svg += `<line class="guide" x1="0" y1="${T}" x2="${vw}" y2="${T}"/>`;
+      svg += `<line class="guide" x1="0" y1="${B}" x2="${vw}" y2="${B}"/>`;
+      // 2. 间距标注线 + 数字（有参考时）
+      const num = (x, y, d) => `<text class="num" x="${x}" y="${y}" text-anchor="middle">${Math.round(d)}</text>`;
+      if (gaps.left) {
+        const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
+        svg += `<line class="sp" x1="${gaps.left.from}" y1="${gy}" x2="${L}" y2="${gy}"/>`;
+        svg += num((gaps.left.from + L) / 2, gy - 4, gaps.left.dist);
+      }
+      if (gaps.right) {
+        const gy = this._clamp(T + rect.height / 2, 20, vh - 6);
+        svg += `<line class="sp" x1="${R}" y1="${gy}" x2="${gaps.right.from}" y2="${gy}"/>`;
+        svg += num((R + gaps.right.from) / 2, gy - 4, gaps.right.dist);
+      }
+      if (gaps.top) {
+        const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
+        svg += `<line class="sp" x1="${gx}" y1="${gaps.top.from}" x2="${gx}" y2="${T}"/>`;
+        svg += `<text class="num" x="${gx}" y="${this._clamp((gaps.top.from + T) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.top.dist)}</text>`;
+      }
+      if (gaps.bottom) {
+        const gx = this._clamp(L + rect.width / 2, 30, vw - 30);
+        svg += `<line class="sp" x1="${gx}" y1="${B}" x2="${gx}" y2="${gaps.bottom.from}"/>`;
+        svg += `<text class="num" x="${gx}" y="${this._clamp((B + gaps.bottom.from) / 2 + 4, 16, vh - 8)}" text-anchor="middle">${Math.round(gaps.bottom.dist)}</text>`;
+      }
+      // 3. padding 色块（content box，青色）
+      const padRect = { x: L + pad.l, y: T + pad.t, w: Math.max(0, rect.width - pad.l - pad.r), h: Math.max(0, rect.height - pad.t - pad.b) };
+      if (padRect.w > 0 && padRect.h > 0 && (pad.l || pad.r || pad.t || pad.b)) {
+        svg += `<rect class="pad-r" data-kind="pad" x="${padRect.x}" y="${padRect.y}" width="${padRect.w}" height="${padRect.h}" rx="1"/>`;
+      }
+      // margin 色块（margin box 外扩，橙色）
+      if (mar.l || mar.r || mar.t || mar.b) {
+        const mx = L - mar.l, my = T - mar.t;
+        const mw = rect.width + mar.l + mar.r, mh = rect.height + mar.t + mar.b;
+        // margin 色块画在 border box 外缘（厚度即 margin 值），0 值用 2px 细条保证可见
+        const th = 2;
+        if (mar.t > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my}" width="${mw}" height="${Math.max(mar.t, th)}"/>`;
+        if (mar.b > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my + mh - Math.max(mar.b, th)}" width="${mw}" height="${Math.max(mar.b, th)}"/>`;
+        if (mar.l > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx}" y="${my}" width="${Math.max(mar.l, th)}" height="${mh}"/>`;
+        if (mar.r > 0) svg += `<rect class="mar-r" data-kind="mar" x="${mx + mw - Math.max(mar.r, th)}" y="${my}" width="${Math.max(mar.r, th)}" height="${mh}"/>`;
+      }
+      this._svg.innerHTML = svg;
+      // 绑定色块 hover/点击 → 显示数值
+      this._bindSwatches(pad, mar);
+      // 气泡
+      const bubble = this._shadow.querySelector('.bubble');
+      bubble.querySelector('.bubble-text').textContent = this._elementLabel(el, rect);
+      const bw = bubble.getBoundingClientRect().width || 120;
+      const bh = bubble.getBoundingClientRect().height || 24;
+      let top = T - bh - 6;
+      if (top < 40) top = B + 6;
+      let left = L + rect.width / 2 - bw / 2;
+      left = this._clamp(left, 8, vw - bw - 8);
+      bubble.style.top = top + 'px';
+      bubble.style.left = left + 'px';
+      this.style.display = 'block';
+    }
+    _bindSwatches(pad, mar) {
+      const tip = this._shadow.querySelector('.tooltip');
+      const showTip = (text, x, y) => {
+        tip.textContent = text;
+        tip.style.left = this._clamp(x + 10, 8, window.innerWidth - 140) + 'px';
+        tip.style.top = this._clamp(y + 14, 8, window.innerHeight - 30) + 'px';
+        tip.style.display = 'block';
+      };
+      const hideTip = () => this._hideTooltip();
+      const padText = `padding: ${Math.round(pad.t)}px ${Math.round(pad.r)}px ${Math.round(pad.b)}px ${Math.round(pad.l)}px`;
+      const marText = `margin: ${Math.round(mar.t)}px ${Math.round(mar.r)}px ${Math.round(mar.b)}px ${Math.round(mar.l)}px`;
+      const self = this;
+      this._svg.querySelectorAll('rect.pad-r').forEach(r => {
+        r.onmouseenter = (e) => showTip(padText, e.clientX, e.clientY);
+        r.onmouseleave = hideTip;
+        r.onclick = (e) => showTip(padText, e.clientX, e.clientY);
+      });
+      this._svg.querySelectorAll('rect.mar-r').forEach(r => {
+        r.onmouseenter = (e) => showTip(marText, e.clientX, e.clientY);
+        r.onmouseleave = hideTip;
+        r.onclick = (e) => showTip(marText, e.clientX, e.clientY);
+      });
+    }
+    _hideTooltip() {
+      const tip = this._shadow.querySelector('.tooltip');
+      if (tip) tip.style.display = 'none';
+    }
+    _render() {
+      this._shadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            inset: 0;
+            z-index: 9545;
+            pointer-events: none;
+            display: none;
+          }
+          svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+          .guide { stroke: rgba(255,77,79,0.45); stroke-width: 1; stroke-dasharray: 4 5; }
+          .sp { stroke: rgba(255,77,79,0.9); stroke-width: 1; }
+          .num {
+            fill: #ff4d4f; font-size: 11px; font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round;
+          }
+          .pad-r { fill: rgba(64,158,255,0.16); stroke: rgba(64,158,255,0.7); stroke-width: 1; pointer-events: auto; cursor: default; }
+          .pad-r:hover { fill: rgba(64,158,255,0.34); }
+          .mar-r { fill: rgba(255,170,0,0.16); stroke: rgba(255,170,0,0.7); stroke-width: 1; pointer-events: auto; cursor: default; }
+          .mar-r:hover { fill: rgba(255,170,0,0.34); }
+          .bubble {
+            position: absolute;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(30, 30, 30, 0.88);
+            color: #fff;
+            font-size: 11px;
+            line-height: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            white-space: nowrap;
+            pointer-events: none;
+          }
+          .tooltip {
+            position: fixed;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #111;
+            color: #fff;
+            font-size: 11px;
+            line-height: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            white-space: nowrap;
+            pointer-events: none;
+            display: none;
+            z-index: 2;
+          }
+        </style>
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="bubble"><span class="bubble-text"></span></div>
+        <div class="tooltip"></div>
+      `;
+      this._svg = this._shadow.getElementById('svg');
+    }
+  }
+
+  // ============================================================
   // wego-wt-color-picker: 颜色选择器
   // ============================================================
   class WegoWtColorPicker extends HTMLElement {
@@ -7781,16 +8020,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .annotation-bubble--sheet .annotation-bubble-input { font-size: 16px; min-height: 96px; }
           .annotation-bubble[hidden] { display: none; }
           .count-bubble[hidden] { display: none; }
-          /* 网格辅助线（计划 3.6：半透明网格，8px 基准，配合拖拽吸附） */
-          .grid-overlay {
-            position: fixed; inset: 0; z-index: 9539;
-            pointer-events: none;
-            background-image:
-              linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
-            background-size: 8px 8px;
-          }
-          .grid-overlay[hidden] { display: none; }
           .annotation-bubble-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
           .annotation-bubble-title { color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; line-height: 18px; }
           .annotation-bubble-close {
@@ -7866,9 +8095,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <button class="tool-btn" data-tool="measure" data-active="false" title="测量模式">
                 ${ICONS.measure}
               </button>
-              <button class="tool-btn" data-tool="grid" data-active="false" title="网格辅助线">
-                ${ICONS.grid}
-              </button>
               <button class="tool-btn" data-tool="annotation" data-active="false" title="批注模式">
                 ${ICONS.annotation}
               </button>
@@ -7935,7 +8161,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <!-- 子组件（走查模式相关） -->
         <wego-wt-highlight hidden></wego-wt-highlight>
         <wego-wt-measure hidden></wego-wt-measure>
-        <div class="grid-overlay" data-grid-overlay hidden></div>
+        <wego-wt-inspector hidden></wego-wt-inspector>
         <wego-wt-style-panel hidden></wego-wt-style-panel>
         <wego-wt-color-picker hidden></wego-wt-color-picker>
         <wego-wt-overview-panel hidden></wego-wt-overview-panel>
@@ -7969,6 +8195,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _initComponents() {
       this._components.highlight = this._shadow.querySelector('wego-wt-highlight');
       this._components.measure = this._shadow.querySelector('wego-wt-measure');
+      this._components.inspector = this._shadow.querySelector('wego-wt-inspector');
       this._components.stylePanel = this._shadow.querySelector('wego-wt-style-panel');
       this._components.colorPicker = this._shadow.querySelector('wego-wt-color-picker');
       this._components.overviewPanel = this._shadow.querySelector('wego-wt-overview-panel');
@@ -8179,12 +8406,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'm' || e.key === 'M') && !inInput) {
         e.preventDefault();
         this._toggleMeasureMode();
-        return;
-      }
-      // G：切换网格辅助线
-      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'g' || e.key === 'G') && !inInput) {
-        e.preventDefault();
-        this._toggleGridMode();
         return;
       }
       // 方向键：选中元素后微调位置（±1px，Shift ±10px，走查模式生效）
@@ -8513,9 +8734,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           break;
         case 'measure':
           this._toggleMeasureMode();
-          break;
-        case 'grid':
-          this._toggleGridMode();
           break;
         case 'annotation':
           this._closeAllPanels();
@@ -9126,8 +9344,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 测量模式：两点横/纵距离（对齐计划 3.5）
       this._measureMode = false;
       this._measureAnchor = null;
-      // 网格辅助线（对齐计划 3.6）
-      this._gridMode = false;
       // 长按拖拽移动：500ms 长按触发，拖拽中 transform 平移 + 偏移气泡
       this._longPressTimer = null;
       this._dragging = null;
@@ -9199,16 +9415,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         drag.accumDx = ax; drag.accumDy = ay;
         let tx = Math.round(ax);
         let ty = Math.round(ay);
-        let snapLines = null;
-        // 网格开启时吸附到 8px 网格线
-        if (this._gridMode) {
-          const snapped = this._snapDragToGrid(tx, ty);
-          tx = Math.round(snapped.dx);
-          ty = Math.round(snapped.dy);
-          snapLines = snapped.snapLines;
-          if (snapLines.length && navigator.vibrate) navigator.vibrate(15); // 轻震动反馈
-        }
-        // 记录最终（含吸附后）位移，松手提交时使用，保证「拖拽中吸附位置 = 提交后位置」
+        // 记录最终位移，松手提交时使用，保证「拖拽中位置 = 提交后位置」
         drag.snapTx = tx;
         drag.snapTy = ty;
         drag.el.style.transform = `${this._dragOrigTransform ? this._dragOrigTransform + ' ' : ''}translate(${tx}px, ${ty}px)`;
@@ -9217,7 +9424,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._detectReorder(drag);
         }
         this._components.highlight.showForElement(drag.el, `+${tx}, +${ty}`);
-        this._showSnapLines(snapLines);
         e.preventDefault();
         e.stopPropagation();
         return;
@@ -9562,7 +9768,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const drag = this._dragging;
       this._dragging = null;
       this._pointerActive = false;
-      this._showSnapLines(null); // 清除吸附辅助线
       if (!drag) return;
       const el = drag.el;
       el.style.transition = '';
@@ -9570,7 +9775,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       el.style.cursor = '';
       const dx = Math.round(e.clientX - drag.startX);
       const dy = Math.round(e.clientY - drag.startY);
-      // 网格吸附：提交时使用拖拽中记录的吸附后位移，保证拖拽中吸附位置与松手后一致
+      // 提交时使用拖拽中记录的位移，保证拖拽中位置与松手后一致
       const fdx = (drag.snapTx !== undefined) ? drag.snapTx : dx;
       const fdy = (drag.snapTy !== undefined) ? drag.snapTy : dy;
       const didMove = drag.moved && (fdx !== 0 || fdy !== 0);
@@ -9622,6 +9827,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._components.highlight.setMode('hover');
       this._components.highlight.removeAttribute('hidden');
       this._components.highlight.showForElement(el);
+      // 功能 5：悬停元信息（四边延长线 + 气泡 + 间距标注 + padding/margin 色块）
+      if (this._components.inspector) this._components.inspector.show(el);
     }
 
     _clearHover() {
@@ -9631,6 +9838,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._components.highlight.hide();
           this._components.highlight.setAttribute('hidden', '');
         }
+        // 功能 5：无选中时隐藏元信息
+        if (!state.selectedElement && this._components.inspector) this._components.inspector.hide();
       }
     }
 
@@ -9766,67 +9975,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._selectElement(el);
     }
 
-    /** 网格辅助线开关（计划 3.6：覆盖半透明网格线，配合拖拽吸附） */
-    _toggleGridMode() {
-      this._gridMode = !this._gridMode;
-      const ov = this._shadow.querySelector('[data-grid-overlay]');
-      if (ov) ov.toggleAttribute('hidden', !this._gridMode);
-      this._updateToolbarState();
-      this._showToast(this._gridMode ? '已开启网格辅助线（8px）' : '已关闭网格辅助线');
-    }
-
-    /** 拖拽吸附：元素边缘接近网格线时吸附（阈值 4px），返回修正后的位移与吸附线 */
-    _snapDragToGrid(dx, dy) {
-      const el = this._dragging.el;
-      const rect = el.getBoundingClientRect();
-      const LEFT = rect.left + dx;
-      const TOP = rect.top + dy;
-      const RIGHT = LEFT + rect.width;
-      const BOTTOM = TOP + rect.height;
-      const GRID = 8;
-      const TH = 4;
-      let ndx = dx;
-      let ndy = dy;
-      const snapLines = [];
-      // 垂直对齐：优先左边缘，其次右边缘
-      const lNear = Math.round(LEFT / GRID) * GRID;
-      if (Math.abs(LEFT - lNear) <= TH) {
-        ndx = dx - (LEFT - lNear);
-        snapLines.push({ orient: 'v', x: lNear, y1: TOP, y2: BOTTOM });
-      } else {
-        const rNear = Math.round(RIGHT / GRID) * GRID;
-        if (Math.abs(RIGHT - rNear) <= TH) {
-          ndx = dx - (RIGHT - rNear);
-          snapLines.push({ orient: 'v', x: rNear, y1: TOP, y2: BOTTOM });
-        }
-      }
-      // 水平对齐：优先上边缘，其次下边缘
-      const tNear = Math.round(TOP / GRID) * GRID;
-      if (Math.abs(TOP - tNear) <= TH) {
-        ndy = dy - (TOP - tNear);
-        snapLines.push({ orient: 'h', y: tNear, x1: LEFT, x2: RIGHT });
-      } else {
-        const bNear = Math.round(BOTTOM / GRID) * GRID;
-        if (Math.abs(BOTTOM - bNear) <= TH) {
-          ndy = dy - (BOTTOM - bNear);
-          snapLines.push({ orient: 'h', y: bNear, x1: LEFT, x2: RIGHT });
-        }
-      }
-      return { dx: ndx, dy: ndy, snapLines };
-    }
-
-    /** 显示/隐藏吸附辅助线（红色虚线，复用测量 overlay 图层） */
-    _showSnapLines(lines) {
-      const measure = this._components.measure;
-      if (!measure) return;
-      if (!lines || lines.length === 0) {
-        if (!this._measureAnchor) measure.clear();
-        return;
-      }
-      if (typeof measure.showSnap !== 'function') return;
-      measure.showSnap(lines);
-    }
-
     /** 测量模式开关（对齐计划 3.5：切换/点空白/切走查退出） */
     _toggleMeasureMode() {
       this._closeAllPanels();
@@ -9889,6 +10037,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._components.highlight.setMode('selected');
       this._components.highlight.removeAttribute('hidden');
       this._components.highlight.showForElement(el);
+      // 功能 5：选中元信息（选中态持续显示，移动端亦生效）
+      if (this._components.inspector) this._components.inspector.show(el);
       const selector = this._resolveCanonicalSelector(el, generateSelector(el));
       state.selectedSelector = selector;
       state.selectedTarget = '';
@@ -9923,6 +10073,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._components.highlight.hide();
         this._components.highlight.setAttribute('hidden', '');
       }
+      if (this._components.inspector) this._components.inspector.hide();
       state.selectedSelector = '';
       state.selectedTarget = '';
       bus.emit('element-deselected');
@@ -10817,9 +10968,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 测量模式按钮激活态
       const msBtn = this._shadow.querySelector('[data-tool="measure"]');
       if (msBtn) msBtn.setAttribute('data-active', String(this._measureMode));
-      // 网格辅助线按钮激活态
-      const gridBtn = this._shadow.querySelector('[data-tool="grid"]');
-      if (gridBtn) gridBtn.setAttribute('data-active', String(this._gridMode));
       // 批注模式按钮激活态
       const annBtn = this._shadow.querySelector('[data-tool="annotation"]');
       if (annBtn) annBtn.setAttribute('data-active', String(this._annotationMode));
@@ -10846,6 +10994,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     if (!customElements.get('wego-wt-overlay')) customElements.define('wego-wt-overlay', WegoWtOverlay);
     if (!customElements.get('wego-wt-highlight')) customElements.define('wego-wt-highlight', WegoWtHighlight);
     if (!customElements.get('wego-wt-measure')) customElements.define('wego-wt-measure', WegoWtMeasure);
+    if (!customElements.get('wego-wt-inspector')) customElements.define('wego-wt-inspector', WegoWtInspector);
     if (!customElements.get('wego-wt-style-panel')) customElements.define('wego-wt-style-panel', WegoWtStylePanel);
     if (!customElements.get('wego-wt-color-picker')) customElements.define('wego-wt-color-picker', WegoWtColorPicker);
     if (!customElements.get('wego-wt-overview-panel')) customElements.define('wego-wt-overview-panel', WegoWtOverviewPanel);
