@@ -2223,6 +2223,38 @@
       if (!scene || !scene.routeId) return;
       scenes.set(scene.routeId, scene);
     },
+    // 将指定场景渲染到调用方提供的容器（迭代画布等"页面平铺"场景使用）。
+    // 与 openRoute 不同：不依赖 hash、不落到全局 sceneLayer/overlayLayer，
+    // 页面 DOM 挂载到 host 内，事件绑定到 host（页面保持可交互）。
+    // 返回 Promise<{ destroy }>；脚本未加载时先异步加载再渲染。
+    renderSceneTo: function (routeId, host) {
+      var config = routeConfigs.get(routeId);
+      if (!config || !host) return Promise.resolve(null);
+      var render = function () {
+        var scene = scenes.get(routeId);
+        if (!scene) return null;
+        host.innerHTML = scene.template || '';
+        var ctx = sceneContext(scene, host);
+        if (typeof scene.init === 'function') {
+          try { scene.init(ctx); } catch (e) { console.warn('[wego-app] renderSceneTo init error:', e); }
+        }
+        window.WegoApp.layoutAllBottomActionBars(host);
+        window.WegoApp.layoutAllNavbars(host);
+        return {
+          scene: scene,
+          ctx: ctx,
+          destroy: function () {
+            runSceneDestroy(scene, host);
+            host.replaceChildren();
+          }
+        };
+      };
+      if (scenes.has(routeId)) return Promise.resolve(render());
+      return ensureScript(routeId, config.script).then(render).catch(function (e) {
+        console.warn('[wego-app] renderSceneTo load failed:', e);
+        return null;
+      });
+    },
     navigate: navigate,
     openRoute: openRoute,
     closeTopLayer: closeTopLayer,
