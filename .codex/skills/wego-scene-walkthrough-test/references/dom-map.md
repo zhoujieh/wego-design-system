@@ -9,7 +9,6 @@
 | 进入走查模式 | `document.querySelector('wego-walkthrough').shadowRoot.querySelector('[data-fab-btn]').click()` |
 | 样式面板 | `wego-walkthrough` shadowRoot → `wego-wt-style-panel`（其 shadowRoot 内为面板字段） |
 | 撤销 / 重做 | style-panel shadowRoot → `[data-action="undo"]` / `[data-action="redo"]` |
-| 面包屑层级 | style-panel shadowRoot → `[data-crumb]`（`data-crumb-index` 层级索引） |
 | 颜色字段触发 | style-panel shadowRoot → `[data-color-trigger][data-field="fillHex"]`（填充）/ `[data-field="strokeHex"]`（描边） |
 
 ## 颜色选择器（wego-wt-color-picker）
