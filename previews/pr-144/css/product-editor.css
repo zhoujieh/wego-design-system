@@ -14,6 +14,20 @@
   padding-right: 16px;
 }
 
+/* 快捷分享按钮 SVG 渠道图标：复用分享面板（product-share.js CHANNELS）同一套图标，
+   适配 32×32 纯图标按钮（与 btn--sm 图标 16px 一致） */
+.publish-product .btn__icon--quick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.publish-product .btn__icon--quick .btn__icon-img {
+  width: 16px;
+  height: 16px;
+  display: block;
+  object-fit: contain;
+}
+
 .publish-product__scroll {
   overflow-y: auto;
   overflow-x: hidden;
