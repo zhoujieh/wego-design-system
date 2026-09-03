@@ -232,6 +232,123 @@
         "交付收口",
         "wego-github-delivery"
       ]
+    },
+    {
+      "id": "ev-017",
+      "date": "2026-09-03",
+      "summary": "校验 PR preview 产物时误判两次：curl .wego-deployment-sha 与 head SHA 不符，实际 pull_request 事件 GITHUB_SHA 是 merge ref 的 SHA 而非 head 分支 SHA，属正常；产物由 build-pages-artifact 把 wego-app/ 摊平到根（index.html + lib/js/walkthrough-tool.js），先 curl wego-app/ 404 是路径猜错。校验应以产物功能符号/内容为准，路径先读 pages-preview.yml",
+      "source": "rework",
+      "scene": "走查工具交互重构-PR交付校验",
+      "tags": [
+        "Pages预览",
+        "GITHUB_SHA",
+        "merge-ref",
+        "产物结构",
+        "交付校验",
+        "wego-github-delivery"
+      ]
+    },
+    {
+      "id": "ev-018",
+      "date": "2026-09-03",
+      "summary": "走查工具拖拽换位（功能④）实现时，_applyReorder 用含 nth-of-type 的规范选择器定位子元素重放顺序，换位后 DOM 顺序已变、nth 选择器漂移到错误元素导致重放错乱。改用身份签名（tag+class+稳定属性+文本摘要，_elementIdentity）排序与定位，move 位移还原同用身份优先（_queryMoveTarget），换位后撤销/重做/刷新重放仍稳定",
+      "source": "rework",
+      "scene": "走查工具交互重构-元素拖拽换位",
+      "tags": [
+        "DOM排序",
+        "选择器漂移",
+        "身份签名",
+        "undo重放",
+        "拖拽换位",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-019",
+      "date": "2026-09-03",
+      "summary": "浏览器实测走查工具时，_saveChanges 有 300ms 防抖落盘，测试刚松手就读 localStorage 会读到 0 条变更造成误判，需等 ≥400ms 再读；测试颜色选择器 DOM 凭记忆猜选择器（data-format 按钮 vs data-format-select 下拉）多次落空，应先 dump 组件 shadow DOM 再写断言",
+      "source": "rework",
+      "scene": "走查工具交互重构-浏览器实测",
+      "tags": [
+        "浏览器测试",
+        "防抖落盘",
+        "读取时序",
+        "DOM探查",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-020",
+      "date": "2026-09-03",
+      "summary": "走查工具 isWalkthroughElement 判定要逐层穿透 shadow 边界：工具 UI（style-panel/color-picker）内部元素 root.host 是自定义组件，Light DOM closest 不命中，真实点击被走查 document 捕获当页面元素吞掉；每层检查 root.host.closest(lightTags) 才放行工具内部点击",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "shadowDOM穿透",
+        "工具UI判定",
+        "点击拦截",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-021",
+      "date": "2026-09-03",
+      "summary": "走查工具撤销/重做后刷新样式面板（_refreshStylePanelData）用 innerHTML 重建会令旧 input 失焦触发 blur→_onFieldChange 写回旧值，500ms 后覆盖撤销结果；重建前设 _suppressFieldSync 抑制标志（finally 复位），_onFieldChange 开头守卫 return",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "撤销回显",
+        "面板重建",
+        "blur写回",
+        "抑制标志",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-022",
+      "date": "2026-09-03",
+      "summary": "走查工具选中即拖与连点选中父级冲突：pointerdown 立即进拖拽会截胡同位置连点；改 120ms 短定时器 + 移动>8px 双触发（_dragArmed），pointerup 未移动走 _handlePointSelection 恢复连点层级上移",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "拖拽点选互斥",
+        "连点上移",
+        "触发阈值",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-023",
+      "date": "2026-09-03",
+      "summary": "走查工具样式面板 fixed 居中定位会覆盖页面选中宽元素的中心，elementFromPoint 命中面板挡住拖动；水平定位改贴右边缘（window.innerWidth - 面板宽 - 8）",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "面板定位",
+        "遮挡",
+        "贴右边缘",
+        "走查工具",
+        "wego-design"
+      ]
+    },
+    {
+      "id": "ev-024",
+      "date": "2026-09-03",
+      "summary": "走查工具元信息 SVG 色块（padding/margin 高亮）pointer-events:auto 会拦截 pointerdown，选中元素无法拖动；_onPointerDown 对工具元素例外：坐标命中已选中元素 rect（_pointInElement）则继续走拖拽流程",
+      "source": "rework",
+      "scene": "走查工具交互重构-验收修复",
+      "tags": [
+        "工具元素互操作",
+        "pointer-events",
+        "拖动例外",
+        "走查工具",
+        "wego-design"
+      ]
     }
   ]
 }
