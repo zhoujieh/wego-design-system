@@ -71,11 +71,12 @@ node scripts/resolve-delivery-unit.mjs --scene {场景}
 
 - **matched + 范围未变** → 跳过此步，直接进入 wego-design。
 - **matched + 范围变化** → 进入 wego-product，在原迭代中失效简报、更新需求规格说明、重新提交并确认。
-- **new** → 进入 wego-product，init 迭代 → 写 spec.md → submit-brief → 用户确认后 confirm-brief。
+- **new** → 进入 wego-product，init 迭代 → 写简要 spec.md（薄档：目标/范围/入口/主路径）→ submit-brief（薄档校验 + 生成验收账本）→ 直接进入 wego-design 原型循环。
 
-**两次确认的边界**：
+**三道确认的边界**：
 - 立项确认（第 0 步前的读代码与用户沟通）：判断要不要做、做哪个场景、大致范围。
-- 规格确认（本步）：细化目标、入口、关键路径、状态、数据契约。
+- 循环反馈（原型循环期间，随轮发生）：用户对原型的业务反馈写回 spec.md 对应字段后重新 submit-brief，不构成独立门禁。
+- 终局确认（验收时）：AI 补全终版 spec.md、核对填写账本、展示补全 diff 与账本，用户过目确认后 confirm-brief + submit-prototype 一次收口。
 
 ## 第 5 步：工作环境就绪
 
