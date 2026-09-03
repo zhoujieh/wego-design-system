@@ -245,13 +245,14 @@
   border: 1px solid var(--border-divider);
   border-radius: 12px;
   padding: var(--spacer-12);
-  margin: var(--spacer-8) 0;
+  margin: 40px 0;
 }
 
 .iter-canvas-page__flow-head {
   display: flex;
   align-items: center;
   gap: var(--spacer-8);
+  margin-bottom: 24px;
 }
 
 .iter-canvas-page__flow-priority {
@@ -286,7 +287,7 @@
 .iter-canvas-page__flow-chain {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacer-4);
+  gap: 40px;
   flex-wrap: nowrap;
   overflow-x: visible;
 }
@@ -294,20 +295,20 @@
 .iter-canvas-page__node {
   display: flex;
   align-items: center;
-  gap: var(--spacer-4);
+  gap: 16px;
 }
 
 /* 一个节点（功能点）= 多个状态块横排 */
 .iter-canvas-page__node-states {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 28px;
 }
 
 .iter-canvas-page__state {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -333,7 +334,7 @@
 .iter-canvas-page__frame-wrap {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   width: 393px;
   min-width: 393px;
   box-sizing: border-box;
@@ -370,8 +371,28 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   position: relative;
+  /* 让本画板成为内部浮层（弹窗/蒙层/键盘/toast）的定位基准：
+     fixed 元素相对当前画板定位，只覆盖本画板，不会漂到整张画布 */
+  transform: translateZ(0);
   /* 浏览态默认锁定交互：画布可自由拖拽/缩放，不误触页面 */
   pointer-events: none;
+}
+
+/* host-tab 页面（如动态流）底部补全局导航：相对本画板底部定位 */
+.iter-canvas-page__scene-host--tabbed .bottom-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0 0 11px 11px;
+}
+
+/* 画板内浮层的基础容器已由 transform 限定在画板内；显式兜底再限定一次 */
+.iter-canvas-page__scene-host .modal,
+.iter-canvas-page__scene-host .actionsheet,
+.iter-canvas-page__scene-host .app-toast-host {
+  position: absolute;
+  inset: 0;
 }
 
 .iter-canvas-page__scene-host--loading {
@@ -431,24 +452,14 @@
   display: flex;
 }
 
-/* 页面容器内：全屏弹窗/居中弹窗改为流式，内容完整撑开 */
-.iter-canvas-page__scene-host .modal--fullscreen,
-.iter-canvas-page__scene-host .modal,
-.iter-canvas-page__scene-host [data-route-id] > .modal {
-  position: static !important;
-  inset: auto !important;
-  width: 100% !important;
-  height: auto !important;
-  max-height: none !important;
-  transform: none !important;
-  overflow: visible !important;
-}
-
+/* 页面容器内：弹窗/全屏表单改为相对本画板定位（absolute），由 transform 限定在画板内，
+   蒙层与面板按真实 app 层叠（蒙层下为发布页、蒙层上为弹窗）；内容超出时在画板内滚动，
+   需要更多空间可拖高画板 */
 .iter-canvas-page__scene-host .modal__panel {
-  position: static !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .iter-canvas-page__frame-route {

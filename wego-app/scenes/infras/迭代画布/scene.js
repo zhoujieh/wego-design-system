@@ -72,58 +72,83 @@ const iterationCanvasTemplate = `
         id: 'publish-product',
         title: '发布产品',
         priority: 'P1',
-        desc: '动态流「发布」入口 → 发布表单空状态 → 录入字段 → 帮卖设置子流程 → 提交后新产品出现在动态流',
+        desc: '动态流「发布」入口 → 空状态 → 填写中 → 填完整 → 发布完成，新产品出现在动态流（按需求规格 empty-form / publish-success）',
         nodes: [
-          { label: '动态流', routeId: 'album-product-feed',
-            states: [{ name: '「发布」入口' }] },
-          { label: '发布产品', routeId: 'publish-product',
-            states: [
-              { name: '空状态', sub: '进入表单' },
-              { name: '填写中', sub: '录入基础字段',
-                prepare: [
-                  { action: 'fill', selector: 'input[placeholder*="请输入产品名"]', value: '荷叶边方领短袖上衣' },
-                  { action: 'fill', selector: 'input[placeholder*="请输入售价"]', value: '139' },
-                  { action: 'fill', selector: 'input[placeholder*="请输入货号"]', value: 'HYB-012' }
-                ] },
-              { name: '帮卖设置', sub: '子流程弹窗', routeId: 'agent-resale' },
-              { name: '发布后', sub: '新产品出现在动态流', routeId: 'album-product-feed' }
-            ] },
-          { label: '动态流', routeId: 'album-product-feed',
-            states: [{ name: '新产品出现' }] }
+          { label: '动态流', routeId: 'album-product-feed', tab: 'dongtai',
+            states: [{ name: '「发布」入口', sub: 'entry' }] },
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '空状态', sub: 'empty-form' }] },
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '填写中', sub: '录入基础字段',
+              prepare: [
+                { action: 'fill', selector: 'input[placeholder*="请输入产品名"]', value: '荷叶边方领短袖上衣' },
+                { action: 'fill', selector: 'input[placeholder*="请输入售价"]', value: '139' },
+                { action: 'fill', selector: 'input[placeholder*="请输入货号"]', value: 'HYB-012' }
+              ] }] },
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '填完整', sub: '全部字段已填写',
+              prepare: [
+                { action: 'fill', selector: 'input[placeholder*="请输入产品名"]', value: '荷叶边方领短袖上衣' },
+                { action: 'fill', selector: 'input[placeholder*="请输入商品简称"]', value: '荷叶边方领短袖' },
+                { action: 'fill', selector: 'input[placeholder*="请输入货号"]', value: 'HYB-012' },
+                { action: 'fill', selector: 'input[placeholder*="请输入拿货价"]', value: '89' },
+                { action: 'fill', selector: 'input[placeholder*="请输入售价"]', value: '139' },
+                { action: 'fill', selector: 'input[placeholder*="请输入拼团价"]', value: '129' },
+                { action: 'fill', selector: 'input[placeholder*="请输入批发价"]', value: '99' },
+                { action: 'fill', selector: 'input[placeholder*="请输入打包价"]', value: '119' },
+                { action: 'fill', selector: 'input[placeholder*="请输入库存"]', value: '200' },
+                { action: 'fill', selector: 'input[placeholder*="请输入商品重量"]', value: '0.35' },
+                { action: 'fill', selector: 'input[placeholder*="请输入运费模板"]', value: '包邮模板' },
+                { action: 'fill', selector: 'input[placeholder*="请输入备注"]', value: '新款短袖，棉质亲肤' },
+                { action: 'fill', selector: 'input[placeholder*="请输入子账号"]', value: '小助手' }
+              ] }] },
+          { label: '动态流', routeId: 'album-product-feed', tab: 'dongtai',
+            states: [{ name: '发布完成', sub: 'publish-success · 新产品出现' }] }
         ]
       },
       {
         id: 'resale-setup',
-        title: '发布并开启帮卖',
+        title: '发布并开启帮卖（子流程）',
         priority: 'P1',
-        desc: '发布表单 → 打开帮卖设置弹窗 → 设置帮卖方式与加价规则 → 完成回到表单 → 提交',
+        desc: '发布表单点击「帮卖分销」→ 蒙层下发布页 + 蒙层上帮卖设置弹窗 → 完成回到表单 → 提交后动态流带「可帮卖」标识（resale-popup-open）',
         nodes: [
-          { label: '发布产品表单', sub: '点击「帮卖分销」', routeId: 'publish-product' },
-          { label: '帮卖设置弹窗', sub: '自由定价 / 固定佣金', routeId: 'agent-resale' },
-          { label: '发布产品表单', sub: '完成回到表单', routeId: 'publish-product' },
-          { label: '动态流', sub: '带「可帮卖」标识', routeId: 'album-product-feed' }
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '点击「帮卖分销」', sub: 'resale 入口' }] },
+          { label: '发布页 + 帮卖弹窗', routeId: 'publish-product',
+            overlay: { type: 'resale', sampleKey: 'first-resale-free-single' },
+            states: [{ name: '帮卖设置弹窗', sub: 'resale-popup-open · 蒙层下为发布页' }] },
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '完成回到表单', sub: '帮卖已设置' }] },
+          { label: '动态流', routeId: 'album-product-feed', tab: 'dongtai',
+            states: [{ name: '带「可帮卖」标识', sub: '发布成功' }] }
         ]
       },
       {
         id: 'product-edit',
         title: '重新编辑',
         priority: 'P1',
-        desc: '动态流「编辑」入口 → 回显已填字段 → 修改 → 保存 → 动态流同步更新',
+        desc: '动态流「编辑」入口 → 回显已填字段 → 修改保存 → 动态流同步更新（edit-form）',
         nodes: [
-          { label: '动态流', sub: '「编辑」入口', routeId: 'album-product-feed' },
-          { label: '发布产品表单', sub: '回显已填字段', routeId: 'publish-product' },
-          { label: '发布产品表单', sub: '修改后保存', routeId: 'publish-product' },
-          { label: '动态流', sub: '对应动态同步更新', routeId: 'album-product-feed' }
+          { label: '动态流', routeId: 'album-product-feed', tab: 'dongtai',
+            states: [{ name: '「编辑」入口', sub: 'edit' }] },
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '回显已填字段', sub: 'edit-form' }] },
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '修改后保存', sub: 'edit' }] },
+          { label: '动态流', routeId: 'album-product-feed', tab: 'dongtai',
+            states: [{ name: '对应动态同步更新', sub: 'edit' }] }
         ]
       },
       {
         id: 'multi-value',
         title: '多值字段录入',
         priority: '—',
-        desc: '规格 / 颜色 / 标签 / 来源 → 一次录入多个值 → 实时展示已录入项 → 可增删',
+        desc: '规格 / 颜色 / 标签 / 来源 → 一次录入多个值 → 实时展示已录入项 → 可增删（multi-value-entry）',
         nodes: [
-          { label: '发布产品表单', sub: '多值字段录入', routeId: 'publish-product' },
-          { label: '发布产品表单', sub: '已录入项实时展示', routeId: 'publish-product' }
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '多值字段录入', sub: 'multi-value-entry' }] },
+          { label: '发布表单', routeId: 'publish-product',
+            states: [{ name: '已录入项实时展示', sub: 'multi-value-entry' }] }
         ]
       }
     ]
@@ -192,7 +217,7 @@ const iterationCanvasTemplate = `
       var stateHtml = states.map(function (st, si) {
         var routeId = st.routeId || node.routeId;
         var key = 'f' + flowIdx + '-n' + nodeIdx + '-s' + si;
-        blocks.push({ key: key, routeId: routeId, prepare: st.prepare || [] });
+        blocks.push({ key: key, routeId: routeId, prepare: st.prepare || [], overlay: node.overlay || null, tab: node.tab || null });
         return ''
           + '<div class="iter-canvas-page__state">'
           +   '<div class="iter-canvas-page__state-label">' + esc(st.name) + '</div>'
@@ -281,9 +306,85 @@ const iterationCanvasTemplate = `
       window.WegoApp.renderSceneTo(block.routeId, host).then(function () {
         host.classList.remove('iter-canvas-page__scene-host--loading');
         host.classList.add('iter-canvas-page__scene-host--ready');
+        if (block.tab) mountBottomTab(host, block.tab);
+        if (block.overlay) mountOverlay(host, block.overlay);
         runPrepare(host, block.prepare);
       });
     });
+  }
+
+  // ── 底部全局导航（host-tab 页面如动态流）：全局 bottom-nav 属宿主外壳，
+  //    不随场景模板渲染，画布平铺时按需补在画板底部 ──
+  var BOTTOM_TABS = [
+    { id: 'dongtai', label: '动态', icon: 'tab-dongtai.svg', iconActive: 'tab-active-dongtai.svg' },
+    { id: 'haoyou', label: '好友', icon: 'tab-haoyou.svg', iconActive: 'tab-active-haoyou.svg' },
+    { id: 'workspace', label: '工作台', icon: 'tab-gongzuotai.svg', iconActive: 'tab-active-gongzuotai.svg' },
+    { id: 'xiaoxi', label: '消息', icon: 'tab-xiaoxi.svg', iconActive: 'tab-active-xiaoxi.svg' },
+    { id: 'my', label: '我的', icon: 'tab-wode.svg', iconActive: 'tab-active-wode.svg' }
+  ];
+
+  function bottomNavHtml(activeId) {
+    return '<nav class="bottom-nav" aria-label="底部导航">'
+      + BOTTOM_TABS.map(function (t) {
+        var active = t.id === activeId;
+        return '<button type="button" class="bottom-nav__item' + (active ? ' active' : '') + '" aria-label="' + t.label + '">'
+          + '<span class="bottom-nav__icon"><img src="./lib/assets/icons/' + (active ? t.iconActive : t.icon) + '" alt="" /></span>'
+          + '<span class="bottom-nav__label">' + t.label + '</span>'
+          + '</button>';
+      }).join('')
+      + '</nav>';
+  }
+
+  function mountBottomTab(host, tabId) {
+    if (host.querySelector('.bottom-nav')) return;
+    host.classList.add('iter-canvas-page__scene-host--tabbed');
+    host.insertAdjacentHTML('beforeend', bottomNavHtml(tabId));
+  }
+
+  // ── 子流程弹窗平铺：用伪造 ctx 复用真实弹窗运行时，渲染出「蒙层下发布页 + 蒙层上弹窗」的真实层叠 ──
+  var RESALE_SAMPLES = {
+    'first-resale-free-single': {
+      key: 'first-resale-free-single',
+      label: '初次帮卖 · 自由定价 · 单一价格',
+      group: '自由定价',
+      badge: { text: '自由定价', type: 'free' },
+      desc: '供货价178.5 · 默认加价+30 · 售价208.5',
+      product_id: 'prod-clothing-001',
+      distribution_type: 1,
+      supply_price: 178.5,
+      skus: [{ id: 'sku-1', supply_price: 178.5 }],
+      distribution_config: { amountType: 1, value: 30 },
+      my_item: false,
+      from_page: 'normal'
+    }
+  };
+
+  function noop() {}
+
+  function mountOverlay(host, overlay) {
+    if (!window.WegoApp || typeof window.WegoApp.openAgentResalePopup !== 'function') return;
+    var sample = RESALE_SAMPLES[overlay.sampleKey];
+    if (!sample) return;
+    // 伪造一个宿主 ctx：openSheet 把弹窗渲染进当前画板（而非全局 overlay 层），
+    // 其余动作（关闭/提示/对话框）在画布平铺态安全忽略
+    var fakeCtx = {
+      openSheet: function (template, opts) {
+        var temp = document.createElement('div');
+        temp.innerHTML = template;
+        var root = temp.firstElementChild;
+        if (!root) return;
+        if (root.matches('.actionsheet, .modal')) root.setAttribute('data-state', 'open');
+        host.appendChild(root);
+        if (opts && typeof opts.init === 'function') {
+          opts.init({ root: root, closeOverlay: noop, toast: noop, back: noop });
+        }
+      },
+      openFullScreenModal: function (template, opts) { fakeCtx.openSheet(template, opts); },
+      closeOverlay: noop,
+      toast: noop,
+      dialog: noop
+    };
+    window.WegoApp.openAgentResalePopup(fakeCtx, { sample: sample, mode: 'resale' });
   }
 
   function deactivateHost(host) {
@@ -384,8 +485,8 @@ const iterationCanvasTemplate = `
     var scale = 1;
     var tx = 0;
     var ty = 0;
-    var MIN = 0.35;
-    var MAX = 3;
+    var MIN = 0.06;
+    var MAX = 10;
 
     function apply() {
       world.style.transform = 'translate(' + tx + 'px, ' + ty + 'px) scale(' + scale + ')';
