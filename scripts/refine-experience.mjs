@@ -31,6 +31,9 @@ const experienceDir = path.join(skillsRoot, 'wego-uxsystem-iterate', 'experience
 const evidencePath = path.join(experienceDir, 'evidence.json');
 const experiencePath = path.join(experienceDir, 'EXPERIENCE.md');
 const CHAR_LIMIT = 1500;
+// 指针上限：L2 摘要正文（不含 ev ID 与次数/日期计数）超过该长度视为展开细节，
+// 若该主题已毕业到场景技能则报错要求降载。
+const POINTER_LIMIT = 60;
 const SCENE_SKILL_PREFIX = 'wego-scene-';
 
 const rawArgs = process.argv.slice(2);
@@ -150,6 +153,29 @@ function extractEvidenceIds(entry) {
   return ids;
 }
 
+// 摘要正文：去掉 ev ID 引用段，只取「教训」本体
+function pointerBody(entry) {
+  const idx = entry.indexOf('[ev-');
+  if (idx === -1) return entry.trim();
+  return entry.slice(0, idx).trim();
+}
+
+// 收集已存在场景技能引用的 ev ID（用于"固化即降载"判断）
+function collectSceneSkillEvIds() {
+  const map = new Map();
+  if (!fs.existsSync(skillsRoot)) return map;
+  const dirs = fs.readdirSync(skillsRoot, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && d.name.startsWith(SCENE_SKILL_PREFIX));
+  for (const d of dirs) {
+    const skillPath = path.join(skillsRoot, d.name, 'SKILL.md');
+    if (!fs.existsSync(skillPath)) continue;
+    const body = fs.readFileSync(skillPath, 'utf8');
+    const ids = [...new Set([...body.matchAll(/ev-\d+/g)].map((m) => m[0]))];
+    map.set(d.name, new Set(ids));
+  }
+  return map;
+}
+
 function checkFormat(content) {
   if (!content.trim()) {
     fail('EXPERIENCE.md 为空');
@@ -207,8 +233,25 @@ function checkCapacity(content) {
   if (charCount > CHAR_LIMIT) {
     fail(`EXPERIENCE.md 超过核心摘要上限：${charCount}/${CHAR_LIMIT}（细节应毕业到 wego-scene-* 场景技能或合并同类条目）`);
   } else if (charCount > CHAR_LIMIT * 0.8) {
-    warn(`EXPERIENCE.md 摘要容量接近上限：${charCount}/${CHAR_LIMIT}`);
+    warn(`EXPERIENCE.md 摘要容量接近上限：${charCount}/${CHAR_LIMIT}；先检查已固化条目（场景技能/正式规则）是否已从摘要降载，再考虑合并同类`);
   }
+}
+
+// 固化即降载：主题已毕业到场景技能时，L2 摘要必须是指针形式（正文 ≤ POINTER_LIMIT）
+function checkSceneSkillDownshift(entries) {
+  const sceneSkills = collectSceneSkillEvIds();
+  if (sceneSkills.size === 0) return;
+  entries.forEach((entry, index) => {
+    const ids = extractEvidenceIds(entry);
+    for (const [skillName, skillIds] of sceneSkills) {
+      const overlap = ids.filter((id) => skillIds.has(id));
+      if (overlap.length === 0) continue;
+      const body = pointerBody(entry);
+      if (body.length > POINTER_LIMIT) {
+        fail(`经验条目 #${index + 1} 已固化到场景技能 ${skillName}（ev: ${overlap.join(', ')}），摘要正文 ${body.length} 字符超过指针上限 ${POINTER_LIMIT}；请压缩为「…，详见 ${skillName}」指针，细节留在场景技能`);
+      }
+    }
+  });
 }
 
 // 场景技能校验：结构合规 + evidence 追溯（当前无场景技能时自然跳过）
@@ -258,6 +301,7 @@ function main() {
 
   checkCapacity(content);
   checkSceneSkills(new Set(events.map((e) => e.id)));
+  checkSceneSkillDownshift(entries);
 
   return finish(report.valid ? 0 : 1);
 }
