@@ -51,7 +51,7 @@
 
 
 /* 发布产品场景（直链 #/publish-product 注册）
-   实际实现已抽离到 lib/js/publish-product-modal.js（全局加载），
+   实际实现已抽离到 wego-app/js/publish-product-modal.js（全局业务运行时），
    本文件仅注册直链路由，init 复用全局 WegoApp.initPublishProduct。 */
 
 const PUBLISH_TEMPLATE = `
