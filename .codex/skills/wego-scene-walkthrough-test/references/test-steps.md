@@ -5,7 +5,7 @@
 ## 公共准备
 1. 打开预览（本地 `http://localhost:8092/wego-app/index.html` 或在线 previews/pr-N）。
 2. 进入走查：点 `wego-walkthrough` shadowRoot `[data-fab-btn]`。
-3. 选中目标元素：点页面元素（如 `.album-feed__head` 中心），`wego-wt-style-panel` 打开；连点可上移选中父级。
+3. 选中目标元素：点页面元素（如 `.album-feed__head` 中心），`wego-wt-style-panel` 打开；鼠标不动连续点击当前选中元素可逐级上移选中父级（点击其内部其他元素则改选，快速双击文本进入改文案）。
 4. 样式面板 fixed 定位，交互前 `scrollIntoView({block:'center'})`；监听 `pageerror` + `console.error`，全程不得有报错。
 5. 证据记录：每条断言输出「操作 → 期望 → 实测 DOM/localStorage → 时间戳」；证据不足记待确认，截图仅佐证，不以截图数/用例数代替通过。
 
@@ -33,13 +33,12 @@
 4. 撤销（回 36）→ 重做（回 88）→ 撤销输入，元素与面板 input 全程同步（防 blur 写回旧值）。
 5. 反例：撤销后面板 input 会因 `_render` 重建写回旧值，断言须等重建完成；非法输入应被回退或忽略（边界）。
 
-## ④ 元素拖拽换位
-1. 选中元素后直接拖动（无需长按）→ 位移限制在父容器内（clamp）。
-2. 拖动中心越过兄弟中心 → 换位 + FLIP 过渡动画（250ms）。
-3. 撤销 → 顺序还原；重做 → 恢复。
-4. 刷新页面 → DOM 顺序保持。
-5. 注意：card 层长距离拖动在 Playwright 合成鼠标下受输入合并限制，验证逻辑用手动 dispatch PointerEvent（见踩坑 ev-017）。
-6. 反例：拖拽未换位先查是否越过兄弟中心（clamp 限制），再查是否被样式面板/inspector 色块拦截（ev-023/ev-024）；先排除环境假象再判真实 bug。
+## ④ 顺序移动（面板按钮 / 键盘方向键）
+1. 选中 flex 容器内的元素（如 `.album-feed__publisher`，父 `.album-feed__meta` 为 flex column）→ 面板移动按钮可用。
+2. 点面板 `[data-move]` 按钮或键盘方向键（row→左右、column→上下）→ 元素 CSS order 改变、显示顺序换位；同类元素共享同步、净零往返还原。
+3. 撤销 → 顺序还原；重做 → 恢复；刷新页面 → DOM 顺序保持（order 落盘）。
+4. 注意：元素拖拽换位（拖动越过兄弟中心）已随「连续点击选择」交互迭代移除；旧 localStorage reorder 数据仍被兼容读取（`_applyReorder`/`_queryMoveTarget` 保留）。
+5. 反例：父容器非 flex（display 无 flex）时移动按钮置灰、方向键无操作，属正常（非 bug）；同档（order 相同）换位会顺延中间同档元素，order 可能多次变化。
 
 ## ⑤ 悬停/选中元信息
 1. 悬停元素（不选中）→ 四边 `line.guide` 红虚线延长线 + `.bubble`（类名 + 宽×高）+ `text.num` 间距数字。
@@ -51,7 +50,7 @@
 7. 反例：无 padding/margin 的元素不显示色块属正常，勿判失败；悬停前先确保无选中态（无选中时 inspector 才走 hover 分支）。
 
 ## 回归基线脚本
-完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-reorder5`（④ head 层）/`wt-card-drag-dispatch`（④ card 层）、`wt-test-hover4`（⑤）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟。
+完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟。
 
 ## 评测闭环（技能自评）
 - 回归评测集：`scripts/wt-smoke.cjs` 是技能回归评测集，每次技能迭代后必须重跑（本地 + 在线），9/9 为基准。
