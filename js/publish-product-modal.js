@@ -1,8 +1,8 @@
-/* 发布产品模态（全局加载组件）
-   - 从原 scenes/发布产品/scene.js 抽离实现，改为全局加载（index.html 引入），
-     确保 window.WegoApp.openPublishProductModal 在任意来源页（动态/我的）调用时均已定义，
+/* 发布产品模态（全局业务运行时，wego-app/js/）
+   - 发布产品场景的完整业务实现，改为全局加载（index.html 引入），
+     确保 window.WegoApp.openPublishProductModal 在任意来源页（动态/我的/开单）调用时均已定义，
      不再因场景脚本懒加载而未定义导致静默失败（TypeError: ... is not a function）。
-   - 直链场景 #/publish-product 仍由 scenes/发布产品/scene.js 注册，
+   - 直链场景 #/publish-product 仍由 scenes/shop/发布产品/scene.js 注册，
      其 init 调用本文件暴露的 WegoApp.initPublishProduct。
    - 依赖：window.WegoApp（app.js）、window.WEGO_PROTOTYPE_DB（prototype-db.js）、
      window.WegoApp.openAgentResalePopup（agent-resale-popup.js，需在其后加载）。 */
