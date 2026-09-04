@@ -1,4 +1,4 @@
-# 走查工具 5 项交互测试步骤
+# 走查工具交互测试步骤
 
 > 每项都验证**回显 + 撤销/重做 + 刷新持久化**完整闭环。环境见 env.md，选择器见 dom-map.md。
 
@@ -56,10 +56,18 @@
 6. 场景无 margin 元素时，可用测试注入 `style.marginTop` 验证 `rect.mar-bg` 逻辑。
 7. 反例：气泡在 highlight `.label`，不在 inspector；无 padding/margin 的元素不显示色块属正常，勿判失败；悬停前先确保无选中态（无选中时 inspector 才走 hover 分支）。
 
+## ⑦ iconfont 图标替换
+1. 选中含 `wego-iconfont-s` 与已注册 `icon-*` 类的元素 → 样式面板正常打开，标题栏右侧出现 `[data-action="iconfont"]`；普通元素不出现入口。
+2. 点击入口 → `[data-iconfont-panel]` 展开；图标项只渲染字形，不显示名称文本；目录数量与已加载 `iconfont.css` 一致，面板可纵向滚动。
+3. 重复点击 `.iconfont-option.is-current` → 不产生 `icon-class` 修改记录；点击其它图标 → 仅替换图标类，`wego-iconfont-s` 与业务结构类保留。
+4. 修改记录写入 `property: icon-class`、原图标类与新图标类；定位选择器不得含可变的 `icon-*` 类。
+5. 撤销恢复原图标、重做恢复新图标；等待防抖落盘后刷新，图标替换仍回放；删除修改项后恢复原图标。
+6. 运行 `scripts/wt-iconfont.cjs`，本地与在线均须全量通过且无 `pageerror` / `console.error`。
+
 ## 回归基线脚本
-完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟。
+完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）、`scripts/wt-iconfont.cjs`（⑦）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟，再跑 iconfont 专项。
 
 ## 评测闭环（技能自评）
-- 回归评测集：`scripts/wt-smoke.cjs` 是技能回归评测集，每次技能迭代后必须重跑（本地 + 在线），9/9 为基准。
+- 回归评测集：`scripts/wt-smoke.cjs` + `scripts/wt-iconfont.cjs` 是技能回归评测集，每次技能迭代后必须重跑（本地 + 在线）。
 - 触发评测：用「走查工具测试/回归/验收/排查」等模拟 prompt 验证 description 命中（对应官方 skill-creator 触发率+通过率双指标）。
 - 技能交付前用一次真实业务走查（完整闭环）实测本技能，确认四段结构能指导跑通，再交付。

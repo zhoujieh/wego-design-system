@@ -10,6 +10,8 @@
 | 样式面板 | `wego-walkthrough` shadowRoot → `wego-wt-style-panel`（其 shadowRoot 内为面板字段） |
 | 撤销 / 重做 | style-panel shadowRoot → `[data-action="undo"]` / `[data-action="redo"]` |
 | 颜色字段触发 | style-panel shadowRoot → `[data-color-trigger][data-field="fillHex"]`（填充）/ `[data-field="strokeHex"]`（描边） |
+| iconfont 入口 | style-panel shadowRoot → `[data-action="iconfont"]`（仅选中已注册 iconfont 元素时存在） |
+| iconfont 面板 | style-panel shadowRoot → `[data-iconfont-panel]`；图标项为 `[data-iconfont-class]`，当前项为 `.is-current` |
 
 ## 颜色选择器（wego-wt-color-picker）
 

@@ -670,6 +670,19 @@
         "分支来源",
         "高频坑"
       ]
+    },
+    {
+      "id": "ev-049",
+      "date": "2026-09-04",
+      "summary": "走查工具替换 iconfont 属类名变更：定位选择器必须排除可变 icon-* 类，修改记录保存原/新图标类，刷新回放需覆盖场景异步二次渲染后再次应用",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-iconfont替换",
+      "tags": [
+        "走查工具",
+        "iconfont",
+        "稳定选择器",
+        "刷新回放"
+      ]
     }
   ]
 }

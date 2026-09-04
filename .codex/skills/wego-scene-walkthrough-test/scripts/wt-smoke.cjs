@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
 
 const args = Object.fromEntries(process.argv.slice(2).map(a => {
   const i = a.indexOf('=');
-  return i > 0 ? [a.slice(0, i), a.slice(i + 1)] : [a, true];
+  return i > 0 ? [a.slice(0, i).replace(/^--/, ''), a.slice(i + 1)] : [a.replace(/^--/, ''), true];
 }));
 const BASE = args.url || 'http://localhost:8092/wego-app/index.html';
 
