@@ -1,5 +1,6 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
+  "qualityGateSince": "ev-042",
   "events": [
     {
       "id": "ev-001",
@@ -583,6 +584,35 @@
         "needs-sync",
         "wego-github-delivery"
       ]
+    },
+    {
+      "id": "ev-042",
+      "date": "2026-09-04",
+      "summary": "经验信号必须先通过因果与复用质量门再进入主题路由，需求复述不得沉淀",
+      "source": "user-correction",
+      "scene": "experience-quality-gate",
+      "tags": [
+        "经验质量",
+        "信号分流",
+        "因果规则",
+        "语义守门",
+        "wego-uxsystem-iterate"
+      ],
+      "kind": "experience",
+      "observation": "连续验收反馈把控件显示、尺寸和提示文案等需求结果直接写成经验，并在已有场景技能中逐条追加，L2 次数随同一交付循环虚增。",
+      "mechanism": "流程先按主题命中已有场景技能并自动迭代，实际绕过了可复用判断；校验脚本又只检查格式、引用和容量，无法拦截没有失败机制的需求复述。",
+      "rule": "用户纠正只生成 L0 信号；先分流需求和普通缺陷，再同时通过因果明确、跨任务可迁移、可改变动作、修复已验证、非冗余五项质量门，最后才允许进入 L1/L2/L3/L4。",
+      "scope": [
+        "经验候选收口",
+        "已有场景技能迭代",
+        "L1/L2/L3/L4 路由"
+      ],
+      "verification": [
+        "qualityGateSince 起的新事件缺少任一结构化质量字段时 refine-experience --check 失败",
+        "纯需求反馈只更新需求、契约或测试，不写 evidence 且不增加 L2 次数",
+        "L2 的 ×N 只随同根因在独立任务复发而增加"
+      ],
+      "novelty": "旧规则虽提到可复用、可行动、非冗余，但主题归属章节允许命中已有技能后直接迭代，且没有可验证的结构化质量字段。"
     }
   ]
 }

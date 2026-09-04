@@ -15,6 +15,7 @@
 | `sync-wego-app-lib.mjs` | 设计系统源变化后同步部署副本 |
 | `build-routes.mjs` | 由各场景 `route.json` 汇总生成 `wego-app/js/routes.js`；`--check` 校验一致性 |
 | `build-pages-artifact.mjs` | 构建 GitHub Pages 发布产物；在本地迭代和合并阶段使用 PR 在线预览 |
+| `refine-experience.mjs` | 经验只读查询与守门；`--related` 查相关因果事实，`--check` 从 `qualityGateSince` 起强制校验 observation/mechanism/rule/scope/verification/novelty，`--self-test-quality` 验证质量门能放行合格结构并拒绝需求记录/缺失机制记录 |
 
 场景源码变化后直接运行静态守卫，无需生成中间证据文件。本地迭代阶段只运行与改动相称的检查；用户验收通过后的合并阶段运行完整静态验证。
 
@@ -40,4 +41,4 @@
 - `validate-scene-iteration-binding.mjs test`
 - `resolve-delivery-unit.mjs test`
 
-守卫只验证 Schema、源码或结构化数据，不检查文档标题、固定句子、引用顺序或人工自证字段。
+守卫只验证 Schema、源码或结构化数据，不检查文档标题、固定句子或引用顺序。经验质量门强制结构化因果字段存在，字段内容仍由 AI 结合事实判断，不以长度或关键词冒充语义质量。
