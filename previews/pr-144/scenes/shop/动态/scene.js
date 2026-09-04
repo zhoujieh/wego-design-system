@@ -637,6 +637,7 @@
                       });
                     }
                     renderList(ctx, listEl);
+                    ctx.toast('转发成功');
                   }
                 }
               });

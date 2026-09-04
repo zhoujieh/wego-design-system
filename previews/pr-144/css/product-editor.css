@@ -358,6 +358,30 @@
   object-fit: cover;
 }
 
+/* 本地相册入口按钮（选图面板内，位于图片网格与取消之间） */
+.publish-product__picker-local {
+  margin: 0 var(--spacer-16) var(--spacer-12);
+  padding: var(--spacer-12);
+  border: 1px dashed var(--border-strong, #d0d0d0);
+  border-radius: var(--radius-8);
+  background: var(--bg-subtle);
+  color: var(--text-link, #3478f6);
+  font-size: var(--body-md-font-size);
+  cursor: pointer;
+  width: calc(100% - var(--spacer-32));
+}
+.publish-product__picker-local:active {
+  background: var(--bg-fill, rgba(0, 0, 0, 0.04));
+}
+
+/* 发布页本地相册视频预览项 */
+.publish-product__img-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
 
 /* ═══ 发布页导航栏分享/快捷分享按钮 ═══
    分享与快捷分享按钮均按 button 组件配置（btn btn--weak/btn--strong btn--sm，
