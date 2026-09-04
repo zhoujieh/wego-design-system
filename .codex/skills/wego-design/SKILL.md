@@ -16,9 +16,9 @@ description: 基于已提交的简要原型简报消费微购设计系统，在�
 
 页面结构形成后，只读取 `page-layers.json`、`library-consumption.json` 和 `uikit-plan.json` 中与本页命中的部分。页面骨架先用正式 Layout 组件搭建 2–3 层信息框架（`layout-page`/`layout-scroll`/`layout-section`/`layout-flow`/`layout-split`/`layout-grid`/`layout-scroll-row`，命中 UI Kit 时继承其 Layout 树），再将业务信息分配到布局槽位；组件确定后，只读取 `components/index.json` 的目标项、对应 Preview 和组件契约；实现时读取需要的 Token；收尾时只读取[场景合同](./references/scene-contract.md)中与当前场景命中的规则。已有场景的历史说明不作为设计前输入。
 
-验收或排查走查工具交互（走查 5 项功能：颜色 HSL/渐变、数值拖动、拖拽换位、悬停元信息）：先读场景技能[wego-scene-walkthrough-test](../wego-scene-walkthrough-test/SKILL.md)，按其固定流程与回归脚本执行。
+验收或排查走查工具交互（颜色 HSL/渐变、数值拖动、顺序移动、连点选择、悬停元信息、iconfont、工具栏）：先读场景技能[wego-scene-walkthrough-test](../wego-scene-walkthrough-test/SKILL.md)，按其分层门禁执行。
 
-实现或修改业务场景（scene.js/scene.css/业务运行时 js）：先读场景技能[wego-scene-app-test](../wego-scene-app-test/SKILL.md)，按其固定流程做回归/全量走查（证据链、置信度分级、直链/overlay 双模式）。
+实现或修改业务场景（scene.js/scene.css/业务运行时 js）：先读场景技能[wego-scene-app-test](../wego-scene-app-test/SKILL.md)，按其分层门禁做轻量回归、交付关键路径或终局全量走查。
 
 <!-- rule-id: scene-dom-copy-preview-verbatim -->
 正式组件必须使用目标 Preview 变体的完整 DOM、class 和可选节点位置；不得凭组件名自行重写结构，页面结构也不得从组件或 UI Kit 反推。
@@ -29,7 +29,7 @@ description: 基于已提交的简要原型简报消费微购设计系统，在�
 - 每轮场景实现完成后，必须运行 `node scripts/validate-scene-contract.mjs <场景路径>` 做场景契约预检，通过后再推送 PR。场景契约问题不得留到合并阶段全量门禁才发现。
 
 <!-- rule-id: scene-app-test-before-delivery -->
-- 每轮场景实现完成后必须按 `wego-scene-app-test` 固定流程做走查测试（硬挂载固定环节，非条件触发）：发现问题先修复、复验通过后，才允许推送 PR 或进入验收；验收前再做一次全量走查。
+- 每轮场景实现完成后必须按 `wego-scene-app-test` 分层门禁做测试：本地小改跑轻量回归，交付节点跑本地关键路径，终局验收前再做全量走查；发现问题先修复并复验同层级用例。
 
 <!-- rule-id: experience-signal-to-inbox -->
 - 经验信号自检：会话中出现用户纠正、用户表达偏好、返工、踩坑（CI 失败/守卫拦截/验收打回）时，向当前交付单元 `.tasks/experience-inbox.json` 追加一条草稿（字段与分流规则见 `wego-uxsystem-iterate/references/workflow-iteration.md`），不直接改经验权威源，无信号不动作。

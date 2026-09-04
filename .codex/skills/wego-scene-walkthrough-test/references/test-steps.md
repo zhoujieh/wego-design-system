@@ -1,13 +1,18 @@
 # 走查工具交互测试步骤
 
-> 每项都验证**回显 + 撤销/重做 + 刷新持久化**完整闭环。环境见 env.md，选择器见 dom-map.md。
+> 本地小改只跑冒烟和受影响项；交付节点对受影响项验证**回显 + 撤销/重做 + 刷新持久化**；终局验收或 PR 发布验证再扩展到本地 + 在线关键链路。环境见 env.md，选择器见 dom-map.md。
 
 ## 公共准备
 1. 打开预览（本地 `http://localhost:8092/wego-app/index.html` 或在线 previews/pr-N）。
 2. 进入走查：点 `wego-walkthrough` shadowRoot `[data-fab-btn]`。
 3. 选中目标元素：点页面元素（如 `.album-feed__head` 中心），`wego-wt-style-panel` 打开；鼠标不动连续点击当前选中元素可逐级上移选中父级（点击其内部其他元素则改选，快速双击文本进入改文案）。
 4. 样式面板 fixed 定位，交互前 `scrollIntoView({block:'center'})`；监听 `pageerror` + `console.error`，全程不得有报错。
-5. 证据记录：每条断言输出「操作 → 期望 → 实测 DOM/localStorage → 时间戳」；证据不足记待确认，截图仅佐证，不以截图数/用例数代替通过。
+5. 证据记录：小改输出「操作 → 实测结果 → 时间戳」；交付/终验层补 DOM 与必要 localStorage；证据不足记待确认，截图仅佐证。
+
+## 分层门禁
+- 轻量冒烟：运行 `scripts/wt-smoke.cjs`，再手测本次直接影响的 1-2 条主路径；不强制刷新持久化。
+- 本地专项闭环：到达交付节点时，按受影响章节验证回显、撤销/重做、刷新持久化和必要边界。
+- 终局/在线验证：用户发起终局验收或 PR 发布验证时，本地先通过专项闭环，再对在线预览跑冒烟和受影响关键链路；iconfont/工具栏可用对应脚本加 `--url`。
 
 ## ① 颜色选择器对齐 HSL
 1. 打开颜色字段（`[data-color-trigger][data-field="fillHex"]`）。
@@ -63,7 +68,7 @@
 4. 同一组件结构且原图标一致的可见实例须全部同步；图标自身无重复组件类时，按最近重复父组件的相对子节点路径匹配；不得把不同组件中碰巧同名的图标一起修改。
 5. 修改记录写入 `property: icon-class`、原图标类与新图标类；定位选择器不得含可变的 `icon-*` 类；共享记录须合并显示“共享 N 个元素”。
 6. 撤销、重做、删除修改组、重置和刷新回放均须整组生效。
-7. 运行 `scripts/wt-iconfont.cjs`，本地与在线均须全量通过且无 `pageerror` / `console.error`。
+7. 运行 `scripts/wt-iconfont.cjs`；PR 发布验证或终局验收时再用 `--url` 跑在线关键链路，均须无 `pageerror` / `console.error`。
 
 ## ⑧ 工具栏定位与 Tooltip
 1. 桌面 1280×960：收起态和展开态中心与视口水平中心一致；即使 localStorage 有旧拖动坐标也忽略，`[data-toolbar]` 为 `.is-fixed`，拖动后位置不变。
@@ -72,12 +77,12 @@
 4. 展开入口 Tooltip 为“展开工具栏”；展开态依次为“收起工具栏 / 走查模式 / 批注模式 / 数据模拟 / 修改记录 / 调试日志 / 更多工具”，均显示在入口上方且无重复原生 title。
 5. 点击“修改记录”后配置列表须在视口内且位于工具栏上方；日志面板同样完整可见；数据模拟/更多面板须锚定各自入口，矮视口重复验证。
 6. 移动端保留 `wego.wgf-position` 历史坐标与现有拖动逻辑，不添加 `.is-fixed`，不显示桌面 hover Tooltip。
-7. 运行 `scripts/wt-toolbar.cjs`，本地与在线均须全量通过且无 `pageerror` / `console.error`。
+7. 运行 `scripts/wt-toolbar.cjs`；PR 发布验证或终局验收时再用 `--url` 跑在线关键链路，均须无 `pageerror` / `console.error`。
 
 ## 回归基线脚本
-完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）、`scripts/wt-iconfont.cjs`（⑦，移动端加 `--mobile`）、`scripts/wt-toolbar.cjs`（⑧）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟，再跑对应专项。
+当前随技能维护的脚本：`scripts/wt-smoke.cjs`（入口、选中、颜色/数值/元信息/iconfont 基础冒烟）、`scripts/wt-iconfont.cjs`（⑦，移动端加 `--mobile`）、`scripts/wt-toolbar.cjs`（⑧）。其它章节按本文件手测，后续新增脚本必须先放入 `scripts/` 再登记。
 
 ## 评测闭环（技能自评）
-- 回归评测集：`scripts/wt-smoke.cjs` + `scripts/wt-iconfont.cjs` + `scripts/wt-toolbar.cjs` 是技能回归评测集，每次技能迭代后必须重跑（本地 + 在线）。
+- 回归评测集：`scripts/wt-smoke.cjs` + `scripts/wt-iconfont.cjs` + `scripts/wt-toolbar.cjs` 是技能回归评测集；技能本体迭代时本地必跑，在线只在 PR 发布验证或终局验收时跑。
 - 触发评测：用「走查工具测试/回归/验收/排查」等模拟 prompt 验证 description 命中（对应官方 skill-creator 触发率+通过率双指标）。
 - 技能交付前用一次真实业务走查（完整闭环）实测本技能，确认四段结构能指导跑通，再交付。
