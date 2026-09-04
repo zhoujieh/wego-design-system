@@ -16,7 +16,7 @@
 
 **本地分支归属盘点**：用 `git branch -vv` 盘点全部本地分支；凡非 `main`、非当前任务、无开放 PR、无挂起登记的分支均为悬空交付单元，先向用户报告并收口（推送创建 PR、登记挂起任务或确认废弃删除），不得静默跨会话保留。
 
-**开放 PR 同步**：CI（`sync-open-prs.yml`）在 main 每次 push 后自动对所有开放 PR 执行 merge main；无需人工逐个检查落后情况。只需检查是否有带 `needs-sync` 标签的 PR（CI 同步冲突时会打此标签），有则先处理冲突。
+**开放 PR 同步**：仓库必须开启 “Always suggest updating pull request branches”（`allow_update_branch=true`）；CI（`sync-open-prs.yml`）在 main 每次 push 后通过 `PUT update-branch` 自动对所有开放 PR 执行 merge main，并携带当前 head SHA 防止竞态。无需人工逐个检查落后情况；只需检查是否有带 `needs-sync` 标签的 PR（CI 同步冲突时会打此标签），有则先处理冲突。
 
 先用以下信息匹配已有交付单元：
 
