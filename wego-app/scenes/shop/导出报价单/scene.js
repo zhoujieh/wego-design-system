@@ -137,6 +137,19 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   function checkboxHtml(checked, extra) {
     return '<div class="checkbox' + (checked ? ' checkbox--checked' : '') + '" data-component-slug="checkbox"' + (extra || '') + '><div class="checkbox__inner"></div>' + (checked ? '<div class="checkbox__icon"><img class="checkbox__asset" src="./lib/assets/icons/checkbox-check.svg" alt=""></div>' : '') + '</div>';
   }
+  function setCheckboxState(checkbox, checked) {
+    if (!checkbox) return;
+    checkbox.classList.toggle('checkbox--checked', checked);
+    var icon = checkbox.querySelector('.checkbox__icon');
+    if (checked && !icon) {
+      icon = document.createElement('div');
+      icon.className = 'checkbox__icon';
+      icon.innerHTML = '<img class="checkbox__asset" src="./lib/assets/icons/checkbox-check.svg" alt="">';
+      checkbox.appendChild(icon);
+    } else if (!checked && icon) {
+      icon.remove();
+    }
+  }
   function productImages(product) {
     var list = (product.image_list || []).filter(Boolean);
     return list.length ? list : ['./lib/assets/icons/default-diagram.svg'];
@@ -216,6 +229,26 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var key = selectionKey(mode, p, idx);
         if (state.selected[key]) delete state.selected[key];
         else state.selected[key] = true;
+      }
+      function syncToggleSelection(toggle, mode, p, idx) {
+        setCheckboxState(toggle.querySelector('[data-role="quote-check"]'), isSelected(mode, p, idx));
+        updateBar();
+      }
+      function syncImageGroupSelection(group, product) {
+        if (!group) return;
+        var images = productImages(product);
+        var selected = 0;
+        images.forEach(function (_, idx) {
+          if (isSelected('image', product, idx)) selected++;
+        });
+        setCheckboxState(group.querySelector('[data-quote-toggle-group] [data-role="quote-check"]'), selected === images.length && images.length > 0);
+        var summary = group.querySelector('.quote-image-group__summary');
+        if (summary) summary.textContent = product.item_no + ' · 已选 ' + selected + '/' + images.length;
+        Array.prototype.forEach.call(group.querySelectorAll('[data-quote-toggle][data-mode="image"]'), function (cell) {
+          var idx = cell.getAttribute('data-idx') ? Number(cell.getAttribute('data-idx')) : 0;
+          setCheckboxState(cell.querySelector('[data-role="quote-check"]'), isSelected('image', product, idx));
+        });
+        updateBar();
       }
       function allSelectedInList(list) {
         var total = 0, sel = 0;
@@ -477,7 +510,12 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           var pid = toggle.getAttribute('data-id');
           var idx = toggle.getAttribute('data-idx') ? Number(toggle.getAttribute('data-idx')) : 0;
           var p = PRODUCTS.filter(function (x) { return x.product_id === pid; })[0];
-          if (p) { toggleSelect(mode, p, idx); renderList(); }
+          if (p) {
+            toggleSelect(mode, p, idx);
+            syncToggleSelection(toggle, mode, p, idx);
+            var group = toggle.closest('.quote-image-group');
+            if (mode === 'image' && group) syncImageGroupSelection(group, p);
+          }
           return;
         }
         var groupToggle = target.closest('[data-quote-toggle-group]');
@@ -493,7 +531,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               var key = selectionKey('image', gp, idx);
               if (all) delete state.selected[key]; else state.selected[key] = true;
             });
-            renderList();
+            syncImageGroupSelection(groupToggle.closest('.quote-image-group'), gp);
           }
           return;
         }
