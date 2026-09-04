@@ -82,8 +82,52 @@ spec 不算"够细"直到满足以下全部：
   2. 开发 AI 用 spec 写代码时的疑问/返工 → 反哺密度标准。
 - 更新产出结构 = 更新本文档 + 同步范本对照表，技能化后同步 SKILL.md。
 
-## 八、待澄清
+## 八、待澄清（2026-09-04 已拍板）
 
-- 是否沿用 shop243 的「双阶段评审」（原型评审 → spec 三方评审）还是简化？
-- spec 存储位置：跟随迭代目录 `_iterations/<id>/`，还是独立 specs 目录？
-- 产出文件命名与迭代简报的关系（增量细规格 vs 替换简报）？
+- ~~是否沿用 shop243 的「双阶段评审」~~ → **已定：先简化**——保留"澄清写回字段 + 自查补漏"闭环，不强制三方独立评审（后续有需要再加）。
+- ~~spec 存储位置~~ → **已定：spec 一定跟迭代存放**在迭代目录 `_iterations/<id>/` 内（与迭代简报同源）。
+- ~~产出文件命名与迭代简报的关系~~ → **已定：简报（轻）+ 细规格（重）并存**，细规格在简报已确认事实上细化，不替换简报；两者**归档好、语义边界正确**（见 §九 迭代目录结构）。
+
+## 九、迭代目录结构规则（沉淀 2026-09-04）
+
+> 背景：spec 跟迭代存放 → 需要统一迭代目录结构。对比仓库内全部 8 个场景的既有迭代，发现**新旧两套命名并存**，需对照权威规则收敛。
+
+### 9.1 权威规则（已存在于 iteration-workflow.md）
+
+```text
+wego-app/scenes/{分类}/{主业务场景}/_iterations/{iteration_id}-{title}-{YYYYMMDD}/
+├── iteration.json                    # 迭代记录（schemaVersion 6，脚本维护）
+├── {iteration_id}-{title}-{YYYYMMDD}.md   # spec.md 需求规格说明（唯一需求源）
+├── acceptance.json                   # 验收勾销账本（submit-brief 生成）
+└── freeze.json                       # 仅明确冻结后存在
+```
+
+- 迭代 ID：`{分类}{3位数字}[-{修订号}]`（shop/bcg/customer/infras）。
+- 目录名 = `{iteration_id}-{title}-{YYYYMMDD}`。
+
+### 9.2 实际仓库偏差（对比发现）
+
+| 类型 | 示例 | 状态 |
+| --- | --- | --- |
+| 新规范命名 | `bcg001-快捷优惠回显-20260901`、`infras001-应用中心布局交互优化-20260829` | 符合权威规则 |
+| 旧命名残留（日期前缀+英文 slug） | `20260825-publish-product-发布产品`、`20260803-agent-resale-代理商帮卖弹窗`、`20260825-album-product-feed-动态商品流`、`20260819-friend-list-restore-好友列表恢复`、`20260825-my-tab-skeleton`、`20260824-order-pad-figma-style-...` | 历史迁移遗留，与权威规则不一致 |
+
+### 9.3 细规格在迭代目录中的位置（spec 技能产物）
+
+细规格（wego-sdd-spec 产物：FR/B1 边界/验收场景/业务规则）**随迭代存放**，与简报同目录，语义边界：
+
+```text
+{迭代目录}/
+├── {iteration_id}-{title}-{YYYYMMDD}.md        # 简报（轻）：goal/范围/入口/关键路径/状态/数据契约
+├── {iteration_id}-{title}-spec-{YYYYMMDD}.md   # 细规格（重，新增）：FR/B1/验收场景/业务规则（画布与开发 AI 消费）
+├── iteration.json / acceptance.json / freeze.json
+```
+
+- 细规格文件名加 `-spec-` 后缀区分，避免与简报文件混淆。
+- 细规格在简报已确认事实上细化，不替换、不重复简报内容。
+
+### 9.4 收敛建议
+
+- 新迭代一律按权威规则（`{iteration_id}-{title}-{YYYYMMDD}` + 文件三件套）创建，由 wego-product `init` 保证。
+- 旧命名迭代：**不强制迁移**（历史冻结/迁移迭代是快照），新内容不进旧目录；涉及继续开发的旧迭代由 wego-product 走新建迭代流程。
+- 细规格由 wego-sdd-spec 技能产出到迭代目录，命名遵守 `-spec-` 后缀约定。
