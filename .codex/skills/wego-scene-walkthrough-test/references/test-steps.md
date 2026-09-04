@@ -21,10 +21,10 @@
 1. 颜色面板 `.seg-btn` 切"渐变" → `.gradient-editor` 出现。
 2. 点 `.gradient-stopbar` 空白加色标（上限 5 个、至少保留 2 个）；`.stop-dot` 可拖动位置、`[data-stop-delete]` 删除。
 3. 角度：−45° 按钮 / `.gradient-angle-slider` / +45° 调节渐变方向。
-4. 改激活色标颜色 → 断言元素 `backgroundImage` 为 `linear-gradient(...)` 且页面同步。
-5. 撤销 2 步回 none、重做恢复——注意：切到渐变模式会先应用默认白→黑渐变（1 条变更记录），改色标再 1 条，共 2 条；走查撤销为逐条记录模型，一次用户操作可能含多条内部变更，须撤销 2 步才回 none（回归脚本须按此粒度断言，勿只撤 1 步判回 none）。
+4. 改激活色标颜色 → 断言元素 `backgroundImage`、`[data-stopbar-preview]` 和激活 `[data-stop-dot]` 同步；再改其它颜色字段，原渐变字段 swatch 不得被实色覆盖。
+5. 撤销 2 步回 none、重做恢复——注意：切到渐变模式会先应用默认白→黑渐变（1 条变更记录），改色标再 1 条，共 2 条；共享元素会按事务整组撤销，验证逐步回退须选非共享元素，勿把共享事务当作失败。
 6. 边界：填充/文本支持渐变；描边（strokeHex）/投影（shadowHex）无渐变切换按钮（原生限制，属正常）。
-7. 反例：撤销渐变后 `backgroundImage` 应回 none；防抖落盘 300ms 后读 localStorage 核对，防旧值残留假象。
+7. 反例：撤销渐变后 `backgroundImage` 应回 none；防抖落盘 300ms 后读 localStorage 核对，防旧值残留假象；只看元素样式不看面板预览会漏掉控件内部同步缺陷。
 
 ## ③ 数值字段拖动调值
 1. 面板数值字段（如 paddingLeft）按住左右拖动调值，断言元素样式与 input 同步。

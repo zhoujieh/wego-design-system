@@ -33,6 +33,7 @@ description: 走查工具自动化测试与回归。改动 wego-app/js/walkthrou
 - 冒烟须覆盖决定代码路径的关键分支，不能只覆盖功能名称。[ev-045]
 - 程序恢复滚动会异步派发可信 scroll，须用时间窗或临时移除监听器。[ev-047]
 - 可变资源类不能进入持久化定位；共享资源按组件语义与原值定界并成组记录。[ev-048, ev-049]
+- 复合颜色值须同步内部预览；状态批量刷新按值类型渲染，勿用实色覆盖渐变。[ev-052, ev-053]
 - 含 fixed 浮层的宿主不得用 transform 居中；受限 flex 面板须显式分配主次滚动区的收缩权。[ev-050, ev-051]
 - Playwright 合成鼠标多段 move 只留 1 次 pointermove，长距拖动手动 dispatch PointerEvent。[ev-017]
 - DOM 在多级 shadowRoot，断言前先 dump，勿凭记忆猜。[ev-019]
