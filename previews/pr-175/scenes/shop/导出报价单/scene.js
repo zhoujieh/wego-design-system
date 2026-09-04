@@ -84,10 +84,12 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     <div class="bottom-action-bar bottom-action-bar--selection quote-bottom-bar" data-component-slug="bottom-action-bar">
       <div class="bottom-action-bar__inner">
         <div class="bottom-action-bar__leading">
-          <button type="button" class="bottom-action-bar__action" data-dom-id="quote-select-all">全选</button>
-          <button type="button" class="bottom-action-bar__action quote-bar-count-btn" data-dom-id="quote-count-dropdown" aria-haspopup="menu" aria-expanded="false">
-            <span data-role="quote-count-label">已选 0</span>
-            <i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i>
+          <button type="button" class="bottom-action-bar__selection-toggle quote-bar-count-btn" data-dom-id="quote-count-dropdown" aria-haspopup="menu" aria-expanded="false">
+            <span class="bottom-action-bar__checkbox-field" data-dom-id="quote-select-all" tabindex="-1" role="checkbox" aria-checked="false">
+              <span class="checkbox" data-component-slug="checkbox" data-role="quote-check"><span class="checkbox__inner"></span></span>
+              <span class="checkbox-field__text">全选</span>
+            </span>
+            <span class="bottom-action-bar__selection-value"><span data-role="quote-count-label">已选 0</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span>
           </button>
           <div class="popmenu popmenu--select quote-count-menu" data-component-slug="popmenu" data-role="quote-count-menu" role="listbox" data-state="closed" hidden>
             <div class="popmenu__list">
@@ -95,9 +97,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               <div class="popmenu__item" data-role="quote-batch-option" data-value="clear"><span class="popmenu__item-text">清空已选</span></div>
             </div>
           </div>
-          <button type="button" class="bottom-action-bar__action" data-dom-id="quote-view-selected">查看已选</button>
         </div>
         <div class="bottom-action-bar__trailing">
+          <button type="button" class="btn btn--weak btn--md" data-component-slug="button" data-dom-id="quote-view-selected">查看已选</button>
           <button type="button" class="btn btn--strong btn--md" data-component-slug="button" data-dom-id="quote-next" disabled>下一步</button>
         </div>
       </div>
@@ -268,15 +270,17 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
 
       function productRowHtml(p) {
         var img = productImages(p)[0];
-        return '<div class="quote-product-row" data-quote-toggle data-mode="product" data-id="' + escapeHtml(p.product_id) + '">'
-          + '<div class="quote-product-row__select">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
+        return '<div class="cell cell--double cell--bg-white quote-product-row" data-component-slug="cell" data-quote-toggle data-mode="product" data-id="' + escapeHtml(p.product_id) + '">'
+          + '<div class="cell__select quote-product-row__select">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
+          + '<div class="cell__body">'
           + '<div class="wg-image wg-image--rounded-sm quote-product-row__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
-          + '<div class="quote-product-row__info">'
-          + '<div class="quote-product-row__copy">'
-          + '<h3 class="quote-product-row__title"><span class="quote-row__no">' + escapeHtml(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + escapeHtml(p.title) + '</span></h3>'
-          + (p.specification ? '<div class="quote-product-row__spec">' + escapeHtml(p.specification) + '</div>' : '')
+          + '<div class="cell__content quote-product-row__info">'
+          + '<div class="cell__title-row quote-product-row__copy">'
+          + '<span class="cell__title quote-product-row__title"><span class="quote-row__no">' + escapeHtml(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + escapeHtml(p.title) + '</span></span>'
           + '</div>'
+          + (p.specification ? '<div class="cell__subtitle quote-product-row__spec">' + escapeHtml(p.specification) + '</div>' : '')
           + '<div class="quote-product-row__price">' + metricHtml(p.price, '16') + '</div>'
+          + '</div>'
           + '</div>'
           + '</div>';
       }
@@ -351,8 +355,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         nextBtn.classList.toggle('btn--disabled', count === 0);
         var list = currentList();
         var stat = allSelectedInList(list);
-        selectAllBtn.textContent = (stat.sel > 0 && stat.sel === stat.total) ? '取消全选' : '全选';
-        selectAllBtn.setAttribute('aria-pressed', (stat.sel > 0 && stat.sel === stat.total) ? 'true' : 'false');
+        var allChecked = stat.sel > 0 && stat.sel === stat.total;
+        setCheckboxState(selectAllBtn.querySelector('[data-role="quote-check"]'), allChecked);
+        selectAllBtn.setAttribute('aria-checked', allChecked ? 'true' : 'false');
       }
 
       function toggleAllInList() {
@@ -391,16 +396,20 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           }
         });
         var itemsHtml = rows.map(function (row) {
-          return '<div class="quote-selected-item">'
-            + '<div class="wg-image wg-image--rounded-sm quote-selected-item__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.img) + '" alt="' + escapeHtml(row.p.title) + '"></div>'
-            + '<div class="quote-selected-item__info"><div class="quote-selected-item__title">' + row.label + '</div><div class="quote-selected-item__meta">' + escapeHtml(row.p.item_no) + '</div></div>'
-            + '<button type="button" class="quote-selected-item__remove" data-remove-selected data-key="' + escapeHtml(row.key) + '" aria-label="移除">移除</button>'
+          return '<div class="cell cell--double cell--bg-white quote-selected-item" data-component-slug="cell">'
+            + '<div class="cell__body">'
+            + '<div class="wg-image wg-image--md wg-image--rounded-sm quote-selected-item__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.img) + '" alt="' + escapeHtml(row.p.title) + '"></div>'
+            + '<div class="cell__content quote-selected-item__info"><div class="cell__title-row"><span class="cell__title quote-selected-item__title">' + row.label + '</span></div><div class="cell__subtitle quote-selected-item__meta">' + escapeHtml(row.p.item_no) + '</div></div>'
+            + '<div class="cell__action"><button type="button" class="btn btn--weak btn--sm btn--icon-only quote-selected-item__remove" data-component-slug="button" data-remove-selected data-key="' + escapeHtml(row.key) + '" aria-label="移除"><i class="btn__icon wego-iconfont-s icon-lajitong16" aria-hidden="true"></i></button></div>'
+            + '</div>'
             + '</div>';
         }).join('');
-        var html = '<div class="actionsheet" data-component-slug="actionsheet" role="dialog" aria-modal="true" data-state="open">'
-          + '<div class="actionsheet__panel actionsheet__panel--lg">'
-          + '<div class="actionsheet__header"><h2 class="actionsheet__title">已选产品</h2><button type="button" class="actionsheet__close wego-iconfont-s icon-guanbi" data-dom-id="quote-selected-close" data-close-selected-sheet aria-label="关闭"></button></div>'
-          + '<div class="quote-selected-list">' + (itemsHtml || '<div class="quote-selected-empty">暂无可展示的已选商品</div>') + '</div>'
+        var html = '<div class="modal modal--frame-x quote-selected-modal" data-component-slug="modal" role="dialog" aria-modal="true" aria-labelledby="quote-selected-title" data-state="open">'
+          + '<div class="modal__panel">'
+          + '<div class="modal__title modal__title--default">'
+          + '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-selected-close" data-close-selected-sheet aria-label="收起"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title" id="quote-selected-title">已选产品</span></div><div class="navbar__right"></div></div></nav>'
+          + '</div>'
+          + '<div class="modal__body modal__body--safe-bottom quote-selected-list">' + (itemsHtml || '<div class="quote-selected-empty">暂无可展示的已选商品</div>') + '</div>'
           + '</div>'
           + '</div>';
         ctx.openSheet(html, {
@@ -590,7 +599,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         strip.hidden = false;
         ctx.toast('筛选面板将在后续阶段接入');
       });
-      selectAllBtn.addEventListener('click', function () { toggleAllInList(); });
+      selectAllBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleAllInList(); });
       countDropdown.addEventListener('click', function () { toggleMenu(countDropdown, countMenu, countMenu.hidden); });
       root.querySelector('[data-dom-id="quote-view-selected"]').addEventListener('click', openSelectedSheet);
       nextBtn.addEventListener('click', function () {
