@@ -345,6 +345,27 @@ function checkAppHost(requireSceneCoverage = false) {
   return [...routedScenes].sort();
 }
 
+function checkBusinessComponents() {
+  // 业务组件（library-consumption.json#/businessComponentRegistry）一旦在 runtime/ 权威源创建，
+  // 必须在 index.html 全局加载其 css 与 lib/js 脚本，否则场景经 WegoApp.open{Component} 消费会静默失败。
+  const consumptionFile = '.codex/skills/wego-design/library-consumption.json';
+  const consumption = exists(consumptionFile) ? readJson(consumptionFile) : null;
+  const registry = consumption?.businessComponentRegistry || [];
+  if (!registry.length) return;
+  const indexPath = path.join(appRoot, 'index.html');
+  if (!fs.existsSync(indexPath)) return;
+  const index = fs.readFileSync(indexPath, 'utf8');
+  for (const bc of registry) {
+    const sourceJs = path.join(libraryRoot, 'runtime', `${bc.slug}.js`);
+    if (!fs.existsSync(sourceJs)) continue; // 组件尚未在权威源创建，跳过
+    for (const asset of bc.load || []) {
+      if (!index.includes(asset)) {
+        add('error', 'business_component.not_loaded', `业务组件 ${bc.slug}（${bc.api}）未在 index.html 全局加载：${asset}`, indexPath);
+      }
+    }
+  }
+}
+
 function sceneFromChangedPath(file) {
   const match = /^wego-app\/scenes\/[^/]+\/([^/]+)\/(.+)$/.exec(file);
   if (!match || match[2].startsWith('_iterations/')) return null;
@@ -522,6 +543,7 @@ function runChangedScope() {
     scenes: targetScenes,
     explicitFiles: explicitIterationFiles
   });
+  checkBusinessComponents();
   conditionalToolTests();
 }
 
@@ -539,6 +561,7 @@ function runFullScope() {
   validateScenes(sceneDirectories());
   runNode('scripts/validate-scene-iteration-binding.mjs', ['--all', '--json'], 'scene.iteration_unbound');
   checkIterations({ all: true });
+  checkBusinessComponents();
 }
 
 function main() {

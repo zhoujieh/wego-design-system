@@ -7,6 +7,9 @@
 - 全程用中文沟通，与用户沟通用业务场景与需求语言，不展开实现层面的技术细节。
 - 每项任务只给出一个推荐方案，直接请用户确认；不列举多方案让用户选择。
 
+<!-- rule-id: experience-auto-sediment-on-signals -->
+- 遇到用户纠正、返工、踩坑时，按 wego-uxsystem-iterate 经验沉淀流程自动沉淀并告知用户；普通代码错误、需求临时变化、单次视觉微调、单场景特例不沉淀。
+
 <!-- rule-id: agent-must-read-host-code-before-asking -->
 - 接收任务后不立即执行：先结合宿主代码现状理清本次要修改的内容与范围，与用户确认（须得到明确肯定）后再开始；禁止未经确认需求细节就改代码。
 
@@ -30,6 +33,9 @@
 - `wego-app/js/routes.js`、`wego-app/lib/`、`components.css` 是生成物，禁止直接编辑；设计系统权威源在 `.codex/skills/wego-design/`（仅限组件、Token、Preview、UI Kit、设计系统运行时组件等设计系统本体），仅 `wego-uxsystem-iterate` 可改。
 - 业务场景实现归属业务代码位置，不得放入技能目录或设计系统权威源：全局业务运行时直接放在 `wego-app/js/`（如 publish-fab.js、product-editor.js、product-share.js、resale-popup.js、upgrade-popup.js、walkthrough-tool.js），配套业务样式放在 `wego-app/css/`（如 product-editor.css、product-share.css、resale-popup.css、upgrade-popup.css、walkthrough-tool.css），均可直接编辑。
 - `.trae/skills/*` 与 `.codebuddy/skills/*` 必须以逐项符号链接指向 `.codex/skills/*`，或以整目录符号链接指向 `.codex/skills`；不得保留副本。
+
+<!-- rule-id: business-component-must-have-demo-scene -->
+- **业务组件必须配套状态展示场景**：每个全局加载的业务组件（`wego-app/lib/js/` 下的业务组件，如 `resale-popup` / `upgrade-popup` / `product-share` / `product-editor`）必须有一个独立状态展示场景——场景页分组列出组件全部状态、点击拉起同一组件实例，并关联进场景管理列表（`wego-app/scenes/infras/场景管理/scene.js` 的 `scenes` 数组）；展示页位于该组件的业务归属场景目录下；组件新增状态时必须同步补入展示页。建法见 `wego-uxsystem-iterate/references/component-demo-scene.md`。
 
 ## 三技能主链路
 

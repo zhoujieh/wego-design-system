@@ -206,6 +206,36 @@
     {
       "id": "ev-015",
       "date": "2026-09-03",
+      "summary": "核验 PR 在线预览时，拿本地 PR head sha 与 previews/pr-N/.wego-deployment-sha 直接比对会误判'部署过期'：pull_request 事件在 GitHub Actions 默认 checkout 的是 merge commit，部署标记实际存的是 refs/pull/N/merge（merge ref）而非 head sha；且在线预览入口在 previews/pr-N/index.html（app 平铺根目录），不是 previews/pr-N/wego-app/index.html（curl 后者 404 会误判部署损坏）。已用部署产物与本地关键文件内容哈希（sha256）逐项一致确认 PR #144 预览为最新，替代 sha 比对",
+      "source": "rework",
+      "scene": "workflow-online-preview",
+      "tags": [
+        "在线预览",
+        "部署核验",
+        "merge-ref",
+        "内容哈希",
+        "返工排查",
+        "wego-uxsystem-iterate"
+      ]
+    },
+    {
+      "id": "ev-016",
+      "date": "2026-09-03",
+      "summary": "走查工单备注语义未落到代码事实就动手导致两处返工：①「快捷分享图标复用分享面板图标」按字面只统一了 iconfont 类名，实际分享面板渠道栏渲染的是 CHANNELS.iconSvg 的 SVG 品牌图标（img 渲染），应改用 iconSvg；②「发布页右侧多按钮」初判改 navbar 组件权威源，实为多按钮特殊场景应走 navbar__right--custom 由场景自担间距。处理走查/需求备注应先追读权威源与渲染机制、形成「改哪个文件+验收看什么」核对清单再动手，禁止按字面猜测。",
+      "source": "user-correction",
+      "scene": "shop243-发布产品分享改造",
+      "tags": [
+        "走查工单",
+        "语义拆解",
+        "渲染机制",
+        "iconSvg",
+        "组件vs场景",
+        "返工"
+      ]
+    },
+    {
+      "id": "ev-017",
+      "date": "2026-09-03",
       "summary": "用户纠正并明确\"完全不能接受\"：业务场景功能（发布产品模态/帮卖弹窗/走查工具）不应冒充设计系统组件放入 .codex/skills/wego-design/runtime/ 充当全局运行时，应归属业务代码位置 wego-app/js 与 wego-app/css（与 publish-fab.js 同级）。修复：3 个业务 JS + 1 个 CSS 迁出技能目录，runtime 仅保留 12 个设计系统通用组件；同步映射收紧；AGENTS.md 补\"业务实现不入技能目录\"边界；validate-wego-design-core.mjs 新增 runtime.business_file 守卫（允许集合由 components/*.json 的 slug 派生，组件迭代自动放行，业务文件混入即 CI 拦截）。教训：设计系统权威源目录只允许设计系统本体，全局业务运行时直接放业务代码位置",
       "source": "user-correction",
       "scene": "publish-product-ux",
@@ -219,7 +249,7 @@
       ]
     },
     {
-      "id": "ev-016",
+      "id": "ev-018",
       "date": "2026-09-03",
       "summary": "用户指出 PR #138 的 Pad 竖屏商品库抽屉改动没有合到项目。核查发现该迭代已验收冻结、CI 通过且 PR 可合并，但停留在开放状态，之后主线已前进 128 个提交。接手后同步最新 main、完成静态与真实视口回归、等待新一轮 CI 和在线预览通过，再合并并清理分支/worktree。教训：验收冻结后必须确认 PR 实际进入 MERGED 状态；任务启动巡检应优先发现已冻结但仍开放的 PR，不能把冻结记录或通过 CI 当作已经交付",
       "source": "user-correction",

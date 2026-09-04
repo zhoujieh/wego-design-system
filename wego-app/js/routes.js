@@ -61,6 +61,28 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/shop/我的/scene.js'
 },
 {
+  routeId: 'product-editor-demo',
+  entry: {
+    type: 'cell-entry',
+    label: '产品编辑',
+    group: 'workspace-tools',
+    tab: 'workspace'
+  },
+  style: './scenes/infras/产品编辑/scene.css',
+  script: './scenes/infras/产品编辑/scene.js'
+},
+{
+  routeId: 'product-share-demo',
+  entry: {
+    type: 'cell-entry',
+    label: '产品分享面板',
+    group: 'workspace-tools',
+    tab: 'workspace'
+  },
+  style: './scenes/shop/产品分享/scene.css',
+  script: './scenes/shop/产品分享/scene.js'
+},
+{
   routeId: 'publish-product',
   entry: {
     type: 'cell-entry',
@@ -81,6 +103,17 @@ window.WEGO_APP_ROUTES = [
   },
   style: './scenes/infras/场景管理/scene.css',
   script: './scenes/infras/场景管理/scene.js'
+},
+{
+  routeId: 'upgrade-popup-demo',
+  entry: {
+    type: 'cell-entry',
+    label: '升级弹窗',
+    group: 'workspace-tools',
+    tab: 'workspace'
+  },
+  style: './scenes/infras/升级弹窗/scene.css',
+  script: './scenes/infras/升级弹窗/scene.js'
 },
 {
   routeId: 'workspace',

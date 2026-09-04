@@ -48,7 +48,6 @@
   'use strict';
 
   var DB = window.WEGO_PROTOTYPE_DB || {};
-  var COMMUNITY_DYNAMICS = (DB.dynamics || []).slice();
   var PUBLISHERS = DB.publishers || [];
   var PRODUCTS = DB.products || [];
   var CURRENT_USER = DB.currentUser || {};
@@ -167,7 +166,26 @@
 
   function mergedDynamics() {
     var published = loadPublished();
-    var list = COMMUNITY_DYNAMICS.concat(published);
+    /* 合并转发的产品到动态列表 */
+    var forwarded = [];
+    if (window.WegoApp && window.WegoApp.getForwardedProducts) {
+      forwarded = window.WegoApp.getForwardedProducts().map(function (fp) {
+        return {
+          dynamic_id: 'fwd-' + fp.productId,
+          publisher_id: fp.forwardFromId,
+          publisher_name: fp.forwardFromName,
+          published_at: fp.forwardedAt,
+          published_order: new Date(fp.forwardedAt).getTime(),
+          text_content: fp.productData ? fp.productData.text : '',
+          media_list: fp.productData ? fp.productData.media_list : [],
+          related_product_ids: [fp.productId],
+          _product: fp.productData ? fp.productData.product : null,
+          _isForwarded: true,
+          _forwardFrom: fp.forwardFromName
+        };
+      });
+    }
+    var list = published.concat(forwarded);
     list.sort(function (a, b) {
       return (Number(b.published_order) || 0) - (Number(a.published_order) || 0);
     });
@@ -205,6 +223,8 @@
     }).filter(function (m) { return !!m.src; });
     var resale = isResaleDynamic(dyn);
     var text = dyn.text_content || '';
+    var isOwn = dyn.publisher_id === CURRENT_USER.user_id;
+    var isForwarded = dyn._isForwarded === true;
 
     var mediaHtml = '';
     if (items.length === 1) {
@@ -252,9 +272,32 @@
         + '</button>';
     }
 
-    var primaryLabel = resale ? '邀请帮卖' : '一键转发';
-    var primaryBtn = '<button type="button" class="btn btn--strong btn--md album-feed__primary" data-component-slug="button" data-action="primary-action" data-dyn-id="' + dyn.dynamic_id + '" data-resale="' + (resale ? '1' : '0') + '">' + primaryLabel + '</button>';
+    /* 主按钮：帮卖商品「邀请帮卖」；自己的产品「一键分享」；别人的产品「一键转发」 */
+    var primaryLabel, primaryAction, primaryData;
+    if (resale) {
+      primaryLabel = '邀请帮卖';
+      primaryAction = 'primary-action';
+      primaryData = 'data-resale="1"';
+    } else if (isOwn) {
+      primaryLabel = '一键分享';
+      primaryAction = 'share-action';
+      primaryData = '';
+    } else {
+      primaryLabel = '一键转发';
+      primaryAction = 'forward-action';
+      primaryData = '';
+    }
+    var primaryBtn = '<button type="button" class="btn btn--strong btn--md album-feed__primary" data-component-slug="button" data-action="' + primaryAction + '" data-dyn-id="' + dyn.dynamic_id + '" ' + primaryData + '>' + primaryLabel + '</button>';
+    /* 帮卖商品次级「转发」按钮；别人的非帮卖产品长按主按钮触发分享面板 */
     var forwardBtn = resale ? '<button type="button" class="btn btn--weak btn--md album-feed__forward" data-component-slug="button" data-action="forward-action" data-dyn-id="' + dyn.dynamic_id + '">转发</button>' : '';
+
+    /* 已分享/已转发标识 */
+    var shareBadge = '';
+    if (isOwn && dyn._shared) {
+      shareBadge = '<span class="album-feed__share-badge">已分享</span>';
+    } else if (isForwarded) {
+      shareBadge = '<span class="album-feed__share-badge album-feed__share-badge--forwarded">已转发</span>';
+    }
 
     return '<article class="album-feed__card" data-dyn-id="' + dyn.dynamic_id + '">'
       + '<header class="album-feed__head">'
@@ -269,7 +312,7 @@
       + mediaHtml
       + productHtml
       + '<footer class="album-feed__actions">'
-      + '<div class="album-feed__actions-row">' + primaryBtn + forwardBtn + '</div>'
+      + '<div class="album-feed__actions-row">' + primaryBtn + forwardBtn + shareBadge + '</div>'
       + '</footer>'
       + '</article>';
   }
@@ -371,7 +414,7 @@
       + '<div class="modal__title modal__title--default"><div class="navbar" data-component-slug="navbar"><div class="navbar__body navbar__body--spaced">'
       + '<div class="navbar__left"><button type="button" class="navbar__left-btn" data-dom-id="close-detail" aria-label="返回"><i class="wego-iconfont-s icon-zuojiantou16"></i></button></div>'
       + '<div class="navbar__center"><span class="navbar__title">产品详情</span></div>'
-      + '<div class="navbar__right"></div>'
+      + '<div class="navbar__right"><button type="button" class="navbar__action" data-action="detail-share" aria-label="分享"><i class="wego-iconfont-s icon-fenxiang" aria-hidden="true"></i></button></div>'
       + '</div></div></div>'
       + '<div class="modal__body modal__body--safe-bottom"><div class="album-feed__detail-body">'
       + '<img class="album-feed__detail-img" src="' + (product.image_list && product.image_list[0] ? product.image_list[0] : '') + '" alt="" />'
@@ -501,7 +544,7 @@
               // supply_price 取帮卖配置里的供货价（低于零售价）；未配置时回退零售价演示
               var supplyPrice = (cfg && cfg.supply_price != null) ? Number(cfg.supply_price) : retailPrice;
               var isFixed = cfg && cfg.distribution_type === 2;
-              window.WegoApp.openAgentResalePopup(ctx, {
+              window.WegoApp.openResalePopup(ctx, {
                 sample: {
                   product_id: product ? product.product_id : '',
                   distribution_type: cfg.distribution_type,
@@ -514,27 +557,115 @@
                   commission: isFixed ? (cfg.commission != null ? Number(cfg.commission) : 0) : undefined
                 }
               });
-            } else {
-              ctx.toast('已复制转发链接（演示）');
+            }
+          } else if (action === 'share-action') {
+            /* 自己的产品：一键分享 */
+            var shareDyn = dynamicById(target.getAttribute('data-dyn-id'));
+            var shareProduct = shareDyn ? productOf(shareDyn) : null;
+            if (window.WegoApp && window.WegoApp.openProductShare) {
+              window.WegoApp.openProductShare(ctx, {
+                content: {
+                  id: shareProduct ? shareProduct.product_id : '',
+                  title: shareDyn ? (shareDyn.text_content || '') : '',
+                  images: shareProduct && shareProduct.image_list ? shareProduct.image_list : [],
+                  videos: [],
+                  isOwn: true
+                },
+                callbacks: {
+                  onSuccess: function () {
+                    /* 标记已分享，刷新列表 */
+                    if (shareDyn) shareDyn._shared = true;
+                    renderList(ctx, listEl);
+                  }
+                }
+              });
             }
           } else if (action === 'forward-action') {
-            ctx.toast('转发入口（本轮为演示反馈）');
+            /* 别人的产品：点击一键转发进入转发编辑页 */
+            var fwdDyn = dynamicById(target.getAttribute('data-dyn-id'));
+            var fwdProduct = fwdDyn ? productOf(fwdDyn) : null;
+            if (window.WegoApp && window.WegoApp.openProductEditor) {
+              window.WegoApp.openProductEditor(ctx, {
+                mode: 'forward',
+                product: fwdProduct,
+                onForward: function () {
+                  renderList(ctx, listEl);
+                }
+              });
+            } else {
+              ctx.toast('转发编辑页（演示）');
+            }
           } else if (action === 'more-actions') {
             openActionSheet(ctx);
           } else if (action === 'empty-publish') {
-            window.WegoApp.openPublishProductModal(ctx);
+            window.WegoApp.openProductEditor(ctx);
           } else if (action === 'retry-load') {
             renderList(ctx, listEl);
           }
         });
+
+        /* 长按一键转发按钮：拉起分享面板（分享+转发同时） */
+        var longPressTimer = null;
+        listEl.addEventListener('touchstart', function (e) {
+          var target = e.target.closest ? e.target.closest('[data-action="forward-action"]') : null;
+          if (!target) return;
+          longPressTimer = setTimeout(function () {
+            var fwdDyn = dynamicById(target.getAttribute('data-dyn-id'));
+            var fwdProduct = fwdDyn ? productOf(fwdDyn) : null;
+            if (window.WegoApp && window.WegoApp.openProductShare) {
+              window.WegoApp.openProductShare(ctx, {
+                content: {
+                  id: fwdProduct ? fwdProduct.product_id : '',
+                  title: fwdDyn ? (fwdDyn.text_content || '') : '',
+                  images: fwdProduct && fwdProduct.image_list ? fwdProduct.image_list : [],
+                  videos: [],
+                  isOwn: false,
+                  forwardFrom: fwdDyn ? fwdDyn.publisher_name : ''
+                },
+                callbacks: {
+                  onSuccess: function () {
+                    /* 分享完成后自动转发到我的相册 */
+                    if (window.WegoApp && window.WegoApp.addForwardedProduct && fwdProduct) {
+                      window.WegoApp.addForwardedProduct({
+                        productId: fwdProduct.product_id + '-fwd-' + Date.now(),
+                        originalProductId: fwdProduct.product_id,
+                        forwardFromId: fwdDyn ? fwdDyn.publisher_id : '',
+                        forwardFromName: fwdDyn ? fwdDyn.publisher_name : '',
+                        forwardedAt: new Date().toISOString(),
+                        productData: { product: fwdProduct, text: fwdDyn ? fwdDyn.text_content : '', media_list: fwdDyn ? fwdDyn.media_list : [] },
+                        isOwn: true
+                      });
+                    }
+                    renderList(ctx, listEl);
+                    ctx.toast('转发成功');
+                  }
+                }
+              });
+            }
+            longPressTimer = null;
+          }, 500);
+        });
+        listEl.addEventListener('touchend', function () {
+          if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+        });
+        listEl.addEventListener('touchmove', function () {
+          if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+        });
       }
       bindDelegated();
+
+      /* 灰度升级弹窗：首次进入动态页弹出（可关闭型） */
+      setTimeout(function () {
+        if (window.WegoApp && window.WegoApp.openUpgradePopup) {
+          window.WegoApp.openUpgradePopup(ctx, 'dismissible');
+        }
+      }, 800);
 
       var publishFab = window.WegoApp.createPublishFab(ctx, {
         fabSelector: '[data-dom-id="open-publish-sheet"]',
         onPublish: function (type) {
           if (type === 'product') {
-            window.WegoApp.openPublishProductModal(ctx);
+            window.WegoApp.openProductEditor(ctx);
           } else {
             var typeLabel = type === 'note' ? '笔记' : '直播';
             ctx.toast('发布' + typeLabel + '（演示）');
@@ -663,6 +794,22 @@
         var r = overlayCtx.root;
         var closeBtn = r.querySelector('[data-dom-id="close-detail"]');
         if (closeBtn) closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+        var shareBtn = r.querySelector('[data-action="detail-share"]');
+        if (shareBtn) {
+          shareBtn.addEventListener('click', function () {
+            if (window.WegoApp && window.WegoApp.openProductShare) {
+              window.WegoApp.openProductShare(ctx, {
+                content: {
+                  id: product ? product.product_id : '',
+                  title: product ? product.name : '',
+                  images: product && product.image_list ? product.image_list : [],
+                  videos: [],
+                  isOwn: true
+                }
+              });
+            }
+          });
+        }
       }
     });
   }

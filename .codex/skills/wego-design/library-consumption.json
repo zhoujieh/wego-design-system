@@ -10,6 +10,32 @@
   "pageLayers": "page-layers.json",
   "uiKitsDir": "ui_kits",
   "iconFontCss": "iconfont.css",
+  "businessComponentRegistry": [
+    {
+      "slug": "resale-popup",
+      "api": "openResalePopup",
+      "businessScene": "帮卖分销：用户设供货价/加价或固定佣金后帮卖产品赚差价，本弹窗承载设价与帮卖并分享",
+      "load": ["css/resale-popup.css", "js/resale-popup.js"]
+    },
+    {
+      "slug": "product-editor",
+      "api": "openProductEditor",
+      "businessScene": "产品发布/编辑/转发：统一产品信息编辑入口，发布/转发/编辑三模式共用",
+      "load": ["css/product-editor.css", "js/product-editor.js"]
+    },
+    {
+      "slug": "product-share",
+      "api": "openProductShare",
+      "businessScene": "内容跨平台分发：把产品分享到第三方平台获客，按内容类型（product/列表/主页/单据/海报/订单）扩展",
+      "load": ["css/product-share.css", "js/product-share.js"]
+    },
+    {
+      "slug": "upgrade-popup",
+      "api": "openUpgradePopup",
+      "businessScene": "版本升级引导：新能力上线后引导用户体验，可关闭型每天 1 次、强制型仅 1 次",
+      "load": ["css/upgrade-popup.css", "js/upgrade-popup.js"]
+    }
+  ],
   "consumptionLayers": {
     "tokens": {
       "files": ["colors_and_type.css"],
@@ -39,6 +65,11 @@
     "icons": {
       "files": ["iconfont.css", "assets/icons/*.svg", "assets/icons/app-center/*.svg"],
       "purpose": "按语义查询已交付图标或 SVG。",
+      "copyable": true
+    },
+    "businessComponents": {
+      "files": ["runtime/*.js", "references/library-map.md (业务组件分类)"],
+      "purpose": "业务组件是全局加载的可复用业务能力（帮卖弹窗、产品编辑页、产品分享、升级弹窗等），场景经 window.WegoApp 全局 API 消费；新需求先按适用业务场景命中业务组件直接复用，无命中才新做并归入 runtime/ 登记。组件头部注释含【业务场景】【适用场景】【消费方式】说明。",
       "copyable": true
     }
   },
@@ -105,6 +136,9 @@
     "registration": "window.WegoApp.registerScene",
     "deliveryCopy": "wego-app/lib",
     "presentationTypes": ["host-tab", "push", "modal", "sheet", "full-screen-modal"],
+    "businessComponentsDir": "runtime",
+    "businessComponentsTarget": "lib/js",
+    "businessComponentLoad": "index.html 全局引入 css 与 lib/js/{slug}.js，场景经 window.WegoApp.open{Component} 消费",
     "rules": [
       "新场景新增 route、scene.js 与 scene.css；已有场景稳定复用 routeId。",
       "业务模板由 registerScene 提供，不通过 fetch/XHR 加载本地 HTML。",
@@ -117,6 +151,7 @@
     "previewFirst": "命中组件后只读取该组件 Preview 与契约；实际 DOM 必须满足正式 anatomy 和变体。",
     "tokenUsage": "场景视觉声明只使用现存语义 Token，不写裸颜色、间距、圆角或字体值。",
     "uikitBoundary": "UI Kit 只在 pagePattern 精确命中时提供组合参考；componentCandidates 不是组件白名单。",
-    "appHostBoundary": "场景通过 routes.js、scene.js、scene.css 增量接入唯一宿主。"
+    "appHostBoundary": "场景通过 routes.js、scene.js、scene.css 增量接入唯一宿主。",
+    "businessComponentFirst": "场景涉及业务能力（帮卖/产品分享/产品编辑/升级引导等）时，先按适用业务场景查业务组件清单（references/library-map.md 业务组件分类 + runtime/），命中即复用、按组件头部注释的消费方式调用；无命中才新做，新做组件归入 runtime/ 并登记清单与业务场景说明。"
   }
 }

@@ -24,7 +24,7 @@
       { "selector": ".publish-product", "content_role": "页面字体", "css_property": "font-family", "token": "var(--body-md-font-family)" }
     ],
     "component_bindings": [
-      { "binding_id": "publish-navbar", "slug": "navbar", "reason": "发布产品顶部导航：左侧取消文本、中间标题、右侧发布强按钮（entity-form 底部 sheet 模态）", "variant_dimensions": { "leftControl": "cancel", "titleAlignment": "center", "actions": "button", "rightActionType": "button", "spacing": "default", "pageTransition": "present", "position": "sticky" } }
+      { "binding_id": "publish-navbar", "slug": "navbar", "reason": "发布产品顶部导航：左侧取消文本、无标题（发布/编辑不显示标题，titleAlignment=custom）、右侧快捷分享+分享+发布按钮（多按钮组合，走 navbar__right--custom 场景，场景内 gap 8px）", "variant_dimensions": { "leftControl": "cancel", "titleAlignment": "custom", "actions": "custom", "rightActionType": "custom", "spacing": "default", "pageTransition": "present", "position": "sticky" } }
     ],
     "layout_contract": {
       "mode": "composed",
@@ -51,8 +51,8 @@
 
 
 /* 发布产品场景（直链 #/publish-product 注册）
-   实际实现已抽离到 wego-app/js/publish-product-modal.js（全局业务运行时），
-   本文件仅注册直链路由，init 复用全局 WegoApp.initPublishProduct。 */
+   实际实现已抽离到 wego-app/js/product-editor.js（全局业务运行时），
+   本文件仅注册直链路由，init 复用全局 WegoApp.initProductEditor。 */
 
 const PUBLISH_TEMPLATE = `
 <div class="modal modal--fullscreen publish-product" data-surface-id="publish-product" data-route-id="publish-product" data-layout-mode="composed" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发布产品" style="--modal-panel-bg: var(--bg-page)">
@@ -61,11 +61,13 @@ const PUBLISH_TEMPLATE = `
       <div class="navbar" data-component-slug="navbar">
         <div class="navbar__body navbar__body--spaced">
           <div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="publish-cancel" aria-label="取消">取消</button></div>
-          <div class="navbar__center"><span class="navbar__title">发布产品</span></div>
-          <div class="navbar__right navbar__right--button">
-            <div class="navbar__action navbar__action--button">
-              <button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit">发布</button>
-            </div>
+          <div class="navbar__center"></div>
+          <div class="navbar__right navbar__right--custom">
+            <button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-dom-id="quick-share" aria-label="快捷分享">
+              <i class="btn__icon icon-pengyouquan" data-quick-share-icon aria-hidden="true"></i>
+            </button>
+            <button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-dom-id="publish-share">分享</button>
+            <button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="publish-submit" data-publish-submit-label>发布</button>
           </div>
         </div>
       </div>
@@ -76,7 +78,6 @@ const PUBLISH_TEMPLATE = `
         <div class="form-group__title">商品图片</div>
         <div class="form-group__content"><div class="publish-product__image-wrap">
           <div class="publish-product__images" data-image-list></div>
-          <button type="button" class="publish-product__img-add" data-dom-id="open-image-picker" aria-label="添加图片"><i class="wego-iconfont-s icon-shangchuantupian" aria-hidden="true"></i><span>添加图片</span></button>
         </div></div>
       </div>
 
@@ -149,6 +150,30 @@ const PUBLISH_TEMPLATE = `
     routeId: 'publish-product',
     template: PUBLISH_TEMPLATE,
     presentation: { type: 'full-screen-modal', transition: 'slide-up-enter, slide-down-exit', coversTabBar: false },
-    init: function (ctx) { window.WegoApp.initPublishProduct(ctx, null); }
+    init: function (ctx) {
+      /* 直链模式：把场景上下文包装成与 overlay 模式一致的 API，修复直链下关闭/跳转错位：
+         - closeOverlay 映射为 ctx.back()（统一关闭语义：overlay 栈/场景栈都能正确退出）
+         - requestGoToFeed 标记发布后跳转，等本场景退场（onDestroy）后再 navigate('album-product-feed')，
+           避开 navigate 与 overlay 关闭的历史竞争（此前会导致 hash 残留、模态被二次打开）
+         - onDestroy 收尾：发布 → 跳转动态流；直链取消 → 清理残留 #/publish-product hash，
+           避免刷新重开空白发布表单（同步清理会与关闭流程的 popstate 冲突，故延迟到退场后） */
+      var pendingGoToFeed = false;
+      var api = Object.assign({}, ctx, {
+        closeOverlay: function () {
+          ctx.back();
+        },
+        requestGoToFeed: function () { pendingGoToFeed = true; }
+      });
+      window.WegoApp.initProductEditor(api, ctx);
+      ctx.onDestroy(function () {
+        if (pendingGoToFeed) {
+          pendingGoToFeed = false;
+          ctx.navigate('album-product-feed');
+        } else if (window.location.hash === '#/publish-product') {
+          /* 直链取消：overlay 已完全退场，清理残留 hash，避免刷新重开空白发布表单 */
+          try { history.replaceState(null, document.title, window.location.pathname + window.location.search); } catch (e) {}
+        }
+      });
+    }
   });
 })();
