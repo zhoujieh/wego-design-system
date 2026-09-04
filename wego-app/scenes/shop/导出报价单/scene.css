@@ -1,0 +1,11 @@
+/** 导出报价单场景样式（shop244）。仅承载场景根作用域的区域关系与业务胶水。 */
+.quote-export-page {
+  background: var(--bg-page);
+}
+
+/* 页面唯一主滚动区 */
+.quote-export-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-block-end: var(--safe-area-bottom-content);
+}
