@@ -976,6 +976,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 外观
       layerOpacity: Math.round(parseNumeric(cs.opacity) * 100),
       borderRadiusAll: parseNumeric(cs.borderTopLeftRadius),
+      borderRadiusTopLeft: parseNumeric(cs.borderTopLeftRadius),
+      borderRadiusTopRight: parseNumeric(cs.borderTopRightRadius),
+      borderRadiusBottomRight: parseNumeric(cs.borderBottomRightRadius),
+      borderRadiusBottomLeft: parseNumeric(cs.borderBottomLeftRadius),
       // 填充（背景）
       fillHex: bgColor.hex,
       fillOpacity: bgColor.opacity,
@@ -1474,6 +1478,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       'margin-right': cs.marginRight,
       'margin-top': cs.marginTop,
       'margin-bottom': cs.marginBottom,
+      'border-top-left-radius': cs.borderTopLeftRadius,
+      'border-top-right-radius': cs.borderTopRightRadius,
+      'border-bottom-right-radius': cs.borderBottomRightRadius,
+      'border-bottom-left-radius': cs.borderBottomLeftRadius,
       'width': cs.width,
       'height': cs.height,
       'font-size': cs.fontSize,
@@ -3688,13 +3696,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 复制到剪贴板
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(prompt).then(() => {
-          bus.emit('toast', { message: '已复制 Prompt' });
+          this._afterPromptCopied();
         }).catch(() => {
           this._fallbackCopy(prompt);
         });
       } else {
         this._fallbackCopy(prompt);
       }
+    }
+
+    _afterPromptCopied() {
+      bus.emit('toast', { message: '已复制 Prompt' });
+      bus.emit('reset-changes');
     }
 
     _fallbackCopy(text) {
@@ -3707,7 +3720,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       textarea.select();
       try {
         document.execCommand('copy');
-        bus.emit('toast', { message: '已复制 Prompt' });
+        this._afterPromptCopied();
       } catch (e) {
         bus.emit('toast', { message: '复制失败，请手动复制' });
       }
@@ -4653,11 +4666,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         paddingTop: 'padding-top',
         paddingRight: 'padding-right',
         paddingBottom: 'padding-bottom',
+        paddingAll: 'padding',
         marginLeft: 'margin-left',
         marginTop: 'margin-top',
         marginRight: 'margin-right',
         marginBottom: 'margin-bottom',
+        marginAll: 'margin',
         borderRadiusAll: 'border-radius',
+        borderRadiusTopLeft: 'border-top-left-radius',
+        borderRadiusTopRight: 'border-top-right-radius',
+        borderRadiusBottomRight: 'border-bottom-right-radius',
+        borderRadiusBottomLeft: 'border-bottom-left-radius',
         strokeWidth: 'border-top-width',
       };
     }
@@ -4683,6 +4702,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
      *  具体值（hex/px）不反查 token，返回 ''（即"没有对应 token 无需选中"）。 */
     _tokenValueOf(field) {
       const d = this._data || {};
+      const groups = this._boxGroups ? this._boxGroups() : {};
+      if (groups[field]) {
+        if (isTokenValue(d[field])) return d[field];
+        if (this._sourceTokens && this._sourceTokens[field]) return this._sourceTokens[field];
+        const values = groups[field].fields.map(childField => {
+          if (isTokenValue(d[childField])) return d[childField];
+          if (this._sourceTokens && this._sourceTokens[childField]) return this._sourceTokens[childField];
+          return '';
+        });
+        return values.length && values.every(v => v && v === values[0]) ? values[0] : '';
+      }
       if (isTokenValue(d[field])) return d[field];
       if (this._sourceTokens && this._sourceTokens[field]) return this._sourceTokens[field];
       return '';
@@ -4699,6 +4729,98 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!v) return '';
       const m = v.match(/var\((--[^)]+)\)/);
       return m ? m[1].replace(/^--/, '') : '';
+    }
+
+    _boxGroups() {
+      return {
+        paddingAll: {
+          label: '内边距 padding',
+          type: 'spacing',
+          icon: ICONS.padding,
+          fields: ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'],
+          labels: ['T', 'R', 'B', 'L'],
+          placeholders: ['上', '右', '下', '左'],
+        },
+        marginAll: {
+          label: '外边距 margin',
+          type: 'spacing',
+          icon: ICONS.margin,
+          fields: ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'],
+          labels: ['T', 'R', 'B', 'L'],
+          placeholders: ['上', '右', '下', '左'],
+        },
+        borderRadiusAll: {
+          label: '圆角',
+          type: 'radius',
+          icon: ICONS.radius,
+          fields: ['borderRadiusTopLeft', 'borderRadiusTopRight', 'borderRadiusBottomRight', 'borderRadiusBottomLeft'],
+          labels: ['TL', 'TR', 'BR', 'BL'],
+          placeholders: ['左上', '右上', '右下', '左下'],
+        },
+      };
+    }
+
+    _boxGroupOf(field) {
+      const groups = this._boxGroups();
+      if (groups[field]) return { allField: field, ...groups[field] };
+      for (const allField in groups) {
+        if (groups[allField].fields.includes(field)) return { allField, ...groups[allField] };
+      }
+      return null;
+    }
+
+    _boxAllValue(allField) {
+      const group = this._boxGroups()[allField];
+      if (!group) return '';
+      const allToken = this._tokenValueOf(allField);
+      if (allToken) return allToken;
+      const d = this._data || {};
+      const values = group.fields.map(field => {
+        const tok = this._tokenValueOf(field);
+        return String(tok || (d[field] != null ? d[field] : '')).trim();
+      });
+      return values.every(v => v === values[0]) ? values[0] : values.join(',');
+    }
+
+    _isBoxAllTokenField(allField) {
+      return !!this._tokenValueOf(allField);
+    }
+
+    _boxAllTokenName(allField) {
+      const v = this._tokenValueOf(allField);
+      if (!v) return '';
+      const m = v.match(/var\((--[^)]+)\)/);
+      return m ? m[1].replace(/^--/, '') : '';
+    }
+
+    _renderBoxControl(allField) {
+      const group = this._boxGroups()[allField];
+      if (!group) return '';
+      const expanded = !!(this._expandedBoxGroups && this._expandedBoxGroups[allField]);
+      const allValue = this._boxAllValue(allField);
+      const allIsToken = this._isBoxAllTokenField(allField);
+      const tokenLabel = allIsToken ? this._boxAllTokenName(allField) : ICONS.token;
+      const fieldHtml = (field, idx) => `<div class="field"><span class="field-icon">${group.labels[idx]}</span><input class="text-input" type="text" value="${escapeHtml(String(this._tokenValueOf(field) || (this._data[field] != null ? this._data[field] : '')))}" data-field="${field}" inputmode="numeric" placeholder="${group.placeholders[idx]}" /><button class="token-btn ${this._isTokenField(field) ? 'active' : ''}" type="button" data-token-trigger="${group.type}" data-field="${field}" title="选择设计系统${group.type === 'radius' ? '圆角' : '间距'} Token">${this._isTokenField(field) ? this._tokenNameOf(field) : ICONS.token}</button></div>`;
+      return `
+            <p class="sub-label">${group.label}</p>
+            <div class="field-row">
+              <div class="field box-field">
+                <span class="field-icon">${group.icon}</span>
+                <input class="text-input" type="text" value="${escapeHtml(allValue)}" data-field="${allField}" inputmode="numeric" placeholder="${group.label}" />
+                <button class="box-expand-btn ${expanded ? 'active' : ''}" type="button" data-box-expand="${allField}" title="${expanded ? '收起分别设置' : '展开分别设置'}">${expanded ? '合' : '分'}</button>
+                <button class="token-btn ${allIsToken ? 'active' : ''}" type="button" data-token-trigger="${group.type}" data-field="${allField}" title="选择设计系统${group.type === 'radius' ? '圆角' : '间距'} Token">${tokenLabel}</button>
+              </div>
+            </div>
+            ${expanded ? `
+            <div class="field-row two-col">
+              ${fieldHtml(group.fields[0], 0)}
+              ${fieldHtml(group.fields[1], 1)}
+            </div>
+            <div class="field-row two-col">
+              ${fieldHtml(group.fields[2], 2)}
+              ${fieldHtml(group.fields[3], 3)}
+            </div>
+            ` : ''}`;
     }
 
     close() {
@@ -5706,6 +5828,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .field.metric-field {
             padding: 0 4px 0 0;
           }
+          .field.box-field {
+            flex: 1;
+          }
+          .box-expand-btn {
+            flex-shrink: 0;
+            min-width: 26px;
+            height: 24px;
+            padding: 0 6px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-secondary, rgba(255,255,255,0.6));
+            font-size: 11px;
+            cursor: pointer;
+          }
+          .box-expand-btn.active {
+            background: rgba(0,185,107,0.12);
+            color: var(--text-brand, #00b96b);
+          }
           .field-select-wrap {
             position: relative;
             flex: 0 0 auto;
@@ -5827,24 +5968,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 </div>
               </div>
             </div>
-            <p class="sub-label">内边距 padding</p>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.paddingLeft || ''}" data-field="paddingLeft" inputmode="numeric" placeholder="左" /><button class="token-btn ${this._isTokenField('paddingLeft') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingLeft" title="选择设计系统间距 Token">${this._isTokenField('paddingLeft') ? this._tokenNameOf('paddingLeft') : ICONS.token}</button></div>
-              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.paddingTop || ''}" data-field="paddingTop" inputmode="numeric" placeholder="上" /><button class="token-btn ${this._isTokenField('paddingTop') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingTop" title="选择设计系统间距 Token">${this._isTokenField('paddingTop') ? this._tokenNameOf('paddingTop') : ICONS.token}</button></div>
-            </div>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.paddingRight || ''}" data-field="paddingRight" inputmode="numeric" placeholder="右" /><button class="token-btn ${this._isTokenField('paddingRight') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingRight" title="选择设计系统间距 Token">${this._isTokenField('paddingRight') ? this._tokenNameOf('paddingRight') : ICONS.token}</button></div>
-              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.paddingBottom || ''}" data-field="paddingBottom" inputmode="numeric" placeholder="下" /><button class="token-btn ${this._isTokenField('paddingBottom') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingBottom" title="选择设计系统间距 Token">${this._isTokenField('paddingBottom') ? this._tokenNameOf('paddingBottom') : ICONS.token}</button></div>
-            </div>
-            <p class="sub-label">外边距 margin</p>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.marginLeft || ''}" data-field="marginLeft" inputmode="numeric" placeholder="左" /><button class="token-btn ${this._isTokenField('marginLeft') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginLeft" title="选择设计系统间距 Token">${this._isTokenField('marginLeft') ? this._tokenNameOf('marginLeft') : ICONS.token}</button></div>
-              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.marginTop || ''}" data-field="marginTop" inputmode="numeric" placeholder="上" /><button class="token-btn ${this._isTokenField('marginTop') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginTop" title="选择设计系统间距 Token">${this._isTokenField('marginTop') ? this._tokenNameOf('marginTop') : ICONS.token}</button></div>
-            </div>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.marginRight || ''}" data-field="marginRight" inputmode="numeric" placeholder="右" /><button class="token-btn ${this._isTokenField('marginRight') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginRight" title="选择设计系统间距 Token">${this._isTokenField('marginRight') ? this._tokenNameOf('marginRight') : ICONS.token}</button></div>
-              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.marginBottom || ''}" data-field="marginBottom" inputmode="numeric" placeholder="下" /><button class="token-btn ${this._isTokenField('marginBottom') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginBottom" title="选择设计系统间距 Token">${this._isTokenField('marginBottom') ? this._tokenNameOf('marginBottom') : ICONS.token}</button></div>
-            </div>
+            ${this._renderBoxControl('paddingAll')}
+            ${this._renderBoxControl('marginAll')}
             <div class="field-row two-col">
               <label class="field metric-field">
                 <span class="field-icon">${ICONS.width}</span>
@@ -5929,8 +6054,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <p class="section-title">外观</p>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">${ICONS.opacity}</span><input class="text-input" type="text" value="${d.layerOpacity ?? 100}" data-field="layerOpacity" inputmode="numeric" placeholder="透明" /></div>
-              <div class="field"><span class="field-icon">${ICONS.radius}</span><input class="text-input" type="text" value="${d.borderRadiusAll || ''}" data-field="borderRadiusAll" inputmode="numeric" placeholder="圆角" /><button class="token-btn ${this._isTokenField('borderRadiusAll') ? 'active' : ''}" type="button" data-token-trigger="radius" data-field="borderRadiusAll" title="选择设计系统圆角 Token">${this._isTokenField('borderRadiusAll') ? this._tokenNameOf('borderRadiusAll') : ICONS.token}</button></div>
             </div>
+            ${this._renderBoxControl('borderRadiusAll')}
           </div>
 
           <!-- 填充 -->
@@ -6225,6 +6350,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 自动布局：顺序移动（上下左右，按 flex 主轴方向前后移动一位，不可移动方向置灰）
       this._shadow.querySelectorAll('[data-move]').forEach(btn => {
         btn.addEventListener('click', () => this._moveSelected(btn.dataset.move));
+      });
+      this._shadow.querySelectorAll('[data-box-expand]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const key = btn.dataset.boxExpand;
+          if (!this._expandedBoxGroups) this._expandedBoxGroups = {};
+          this._expandedBoxGroups[key] = !this._expandedBoxGroups[key];
+          this._render();
+          this._bindEvents();
+        });
       });
       // 自动布局：gap 输入框在「左右对齐」显示 auto 态下，聚焦时清空便于直接输入数值
       const gapInput = this._shadow.querySelector('input[data-field="layoutGap"]');
@@ -6570,6 +6705,71 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (this._suppressFieldSync) return;
       // auto 是「左右对齐」模式下的间距显示态，不作为可提交的间距值（忽略，避免误提交/误报）
       if (field === 'layoutGap' && value === 'auto') return;
+      const boxGroup = this._boxGroups()[field];
+      if (boxGroup) {
+        const raw = String(value == null ? '' : value).trim();
+        if (raw.includes(',')) return;
+        for (const childField of boxGroup.fields) {
+          const guard = this._validateFieldValue(childField, value);
+          if (!guard.ok) {
+            bus.emit('toast', { message: guard.reason });
+            return;
+          }
+        }
+        if (this._target) {
+          for (const childField of boxGroup.fields) {
+            this._data[childField] = value;
+            if (this._sourceTokens) delete this._sourceTokens[childField];
+            if (this._sourceTokens) delete this._sourceTokens[field];
+            const cssProp = this._fieldToCssProp(childField);
+            const cssVal = isTokenValue(value) ? value : (isNaN(parseFloat(value)) ? '' : parseFloat(value) + 'px');
+            applyPseudoStyle(this._selector, this._target, cssProp, cssVal);
+            bus.emit('style-change', {
+              selector: this._selector,
+              target: this._target,
+              elementTag: this._targetEl.tagName.toLowerCase(),
+              elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+              elementClass: getFirstStableClass(this._targetEl),
+              elementClasses: getStableClasses(this._targetEl),
+              property: cssProp,
+              oldValue: '',
+              newValue: cssVal,
+              el: this._targetEl,
+            });
+          }
+          this._updateActiveStates();
+          return;
+        }
+        for (const childField of boxGroup.fields) {
+          this._data[childField] = value;
+          if (this._sourceTokens) delete this._sourceTokens[childField];
+          if (this._sourceTokens) delete this._sourceTokens[field];
+          const result = this._applyField(childField, value);
+          if (!result) continue;
+          const baseOld = result.oldValue;
+          const noop = normalizeCssValue(baseOld) === normalizeCssValue(result.newValue);
+          if (noop) {
+            try { this._targetEl.style.setProperty(result.property, ''); } catch (e) {}
+            continue;
+          }
+          bus.emit('style-change', {
+            selector: this._selector,
+            elementTag: this._targetEl.tagName.toLowerCase(),
+            elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+            elementClass: getFirstStableClass(this._targetEl),
+            elementClasses: getStableClasses(this._targetEl),
+            property: result.property,
+            oldValue: baseOld,
+            newValue: result.newValue,
+            el: this._targetEl,
+            shared: false,
+            sharedKey: '',
+          });
+          this._scheduleSharedSync(result);
+        }
+        this._updateActiveStates();
+        return;
+      }
       // 输入守门：拦截负数尺寸、非 flex 容器布局方向等非法操作（伪元素与普通元素路径统一），
       // 必须在写 _data 之前拦截，避免污染面板数据
       const guard = this._validateFieldValue(field, value);
@@ -6581,6 +6781,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._data[field] = value;
       // 用户手动改过字段值后，源码 token 匹配失效（改完即脱离 token 语义）
       if (this._sourceTokens) delete this._sourceTokens[field];
+      const childBoxGroup = this._boxGroupOf(field);
+      if (childBoxGroup && childBoxGroup.allField !== field && this._sourceTokens) {
+        delete this._sourceTokens[childBoxGroup.allField];
+      }
       // 自动布局联动：间距输入数值 → 自动回「左对齐」布局（参考宽高输入数值自动回固定模式）
       if (!this._target && field === 'layoutGap' && String(value || '').trim() !== '' && !isNaN(parseFloat(value))) {
         if (this._data.justifyContent !== 'flex-start') this._data.justifyContent = 'flex-start';
@@ -6890,10 +7094,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         paddingRight: 'padding-right',
         paddingTop: 'padding-top',
         paddingBottom: 'padding-bottom',
+        paddingAll: 'padding',
         marginTop: 'margin-top',
         marginRight: 'margin-right',
         marginBottom: 'margin-bottom',
         marginLeft: 'margin-left',
+        marginAll: 'margin',
         width: 'width',
         height: 'height',
         display: 'display',
@@ -6907,6 +7113,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         textAlign: 'text-align',
         layerOpacity: 'opacity',
         borderRadiusAll: 'border-radius',
+        borderRadiusTopLeft: 'border-top-left-radius',
+        borderRadiusTopRight: 'border-top-right-radius',
+        borderRadiusBottomRight: 'border-bottom-right-radius',
+        borderRadiusBottomLeft: 'border-bottom-left-radius',
         fillHex: 'background-color',
         fillOpacity: 'background-color',
         strokeHex: 'border',
@@ -6977,15 +7187,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           // 内描边与投影共用 box-shadow，统一组合输出，避免互相覆盖
           return this._combineBoxShadow();
         case 'fontSize':
+        case 'paddingAll':
         case 'paddingLeft':
         case 'paddingRight':
         case 'paddingTop':
         case 'paddingBottom':
+        case 'marginAll':
         case 'marginLeft':
         case 'marginRight':
         case 'marginTop':
         case 'marginBottom':
         case 'borderRadiusAll':
+        case 'borderRadiusTopLeft':
+        case 'borderRadiusTopRight':
+        case 'borderRadiusBottomRight':
+        case 'borderRadiusBottomLeft':
         case 'layoutGap':
           if (isTokenValue(d[field])) return d[field];
           return num(d[field]) ? num(d[field]) + 'px' : '';
@@ -7017,6 +7233,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom',
         'marginLeft', 'marginRight', 'marginTop', 'marginBottom',
         'fontSize', 'lineHeight', 'borderRadiusAll',
+        'borderRadiusTopLeft', 'borderRadiusTopRight', 'borderRadiusBottomRight', 'borderRadiusBottomLeft',
         'shadowX', 'shadowY', 'shadowBlur', 'shadowSpread',
         'gradientAngle',
       ]);
@@ -7025,7 +7242,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _clampDragValue(field, v) {
       if (/Opacity$/.test(field)) return Math.max(0, Math.min(100, v));
       if (field === 'gradientAngle') return ((v % 360) + 360) % 360;
-      if (/^(width|height|fontSize|layoutGap|paddingLeft|paddingRight|paddingTop|paddingBottom|marginLeft|marginRight|marginTop|marginBottom|borderRadiusAll|shadowBlur|shadowSpread)$/.test(field)) {
+      if (/^(width|height|fontSize|layoutGap|paddingLeft|paddingRight|paddingTop|paddingBottom|marginLeft|marginRight|marginTop|marginBottom|borderRadiusAll|borderRadiusTopLeft|borderRadiusTopRight|borderRadiusBottomRight|borderRadiusBottomLeft|shadowBlur|shadowSpread)$/.test(field)) {
         return Math.max(0, v);
       }
       return v;
@@ -7125,7 +7342,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const isFlexOrGrid = display === 'flex' || display === 'grid';
       switch (field) {
         case 'layoutGap':
+          if (String(value || '').includes(',')) break;
           if (isNaN(numVal) || numVal < 0) return { ok: false, reason: '间距（gap）不能为空或负数' };
+          break;
+        case 'paddingAll':
+        case 'marginAll':
+          if (String(value || '').includes(',')) break;
+          if (isNaN(numVal) || numVal < 0) return { ok: false, reason: '尺寸/间距不能为空或负数' };
           break;
         case 'paddingLeft':
         case 'paddingRight':
@@ -7138,7 +7361,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'width':
         case 'height':
         case 'fontSize':
-        case 'borderRadiusAll': {
+        case 'borderRadiusAll':
+        case 'borderRadiusTopLeft':
+        case 'borderRadiusTopRight':
+        case 'borderRadiusBottomRight':
+        case 'borderRadiusBottomLeft': {
           const raw = String(value || '').trim();
           const isSemantic = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(raw);
           if (isSemantic) break;
@@ -7231,6 +7458,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           return res;
         }
+        case 'paddingAll': {
+          const oldValue = cs().padding;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.padding = out;
+          return { property: 'padding', oldValue, newValue: out };
+        }
         case 'paddingLeft': {
           const oldValue = cs().paddingLeft;
           const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
@@ -7254,6 +7487,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
           el.style.paddingBottom = out;
           return { property: 'padding-bottom', oldValue, newValue: out };
+        }
+        case 'marginAll': {
+          const oldValue = cs().margin;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.margin = out;
+          return { property: 'margin', oldValue, newValue: out };
         }
         case 'marginLeft': {
           const oldValue = cs().marginLeft;
@@ -7469,6 +7708,30 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
           el.style.borderRadius = out;
           return { property: 'border-radius', oldValue, newValue: out };
+        }
+        case 'borderRadiusTopLeft': {
+          const oldValue = cs().borderTopLeftRadius;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderTopLeftRadius = out;
+          return { property: 'border-top-left-radius', oldValue, newValue: out };
+        }
+        case 'borderRadiusTopRight': {
+          const oldValue = cs().borderTopRightRadius;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderTopRightRadius = out;
+          return { property: 'border-top-right-radius', oldValue, newValue: out };
+        }
+        case 'borderRadiusBottomRight': {
+          const oldValue = cs().borderBottomRightRadius;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderBottomRightRadius = out;
+          return { property: 'border-bottom-right-radius', oldValue, newValue: out };
+        }
+        case 'borderRadiusBottomLeft': {
+          const oldValue = cs().borderBottomLeftRadius;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderBottomLeftRadius = out;
+          return { property: 'border-bottom-left-radius', oldValue, newValue: out };
         }
         case 'fillHex':
         case 'fillOpacity': {
@@ -7710,8 +7973,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const [jc, ai] = btn.dataset.alignPreset.split('|');
         btn.classList.toggle('active', jc === d.justifyContent && ai === d.alignItems);
       });
+      ['paddingAll', 'marginAll', 'borderRadiusAll'].forEach(field => {
+        const input = this._shadow.querySelector(`input[data-field="${field}"]`);
+        if (input) {
+          const val = this._boxAllValue(field);
+          if (input.value !== String(val)) input.value = String(val);
+        }
+        const tokenBtn = this._shadow.querySelector(`[data-token-trigger][data-field="${field}"]`);
+        if (tokenBtn) {
+          const isTok = this._isBoxAllTokenField(field);
+          tokenBtn.classList.toggle('active', isTok);
+          if (isTok) {
+            const tokName = this._boxAllTokenName(field);
+            if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
+          } else if (tokenBtn.innerHTML.trim() !== ICONS.token.trim()) {
+            tokenBtn.innerHTML = ICONS.token;
+          }
+        }
+      });
       // 间距/圆角/描边宽 Token 按钮状态 + 输入框回显（layoutGap 在上面单独处理）
-      const metricTokenFields = ['paddingLeft', 'paddingTop', 'paddingRight', 'paddingBottom', 'marginLeft', 'marginTop', 'marginRight', 'marginBottom', 'borderRadiusAll', 'strokeWidth'];
+      const metricTokenFields = ['paddingLeft', 'paddingTop', 'paddingRight', 'paddingBottom', 'marginLeft', 'marginTop', 'marginRight', 'marginBottom', 'borderRadiusTopLeft', 'borderRadiusTopRight', 'borderRadiusBottomRight', 'borderRadiusBottomLeft', 'strokeWidth'];
       metricTokenFields.forEach(field => {
         const tokenVal = this._tokenValueOf(field);
         const isTok = !!tokenVal;
@@ -8757,13 +9038,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         e.preventDefault();
         this._closeAllPanels();
         this._setWalkthroughMode(!this._walkthroughMode);
-        return;
-      }
-      // L：打开/关闭配置列表（输入框内放行）
-      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'l' || e.key === 'L') && !inInput) {
-        e.preventDefault();
-        const ov = this._components.overviewPanel;
-        if (ov && !ov.hasAttribute('hidden')) { ov.close(); } else { this._openOverview(); }
         return;
       }
       // Tab：展开/收起样式编辑面板（有选中元素时）
@@ -10432,7 +10706,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         // 像素类属性补单位：撤销/重做恢复的纯数字值（如 padding-left=26）须带 px 才被浏览器接受。
         // 排除 line-height（无单位是倍数语义）、box-shadow（复合值）等。
-        const PX_PROP_RE = /^(padding|margin|top|right|bottom|left|gap|row-gap|column-gap|font-size|border-radius|border-(top|right|bottom|left)-width|width|height|letter-spacing|text-indent)$/;
+        const PX_PROP_RE = /^(padding|margin|top|right|bottom|left|gap|row-gap|column-gap|font-size|border-radius|border-(top-left|top-right|bottom-right|bottom-left)-radius|border-(top|right|bottom|left)-width|width|height|letter-spacing|text-indent)$/;
         const vTrim = String(value == null ? '' : value).trim();
         if (PX_PROP_RE.test(property) && /^-?\d+(\.\d+)?$/.test(vTrim)) {
           value = vTrim + 'px';

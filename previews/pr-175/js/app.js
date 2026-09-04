@@ -2218,7 +2218,8 @@
     window.WegoApp.layoutAllNavbars = layoutAll;
   })();
 
-  window.WegoApp = {
+  var existingWegoApp = window.WegoApp || {};
+  window.WegoApp = Object.assign(existingWegoApp, {
     registerScene: function (scene) {
       if (!scene || !scene.routeId) return;
       scenes.set(scene.routeId, scene);
@@ -2236,7 +2237,7 @@
     layoutAllNavbars: window.WegoApp.layoutAllNavbars,
     getState: function () { return appState; },
     faultInjection: null
-  };
+  });
 
   /* ── 失败注入试验开关（全局运行时试验能力）──
      用于验收时对任意场景触发 加载/新增/删除 三类失败分支。

@@ -287,10 +287,11 @@
 
 /* ===== 商品列表（按图-分组） ===== */
 .quote-image-groups {
-  padding: var(--spacer-8) var(--spacer-16) 0;
+  padding: var(--spacer-8);
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-12);
+  gap: var(--spacer-8);
+  justify-content: flex-start;
 }
 .quote-image-group {
   background: var(--bg-surface);
@@ -301,7 +302,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacer-8);
-  padding: var(--spacer-8) var(--spacer-12);
+  padding: var(--spacer-8);
   border-block-end: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 .quote-image-group__select {
@@ -325,8 +326,6 @@
 }
 .quote-image-group__summary {
   flex: 0 0 auto;
-  padding-inline-end: var(--spacer-8);
-  border-inline-end: var(--stroke-hairline) solid var(--border-neutral-l2);
   font-size: var(--body-md-font-size);
   line-height: var(--body-md-line-height);
   color: var(--text-secondary);
@@ -335,16 +334,17 @@
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--spacer-2);
-  padding: var(--spacer-2);
+  padding: var(--spacer-8);
 }
 .quote-image-cell {
   position: relative;
-  border-radius: var(--radius-6);
+  border-radius: var(--radius-4);
   overflow: hidden;
 }
 .quote-image-cell__img {
   width: 100%;
   aspect-ratio: 1;
+  border-radius: var(--radius-4);
 }
 .quote-image-cell__img .wg-image__src {
   width: 100%;
@@ -433,18 +433,11 @@
 .quote-bottom-bar .quote-view-selected-btn {
   min-width: 0;
   max-width: none;
-  min-height: var(--size-40);
-  flex-direction: row;
-  padding: 0 var(--spacer-4);
-  color: var(--text-brand);
-}
-.quote-bottom-bar .quote-view-selected-btn .bottom-action-bar__action-label {
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
+  height: var(--size-40);
+  color: var(--text-link);
 }
 .quote-bottom-bar .quote-view-selected-btn.is-disabled {
   color: var(--text-disabled);
-  opacity: 0.4;
   pointer-events: none;
 }
 .quote-count-menu {
