@@ -83,23 +83,28 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   <div class="layout-page__bottom">
     <div class="bottom-action-bar bottom-action-bar--selection quote-bottom-bar" data-component-slug="bottom-action-bar">
       <div class="bottom-action-bar__inner">
-        <div class="bottom-action-bar__leading">
-          <button type="button" class="bottom-action-bar__selection-toggle quote-bar-count-btn" data-dom-id="quote-count-dropdown" aria-haspopup="menu" aria-expanded="false">
-            <span class="bottom-action-bar__checkbox-field" data-dom-id="quote-select-all" tabindex="-1" role="checkbox" aria-checked="false">
+        <div class="bottom-action-bar__leading quote-batch-control">
+          <button type="button" class="bottom-action-bar__selection-toggle quote-select-check-btn" data-dom-id="quote-select-all" aria-pressed="false" aria-label="批量选择商品">
+            <span class="bottom-action-bar__checkbox-field" tabindex="-1" role="checkbox" aria-checked="false">
               <span class="checkbox" data-component-slug="checkbox" data-role="quote-check"><span class="checkbox__inner"></span></span>
-              <span class="checkbox-field__text">全选</span>
             </span>
-            <span class="bottom-action-bar__selection-value"><span data-role="quote-count-label">已选 0</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span>
+          </button>
+          <button type="button" class="bottom-action-bar__selection-toggle quote-bar-count-btn" data-dom-id="quote-count-dropdown" aria-haspopup="menu" aria-expanded="false">
+            <span class="bottom-action-bar__selection-value"><span data-role="quote-count-label">0/100</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span>
+          </button>
+          <span class="quote-batch-divider" aria-hidden="true"></span>
+          <button type="button" class="bottom-action-bar__action quote-view-selected-btn" data-dom-id="quote-view-selected">
+            <span class="bottom-action-bar__action-label">查看已选</span>
           </button>
           <div class="popmenu popmenu--select quote-count-menu" data-component-slug="popmenu" data-role="quote-count-menu" role="listbox" data-state="closed" hidden>
             <div class="popmenu__list">
-              <div class="popmenu__item" data-role="quote-batch-option" data-value="all"><span class="popmenu__item-text">全选全部</span></div>
-              <div class="popmenu__item" data-role="quote-batch-option" data-value="clear"><span class="popmenu__item-text">清空已选</span></div>
+              <div class="popmenu__item" data-role="quote-batch-option" data-value="50" role="option" aria-selected="false"><span class="popmenu__item-text">50</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i></div>
+              <div class="popmenu__item popmenu__item--selected" data-role="quote-batch-option" data-value="100" role="option" aria-selected="true"><span class="popmenu__item-text">100</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i></div>
+              <div class="popmenu__item" data-role="quote-batch-option" data-value="200" role="option" aria-selected="false"><span class="popmenu__item-text">200</span><i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i></div>
             </div>
           </div>
         </div>
         <div class="bottom-action-bar__trailing">
-          <button type="button" class="btn btn--weak btn--md" data-component-slug="button" data-dom-id="quote-view-selected">查看已选</button>
           <button type="button" class="btn btn--strong btn--md" data-component-slug="button" data-dom-id="quote-next" disabled>下一步</button>
         </div>
       </div>
@@ -116,6 +121,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     records: 'wego.quote.records'
   };
   var PAGE_SIZE = 6;
+  var DEFAULT_BATCH_SELECT_VALUE = '100';
+  var BATCH_SELECT_VALUES = ['50', '100', '200'];
 
   function safeReadJSON(key, fallback) {
     try {
@@ -186,6 +193,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         page: 1,
         hasMore: true,
         loading: false,
+        batchSelectValue: DEFAULT_BATCH_SELECT_VALUE,
         selected: {}          /* 按产品模式：{ product_id: true }；按图模式：{ product_id + ':' + idx: true } */
       };
       var listEl = root.querySelector('[data-role="quote-list"]');
@@ -203,6 +211,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       var countMenu = root.querySelector('[data-role="quote-count-menu"]');
       var guideBubble = root.querySelector('[data-role="quote-guide-bubble"]');
       var toolbarEl = root.querySelector('.quote-search-toolbar');
+      var toolbarWrap = root.querySelector('.quote-select-toolbar');
+      var viewSelectedBtn = root.querySelector('[data-dom-id="quote-view-selected"]');
 
       function currentList() {
         var query = state.query.trim().toLowerCase();
@@ -267,6 +277,57 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         });
         return { total: total, sel: sel };
       }
+      function batchSelectLimit(value) {
+        var normalized = BATCH_SELECT_VALUES.indexOf(String(value)) >= 0 ? String(value) : DEFAULT_BATCH_SELECT_VALUE;
+        return Number(normalized);
+      }
+      function batchSelectableRows() {
+        var rows = [];
+        currentList().forEach(function (p) {
+          if (state.selectMode === 'image') {
+            productImages(p).forEach(function (_, idx) {
+              rows.push({ p: p, key: selectionKey('image', p, idx) });
+            });
+          } else {
+            rows.push({ p: p, key: selectionKey('product', p, 0) });
+          }
+        });
+        return rows.slice(0, batchSelectLimit(state.batchSelectValue));
+      }
+      function batchSelectionState() {
+        var rows = batchSelectableRows();
+        var selected = rows.filter(function (row) { return state.selected[row.key]; }).length;
+        return {
+          target: batchSelectLimit(state.batchSelectValue),
+          available: rows.length,
+          selected: selected,
+          complete: rows.length > 0 && selected === rows.length
+        };
+      }
+      function selectedRows(mode) {
+        var rows = [];
+        PRODUCTS.forEach(function (p) {
+          if (mode === 'image') {
+            productImages(p).forEach(function (img, idx) {
+              if (isSelected('image', p, idx)) rows.push({ p: p, img: img, key: selectionKey('image', p, idx), label: escapeHtml(p.title) + ' · 图' + (idx + 1) });
+            });
+          } else {
+            if (isSelected('product', p, 0)) rows.push({ p: p, img: productImages(p)[0], key: selectionKey('product', p, 0), label: escapeHtml(p.title) });
+          }
+        });
+        return rows;
+      }
+      function selectedItemsHtml(rows) {
+        return rows.map(function (row) {
+          return '<div class="cell cell--double cell--bg-white quote-selected-item" data-component-slug="cell">'
+            + '<div class="cell__body">'
+            + '<div class="wg-image wg-image--md wg-image--rounded-sm quote-selected-item__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.img) + '" alt="' + escapeHtml(row.p.title) + '"></div>'
+            + '<div class="cell__content quote-selected-item__info"><div class="cell__title-row"><span class="cell__title quote-selected-item__title">' + row.label + '</span></div><div class="cell__subtitle quote-selected-item__meta">' + escapeHtml(row.p.item_no) + '</div></div>'
+            + '<div class="cell__action"><button type="button" class="btn btn--weak btn--sm btn--icon-only quote-selected-item__remove" data-component-slug="button" data-remove-selected data-key="' + escapeHtml(row.key) + '" aria-label="移除"><i class="btn__icon wego-iconfont-s icon-lajitong16" aria-hidden="true"></i></button></div>'
+            + '</div>'
+            + '</div>';
+        }).join('') || '<div class="quote-selected-empty">暂无可展示的已选商品</div>';
+      }
 
       function productRowHtml(p) {
         var img = productImages(p)[0];
@@ -320,8 +381,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var pageItems = list.slice(0, state.page * PAGE_SIZE);
         state.hasMore = pageItems.length < list.length;
         var noResult = list.length === 0 && state.query.trim() !== '';
-        /* 空态（搜索无匹配）隐藏搜索工具栏，聚焦空态并给出清空入口（spec：空态隐藏搜索框） */
-        if (toolbarEl) toolbarEl.hidden = noResult;
+        var initialEmpty = PRODUCTS.length === 0 && state.query.trim() === '';
+        if (toolbarWrap) toolbarWrap.hidden = initialEmpty;
+        if (toolbarEl) toolbarEl.hidden = false;
         var html = '';
         if (state.selectMode === 'image') {
           html = '<div class="quote-image-groups">' + pageItems.map(imageGroupHtml).join('') + '</div>';
@@ -350,31 +412,48 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
 
       function updateBar() {
         var count = selectedCount();
-        countLabel.textContent = '已选 ' + count;
+        var batchState = batchSelectionState();
+        countLabel.textContent = count + '/' + state.batchSelectValue;
         nextBtn.disabled = count === 0;
         nextBtn.classList.toggle('btn--disabled', count === 0);
-        var list = currentList();
-        var stat = allSelectedInList(list);
-        var allChecked = stat.sel > 0 && stat.sel === stat.total;
+        viewSelectedBtn.disabled = count === 0;
+        viewSelectedBtn.classList.toggle('is-disabled', count === 0);
+        var allChecked = batchState.complete;
         setCheckboxState(selectAllBtn.querySelector('[data-role="quote-check"]'), allChecked);
-        selectAllBtn.setAttribute('aria-checked', allChecked ? 'true' : 'false');
+        selectAllBtn.setAttribute('aria-pressed', allChecked ? 'true' : 'false');
+        selectAllBtn.querySelector('.bottom-action-bar__checkbox-field').setAttribute('aria-checked', allChecked ? 'true' : 'false');
       }
 
-      function toggleAllInList() {
-        var list = currentList();
-        var stat = allSelectedInList(list);
-        var all = stat.sel > 0 && stat.sel === stat.total;
-        list.forEach(function (p) {
-          if (state.selectMode === 'image') {
-            productImages(p).forEach(function (_, idx) {
-              var key = selectionKey('image', p, idx);
-              if (all) delete state.selected[key]; else state.selected[key] = true;
-            });
-          } else {
-            var key = selectionKey('product', p, 0);
-            if (all) delete state.selected[key]; else state.selected[key] = true;
-          }
+      function toggleBatchSelection() {
+        var rows = batchSelectableRows();
+        if (!rows.length) {
+          closeAllMenus();
+          ctx.toast('暂无可选商品');
+          renderList();
+          return;
+        }
+        var batchState = batchSelectionState();
+        rows.forEach(function (row) {
+          if (batchState.complete) delete state.selected[row.key];
+          else state.selected[row.key] = true;
         });
+        closeAllMenus();
+        renderList();
+        if (!batchState.complete && batchState.available < batchState.target) {
+          ctx.toast('当前筛选结果仅有 ' + batchState.available + ' 项');
+        }
+      }
+
+      function setBatchSelectValue(value) {
+        var next = BATCH_SELECT_VALUES.indexOf(String(value)) >= 0 ? String(value) : DEFAULT_BATCH_SELECT_VALUE;
+        var before = batchSelectionState();
+        state.batchSelectValue = next;
+        syncBatchMenuSelection();
+        closeAllMenus();
+        if (before.complete) {
+          state.selected = {};
+          batchSelectableRows().forEach(function (row) { state.selected[row.key] = true; });
+        }
         renderList();
       }
 
@@ -385,25 +464,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
 
       function openSelectedSheet() {
         var mode = state.selectMode;
-        var rows = [];
-        PRODUCTS.forEach(function (p) {
-          if (mode === 'image') {
-            productImages(p).forEach(function (img, idx) {
-              if (isSelected('image', p, idx)) rows.push({ p: p, img: img, key: selectionKey('image', p, idx), label: escapeHtml(p.title) + ' · 图' + (idx + 1) });
-            });
-          } else {
-            if (isSelected('product', p, 0)) rows.push({ p: p, img: productImages(p)[0], key: selectionKey('product', p, 0), label: escapeHtml(p.title) });
-          }
-        });
-        var itemsHtml = rows.map(function (row) {
-          return '<div class="cell cell--double cell--bg-white quote-selected-item" data-component-slug="cell">'
-            + '<div class="cell__body">'
-            + '<div class="wg-image wg-image--md wg-image--rounded-sm quote-selected-item__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.img) + '" alt="' + escapeHtml(row.p.title) + '"></div>'
-            + '<div class="cell__content quote-selected-item__info"><div class="cell__title-row"><span class="cell__title quote-selected-item__title">' + row.label + '</span></div><div class="cell__subtitle quote-selected-item__meta">' + escapeHtml(row.p.item_no) + '</div></div>'
-            + '<div class="cell__action"><button type="button" class="btn btn--weak btn--sm btn--icon-only quote-selected-item__remove" data-component-slug="button" data-remove-selected data-key="' + escapeHtml(row.key) + '" aria-label="移除"><i class="btn__icon wego-iconfont-s icon-lajitong16" aria-hidden="true"></i></button></div>'
-            + '</div>'
-            + '</div>';
-        }).join('');
+        var itemsHtml = selectedItemsHtml(selectedRows(mode));
         var html = '<div class="modal modal--frame-x quote-selected-modal" data-component-slug="modal" role="dialog" aria-modal="true" aria-labelledby="quote-selected-title" data-state="open">'
           + '<div class="modal__panel">'
           + '<div class="modal__title modal__title--default">'
@@ -416,16 +477,21 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           label: '查看已选',
           init: function (sheetCtx) {
             var sheetRoot = sheetCtx.root;
-            activateImages(sheetRoot);
-            Array.prototype.forEach.call(sheetRoot.querySelectorAll('[data-remove-selected]'), function (btn) {
-              btn.addEventListener('click', function () {
-                var key = btn.getAttribute('data-key');
-                if (key && state.selected[key]) delete state.selected[key];
-                ctx.closeOverlay();
-                renderList();
-                ctx.toast('已移除 1 项');
+            function refreshSelectedModal() {
+              var list = sheetRoot.querySelector('.quote-selected-list');
+              if (list) list.innerHTML = selectedItemsHtml(selectedRows(mode));
+              activateImages(sheetRoot);
+              Array.prototype.forEach.call(sheetRoot.querySelectorAll('[data-remove-selected]'), function (btn) {
+                btn.addEventListener('click', function () {
+                  var key = btn.getAttribute('data-key');
+                  if (key && state.selected[key]) delete state.selected[key];
+                  renderList();
+                  refreshSelectedModal();
+                  ctx.toast('已移除 1 项');
+                });
               });
-            });
+            }
+            refreshSelectedModal();
             var close = sheetRoot.querySelector('[data-close-selected-sheet]');
             if (close) close.addEventListener('click', function () { ctx.closeOverlay(); });
             sheetRoot.addEventListener('click', function (e) { if (e.target === sheetCtx.root) ctx.closeOverlay(); });
@@ -448,6 +514,13 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function syncModeMenuSelection() {
         Array.prototype.forEach.call(root.querySelectorAll('[data-role="quote-mode-option"]'), function (opt) {
           var selected = opt.getAttribute('data-mode') === state.selectMode;
+          opt.classList.toggle('popmenu__item--selected', selected);
+          opt.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+      }
+      function syncBatchMenuSelection() {
+        Array.prototype.forEach.call(root.querySelectorAll('[data-role="quote-batch-option"]'), function (opt) {
+          var selected = opt.getAttribute('data-value') === state.batchSelectValue;
           opt.classList.toggle('popmenu__item--selected', selected);
           opt.setAttribute('aria-selected', selected ? 'true' : 'false');
         });
@@ -576,6 +649,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         root.querySelector('[data-dom-id="quote-view-toggle"]').hidden = true;
       }
       syncModeMenuSelection();
+      syncBatchMenuSelection();
       renderList();
       showGuideBubble();
       if (guideBubble) guideBubble.addEventListener('click', function () {
@@ -599,7 +673,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         strip.hidden = false;
         ctx.toast('筛选面板将在后续阶段接入');
       });
-      selectAllBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleAllInList(); });
+      selectAllBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleBatchSelection(); });
       countDropdown.addEventListener('click', function () { toggleMenu(countDropdown, countMenu, countMenu.hidden); });
       root.querySelector('[data-dom-id="quote-view-selected"]').addEventListener('click', openSelectedSheet);
       nextBtn.addEventListener('click', function () {
@@ -616,8 +690,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         opt.addEventListener('click', function () {
           var value = opt.getAttribute('data-value');
           closeAllMenus();
-          if (value === 'all') toggleAllInList();
-          else if (value === 'clear') clearSelection();
+          setBatchSelectValue(value);
         });
       });
 

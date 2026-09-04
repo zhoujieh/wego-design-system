@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "scope_revision": 1,
-  "updated_at": "2026-09-04T09:14:14.670Z",
+  "updated_at": "2026-09-04T12:39:16.383Z",
   "items": [
     {
       "dimension": "entry_points",
@@ -96,15 +96,15 @@
     },
     {
       "dimension": "states",
-      "label": "空状态（选品）：搜索/筛选无匹配 → 「暂无相关结果」，隐藏搜索框。",
-      "anchor": "11e91fbe733f95bb7a3f0fbc3eb511e0dc071111c06645cd4d5da5390c3568b5",
+      "label": "空状态（选品）：搜索/筛选无匹配 → 「暂无相关结果」，保留搜索整栏；只有初始态商品数据为空时隐藏搜索整栏。",
+      "anchor": "873f345915d5c2ca866fb11dc1a0f2dbc9050fdd13a045e8e5dece4e5ba420a1",
       "status": "unverified",
       "evidence": ""
     },
     {
       "dimension": "states",
-      "label": "空状态（记录）：无任何记录 → 「暂无报价记录」；搜索无匹配 → 「暂无相关结果」；均隐藏搜索框。",
-      "anchor": "598512eebba6763f6f4dd7f8db116e1ccd85c22c36c533f08201a2403307ae56",
+      "label": "空状态（记录）：无任何记录 → 「暂无报价记录」并隐藏搜索整栏；搜索无匹配 → 「暂无相关结果」并保留搜索整栏。",
+      "anchor": "b4c42cd205a53cd725e67c13916eed8016709b2b66b5897433238d8515a6f7c1",
       "status": "unverified",
       "evidence": ""
     },
