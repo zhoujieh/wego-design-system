@@ -8,25 +8,25 @@
 const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id="quote-export" data-route-id="quote-export" data-layout-mode="composed" data-bg="page" data-component-slug="layout-page">
   <div class="layout-page__top">
     <nav class="navbar" data-component-slug="navbar">
-      <div class="navbar__body navbar__body--split">
+      <div class="navbar__body">
         <div class="navbar__left">
           <button type="button" class="navbar__left-btn" data-dom-id="quote-back" aria-label="返回">
             <i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i>
           </button>
         </div>
-        <div class="navbar__center">
+        <div class="navbar__center navbar__center--custom">
           <div class="quote-nav-mode">
-            <button type="button" class="quote-nav-mode__button" data-dom-id="quote-mode-button" aria-haspopup="menu" aria-expanded="false">
+            <button type="button" class="quote-nav-mode__button" data-dom-id="quote-mode-button" aria-haspopup="listbox" aria-controls="quote-mode-menu" aria-expanded="false">
               <span data-role="quote-mode-label">按产品报价</span>
               <i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i>
             </button>
-            <div class="popmenu popmenu--select quote-mode-menu" data-component-slug="popmenu" data-role="quote-mode-menu" role="listbox" data-state="closed" hidden>
+            <div class="popmenu popmenu--select quote-mode-menu" id="quote-mode-menu" data-component-slug="popmenu" data-role="quote-mode-menu" role="listbox" data-state="closed" hidden>
               <div class="popmenu__list">
-                <div class="popmenu__item" data-role="quote-mode-option" data-mode="product">
+                <div class="popmenu__item popmenu__item--selected" data-role="quote-mode-option" data-mode="product" role="option" aria-selected="true">
                   <span class="popmenu__item-text">按产品报价</span>
                   <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
                 </div>
-                <div class="popmenu__item" data-role="quote-mode-option" data-mode="image">
+                <div class="popmenu__item" data-role="quote-mode-option" data-mode="image" role="option" aria-selected="false">
                   <span class="popmenu__item-text">按图报价</span>
                   <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
                 </div>
@@ -37,6 +37,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         <div class="navbar__right navbar__right--icon">
           <button type="button" class="navbar__action" data-dom-id="quote-records-entry" aria-label="报价记录">
             <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shangxiajiantou16" aria-hidden="true"></i></span>
+            <span class="navbar__action-label">报价记录</span>
           </button>
           <span class="quote-guide-bubble" data-role="quote-guide-bubble" hidden>你的报价单都在这</span>
         </div>
@@ -158,8 +159,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     init: function init(ctx) {
       var root = ctx.root;
       var destroyed = false;
+      var savedSelectMode = safeReadJSON(STORAGE_KEYS.mode, 'product');
       var state = {
-        selectMode: safeReadJSON(STORAGE_KEYS.mode, 'product'),
+        selectMode: savedSelectMode === 'image' ? 'image' : 'product',
         view: 'list',
         query: '',
         page: 1,
@@ -388,6 +390,14 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         toggleMenu(countDropdown, countMenu, false);
       }
 
+      function syncModeMenuSelection() {
+        Array.prototype.forEach.call(root.querySelectorAll('[data-role="quote-mode-option"]'), function (opt) {
+          var selected = opt.getAttribute('data-mode') === state.selectMode;
+          opt.classList.toggle('popmenu__item--selected', selected);
+          opt.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+      }
+
       function switchMode(mode) {
         if (mode !== 'product' && mode !== 'image') return;
         state.selectMode = mode;
@@ -395,6 +405,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         state.selected = {};   /* 模式切换后重置已选（两种模式选择单位不同） */
         safeWriteJSON(STORAGE_KEYS.mode, mode);
         root.querySelector('[data-role="quote-mode-label"]').textContent = mode === 'image' ? '按图报价' : '按产品报价';
+        syncModeMenuSelection();
         var viewToggle = root.querySelector('[data-dom-id="quote-view-toggle"]');
         viewToggle.hidden = mode === 'image';
         closeAllMenus();
@@ -495,6 +506,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         root.querySelector('[data-role="quote-mode-label"]').textContent = '按图报价';
         root.querySelector('[data-dom-id="quote-view-toggle"]').hidden = true;
       }
+      syncModeMenuSelection();
       renderList();
       showGuideBubble();
       if (guideBubble) guideBubble.addEventListener('click', function () { guideBubble.hidden = true; });
@@ -502,7 +514,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       /* 交互 data-dom-id 显式绑定 */
       root.querySelector('[data-dom-id="quote-back"]').addEventListener('click', function () { ctx.navigateBack(); });
       root.querySelector('[data-dom-id="quote-records-entry"]').addEventListener('click', function () { ctx.toast('报价记录将在后续阶段接入'); });
-      modeButton.addEventListener('click', function () { toggleMenu(modeButton, modeMenu, modeMenu.hidden); });
+      modeButton.addEventListener('click', function () {
+        syncModeMenuSelection();
+        toggleMenu(modeButton, modeMenu, modeMenu.hidden);
+      });
       root.querySelector('[data-dom-id="quote-view-toggle"]').addEventListener('click', function () { switchView(state.view === 'grid' ? 'list' : 'grid'); });
       root.querySelector('[data-dom-id="quote-filter-btn"]').addEventListener('click', function () {
         var badge = root.querySelector('[data-role="quote-filter-badge"]');
