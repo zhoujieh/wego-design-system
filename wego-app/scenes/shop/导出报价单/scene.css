@@ -317,6 +317,10 @@
   font-size: var(--size-32);
   color: var(--icon-tertiary);
 }
+.quote-empty__action {
+  margin-block-start: var(--spacer-4);
+}
+
 
 /* ===== 底部批量栏 ===== */
 .quote-bottom-bar .quote-bar-text-btn,

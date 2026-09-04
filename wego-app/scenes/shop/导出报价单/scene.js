@@ -164,6 +164,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         query: '',
         page: 1,
         hasMore: true,
+        loading: false,
         selected: {}          /* 按产品模式：{ product_id: true }；按图模式：{ product_id + ':' + idx: true } */
       };
       var listEl = root.querySelector('[data-role="quote-list"]');
@@ -180,6 +181,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       var countDropdown = root.querySelector('[data-dom-id="quote-count-dropdown"]');
       var countMenu = root.querySelector('[data-role="quote-count-menu"]');
       var guideBubble = root.querySelector('[data-role="quote-guide-bubble"]');
+      var toolbarEl = root.querySelector('.quote-search-toolbar');
 
       function currentList() {
         var query = state.query.trim().toLowerCase();
@@ -273,6 +275,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var list = currentList();
         var pageItems = list.slice(0, state.page * PAGE_SIZE);
         state.hasMore = pageItems.length < list.length;
+        var noResult = list.length === 0 && state.query.trim() !== '';
+        /* 空态（搜索无匹配）隐藏搜索工具栏，聚焦空态并给出清空入口（spec：空态隐藏搜索框） */
+        if (toolbarEl) toolbarEl.hidden = noResult;
         var html = '';
         if (state.selectMode === 'image') {
           html = '<div class="quote-image-groups">' + pageItems.map(imageGroupHtml).join('') + '</div>';
@@ -285,9 +290,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         activateImages(listEl);
         emptyEl.hidden = list.length !== 0;
         emptyEl.innerHTML = list.length === 0
-          ? '<div class="card card--filled quote-empty__card" data-component-slug="card"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i><strong>暂无相关结果</strong><span>换个关键词试试</span></div>'
+          ? (noResult
+              ? '<div class="card card--filled quote-empty__card" data-component-slug="card"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i><strong>暂无相关结果</strong><span>换个关键词试试</span><button type="button" class="btn btn--ghost btn--sm quote-empty__action" data-action="clear-search">清空搜索</button></div>'
+              : '<div class="card card--filled quote-empty__card" data-component-slug="card"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i><strong>暂无商品</strong><span>商品库暂无可选商品</span></div>')
           : '';
-        loadingEl.hidden = !state.hasMore;
         updateBar();
       }
 
@@ -427,6 +433,12 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
 
       function onListClick(e) {
         var target = e.target;
+        var clearSearch = target.closest('[data-action="clear-search"]');
+        if (clearSearch) {
+          searchInput.value = '';
+          applySearch('');
+          return;
+        }
         var toggle = target.closest('[data-quote-toggle]');
         if (toggle) {
           var mode = toggle.getAttribute('data-mode');
@@ -466,9 +478,16 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
 
       function onScroll() {
         var bottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 40;
-        if (bottom && state.hasMore) {
-          state.page += 1;
-          renderList();
+        if (bottom && state.hasMore && !state.loading) {
+          state.loading = true;
+          loadingEl.hidden = false;
+          window.setTimeout(function () {
+            if (destroyed) return;
+            state.page += 1;
+            state.loading = false;
+            loadingEl.hidden = true;
+            renderList();
+          }, 400);
         }
       }
 
@@ -479,6 +498,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       }
       renderList();
       showGuideBubble();
+      if (guideBubble) guideBubble.addEventListener('click', function () { guideBubble.hidden = true; });
 
       /* 交互 data-dom-id 显式绑定 */
       root.querySelector('[data-dom-id="quote-back"]').addEventListener('click', function () { ctx.navigateBack(); });
@@ -516,7 +536,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       });
 
       /* 动态商品列表委托 + 滚动分页 + 外部点击关闭菜单 */
-      listEl.addEventListener('click', onListClick);
+      scrollEl.addEventListener('click', onListClick);
       scrollEl.addEventListener('scroll', onScroll);
       document.addEventListener('click', onDocumentClick);
 
@@ -528,7 +548,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
 
       ctx.onDestroy(function () {
         destroyed = true;
-        listEl.removeEventListener('click', onListClick);
+        scrollEl.removeEventListener('click', onListClick);
         scrollEl.removeEventListener('scroll', onScroll);
         document.removeEventListener('click', onDocumentClick);
       });
