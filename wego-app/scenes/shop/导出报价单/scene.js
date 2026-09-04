@@ -105,7 +105,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           </div>
         </div>
         <div class="bottom-action-bar__trailing">
-          <button type="button" class="btn btn--strong btn--md" data-component-slug="button" data-dom-id="quote-next" disabled>下一步</button>
+          <button type="button" class="btn btn--strong btn--md btn--disabled" data-component-slug="button" data-dom-id="quote-next" aria-disabled="true" aria-label="下一步，请先选择要导出的产品">下一步</button>
         </div>
       </div>
     </div>
@@ -255,7 +255,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         });
         setCheckboxState(group.querySelector('[data-quote-toggle-group] [data-role="quote-check"]'), selected === images.length && images.length > 0);
         var summary = group.querySelector('.quote-image-group__summary');
-        if (summary) summary.textContent = product.item_no + ' · 已选 ' + selected + '/' + images.length;
+        if (summary) summary.textContent = '已选 ' + selected + '/' + images.length;
         Array.prototype.forEach.call(group.querySelectorAll('[data-quote-toggle][data-mode="image"]'), function (cell) {
           var idx = cell.getAttribute('data-idx') ? Number(cell.getAttribute('data-idx')) : 0;
           setCheckboxState(cell.querySelector('[data-role="quote-check"]'), isSelected('image', product, idx));
@@ -363,8 +363,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         return '<section class="quote-image-group" data-group-id="' + escapeHtml(p.product_id) + '">'
           + '<div class="quote-image-group__head">'
           + '<button type="button" class="quote-image-group__select" data-quote-toggle-group data-id="' + escapeHtml(p.product_id) + '" aria-label="全选本组">' + checkboxHtml(all, ' data-role="quote-check"') + '</button>'
-          + '<div class="quote-image-group__title">' + escapeHtml(p.title) + '</div>'
-          + '<div class="quote-image-group__summary">' + escapeHtml(p.item_no) + ' · 已选 ' + groupSel + '/' + images.length + '</div>'
+          + '<div class="quote-image-group__title">' + escapeHtml(p.title) + '<span class="quote-image-group__title-no">' + escapeHtml(p.item_no) + '</span></div>'
+          + '<div class="quote-image-group__summary">已选 ' + groupSel + '/' + images.length + '</div>'
           + '</div>'
           + '<div class="quote-image-group__grid">'
           + images.map(function (img, idx) {
@@ -414,8 +414,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var count = selectedCount();
         var batchState = batchSelectionState();
         countLabel.textContent = count + '/' + state.batchSelectValue;
-        nextBtn.disabled = count === 0;
         nextBtn.classList.toggle('btn--disabled', count === 0);
+        if (count === 0) nextBtn.setAttribute('aria-disabled', 'true');
+        else nextBtn.removeAttribute('aria-disabled');
+        nextBtn.setAttribute('aria-label', count === 0 ? '下一步，请先选择要导出的产品' : '下一步');
         viewSelectedBtn.disabled = count === 0;
         viewSelectedBtn.classList.toggle('is-disabled', count === 0);
         var allChecked = batchState.complete;
@@ -672,6 +674,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       countDropdown.addEventListener('click', function () { toggleMenu(countDropdown, countMenu, countMenu.hidden); });
       root.querySelector('[data-dom-id="quote-view-selected"]').addEventListener('click', openSelectedSheet);
       nextBtn.addEventListener('click', function () {
+        if (selectedCount() === 0) {
+          ctx.toast('请先选择要导出的产品');
+          return;
+        }
         ctx.toast('已选 ' + selectedCount() + ' 项，预览编辑将在下一阶段接入');
       });
       searchInput.addEventListener('input', function () { applySearch(searchInput.value); });

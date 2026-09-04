@@ -324,6 +324,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.quote-image-group__title-no {
+  margin-inline-start: var(--spacer-4);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-regular);
+}
 .quote-image-group__summary {
   flex: 0 0 auto;
   font-size: var(--body-md-font-size);
@@ -433,12 +438,16 @@
 .quote-bottom-bar .quote-view-selected-btn {
   min-width: 0;
   max-width: none;
-  height: var(--size-40);
+  height: auto;
   color: var(--text-link);
 }
 .quote-bottom-bar .quote-view-selected-btn.is-disabled {
   color: var(--text-disabled);
   pointer-events: none;
+}
+.quote-bottom-bar [data-dom-id="quote-next"][aria-disabled="true"] {
+  pointer-events: auto;
+  cursor: pointer;
 }
 .quote-count-menu {
   position: absolute;
@@ -473,13 +482,15 @@
 }
 .quote-selected-item__info {
   min-width: 0;
+  gap: var(--spacer-6);
+  justify-content: flex-start;
 }
 .quote-selected-item__title {
   font-size: var(--body-md-font-size);
   line-height: var(--body-md-line-height);
 }
-.quote-selected-item__meta {
-  font-size: var(--body-sm-font-size);
+.quote-selected-item .quote-selected-item__meta {
+  font-size: var(--body-md-font-size);
   line-height: var(--body-sm-line-height);
 }
 .quote-selected-item__remove {
