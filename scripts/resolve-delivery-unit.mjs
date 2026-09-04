@@ -13,6 +13,7 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -70,17 +71,48 @@ function readJson(file) {
   }
 }
 
-function activeIterations(worktree, scene) {
-  const directory = path.join(worktree.path, 'wego-app', 'scenes', scene, '_iterations');
+const terminalStatuses = new Set(['frozen', 'cancelled', 'superseded']);
+
+function iterationMatchesScene(iteration, scene) {
+  return [
+    iteration.identity?.primary_scene,
+    ...(Array.isArray(iteration.identity?.related_scenes) ? iteration.identity.related_scenes : []),
+    ...(Array.isArray(iteration.affected_scenes) ? iteration.affected_scenes : [])
+  ].includes(scene);
+}
+
+function findIterationFiles(directory) {
   if (!fs.existsSync(directory)) return [];
   const records = [];
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const file = path.join(directory, entry.name, 'iteration.json');
-    if (!fs.existsSync(file)) continue;
+  const visit = current => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const target = path.join(current, entry.name);
+      if (entry.isDirectory()) visit(target);
+      else if (entry.isFile() && entry.name === 'iteration.json' && /[\\/]_iterations[\\/]/.test(target)) records.push(target);
+    }
+  };
+  visit(directory);
+  return records;
+}
+
+function activeIterations(worktree, scene) {
+  const records = [];
+  const scenesRoot = path.join(worktree.path, 'wego-app', 'scenes');
+  for (const file of findIterationFiles(scenesRoot)) {
     const iteration = readJson(file);
-    if (iteration.identity?.primary_scene === scene && !['frozen', 'cancelled', 'superseded'].includes(iteration.status)) {
-      records.push({ id: iteration.identity.iteration_id, status: iteration.status, file });
+    if (iterationMatchesScene(iteration, scene) && !terminalStatuses.has(iteration.status)) {
+      records.push({
+        id: iteration.identity?.iteration_id,
+        status: iteration.status,
+        file,
+        briefFile: iteration.brief_file || null,
+        scenes: [...new Set([
+          iteration.identity?.primary_scene,
+          ...(iteration.identity?.related_scenes || []),
+          ...(iteration.affected_scenes || [])
+        ].filter(Boolean))],
+        affectedRuntime: Array.isArray(iteration.affected_runtime) ? iteration.affected_runtime : []
+      });
     }
   }
   return records;
@@ -92,18 +124,17 @@ function allLocalBranches() {
 }
 
 function branchActiveIterations(branch, scene) {
-  const treePath = `wego-app/scenes/${scene}/_iterations`;
   let listing;
   try {
-    listing = command('git', ['ls-tree', '-d', '--name-only', branch, treePath]);
+    listing = command('git', ['-c', 'core.quotepath=false', 'ls-tree', '-r', '--name-only', branch, 'wego-app/scenes']);
   } catch {
     return [];
   }
-  const dirs = listing.split('\n').map(line => line.trim()).filter(Boolean);
-  if (!dirs.length) return [];
+  const iterationFiles = listing.split('\n')
+    .map(line => line.trim())
+    .filter(file => /^wego-app\/scenes\/[^/]+\/[^/]+\/_iterations\/[^/]+\/iteration\.json$/.test(file));
   const records = [];
-  for (const dir of dirs) {
-    const iterationFile = `${dir}/iteration.json`;
+  for (const iterationFile of iterationFiles) {
     let raw;
     try {
       raw = command('git', ['show', `${branch}:${iterationFile}`]);
@@ -116,11 +147,77 @@ function branchActiveIterations(branch, scene) {
     } catch {
       continue;
     }
-    if (iteration.identity?.primary_scene === scene && !['frozen', 'cancelled', 'superseded'].includes(iteration.status)) {
-      records.push({ id: iteration.identity.iteration_id, status: iteration.status, file: iterationFile });
+    if (iterationMatchesScene(iteration, scene) && !terminalStatuses.has(iteration.status)) {
+      records.push({
+        id: iteration.identity?.iteration_id,
+        status: iteration.status,
+        file: iterationFile,
+        briefFile: iteration.brief_file || null,
+        scenes: [...new Set([
+          iteration.identity?.primary_scene,
+          ...(iteration.identity?.related_scenes || []),
+          ...(iteration.affected_scenes || [])
+        ].filter(Boolean))],
+        affectedRuntime: Array.isArray(iteration.affected_runtime) ? iteration.affected_runtime : []
+      });
     }
   }
   return records;
+}
+
+function lines(output) {
+  return (output || '').split('\n').map(line => line.trim()).filter(Boolean);
+}
+
+function changedFilesForWorktree(worktree) {
+  const files = new Set();
+  const commands = [
+    ['git', ['-c', 'core.quotepath=false', 'diff', '--name-only', 'origin/main...HEAD']],
+    ['git', ['-c', 'core.quotepath=false', 'diff', '--name-only']],
+    ['git', ['-c', 'core.quotepath=false', 'diff', '--cached', '--name-only']],
+    ['git', ['-c', 'core.quotepath=false', 'ls-files', '--others', '--exclude-standard']]
+  ];
+  for (const [commandName, commandArgs] of commands) {
+    const result = spawnSync(commandName, commandArgs, { cwd: worktree.path, encoding: 'utf8' });
+    if (result.status === 0) for (const file of lines(result.stdout)) files.add(file);
+  }
+  return [...files];
+}
+
+function changedFilesForBranch(branch) {
+  try {
+    return lines(command('git', ['-c', 'core.quotepath=false', 'diff', '--name-only', `origin/main...${branch}`]));
+  } catch {
+    return [];
+  }
+}
+
+function iterationOwnedByChanges(iteration, changedFiles, worktreePath = null) {
+  const iterationFile = worktreePath
+    ? path.relative(worktreePath, iteration.file).split(path.sep).join('/')
+    : iteration.file;
+  const iterationDirectory = path.posix.dirname(iterationFile);
+  const direct = changedFiles.some(file => file === iterationFile || file.startsWith(`${iterationDirectory}/`));
+  if (direct) return { direct: true, related: true };
+  const related = changedFiles.some(file => (
+    iteration.scenes.some(scene => new RegExp(`^wego-app/scenes/[^/]+/${escapeRegex(scene)}/`).test(file))
+    || iteration.affectedRuntime.includes(file)
+  ));
+  return { direct: false, related };
+}
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function ownedIterations(iterations, changedFiles, worktreePath = null) {
+  const classified = iterations.map(iteration => ({
+    iteration,
+    ownership: iterationOwnedByChanges(iteration, changedFiles, worktreePath)
+  }));
+  const direct = classified.filter(item => item.ownership.direct).map(item => item.iteration);
+  if (direct.length) return direct;
+  return classified.filter(item => item.ownership.related).map(item => item.iteration);
 }
 
 function classify(candidates) {
@@ -130,7 +227,13 @@ function classify(candidates) {
   return { outcome: 'matched', candidates: [candidates[0]] };
 }
 
-function resolve(scene, { listWorktrees = worktrees, listPullRequests = openPullRequests, listBranches = allLocalBranches } = {}) {
+function resolve(scene, {
+  listWorktrees = worktrees,
+  listPullRequests = openPullRequests,
+  listBranches = allLocalBranches,
+  listWorktreeChanges = changedFilesForWorktree,
+  listBranchChanges = changedFilesForBranch
+} = {}) {
   if (!scene) throw new Error('--scene 必填，必须使用已确认的场景名称');
   const pullRequests = listPullRequests();
   const worktreeList = listWorktrees();
@@ -138,7 +241,8 @@ function resolve(scene, { listWorktrees = worktrees, listPullRequests = openPull
 
   // 1. 遍历有 worktree 的分支
   const candidates = worktreeList.flatMap(worktree => {
-    const iterations = activeIterations(worktree, scene);
+    if (worktree.branch === 'main') return [];
+    const iterations = ownedIterations(activeIterations(worktree, scene), listWorktreeChanges(worktree), worktree.path);
     if (!iterations.length) return [];
     const pullRequest = pullRequests.find(item => item.headRefName === worktree.branch) || null;
     return [{
@@ -155,7 +259,7 @@ function resolve(scene, { listWorktrees = worktrees, listPullRequests = openPull
   for (const branch of listBranches()) {
     if (worktreeBranches.has(branch)) continue;
     if (branch === 'main') continue;
-    const iterations = branchActiveIterations(branch, scene);
+    const iterations = ownedIterations(branchActiveIterations(branch, scene), listBranchChanges(branch));
     if (!iterations.length) continue;
     const pullRequest = pullRequests.find(item => item.headRefName === branch) || null;
     candidates.push({
@@ -164,6 +268,23 @@ function resolve(scene, { listWorktrees = worktrees, listPullRequests = openPull
       pullRequest,
       orphan: true,
       stage: 'orphan-branch',
+      iterations
+    });
+  }
+
+  // 3. 开放 PR 可能只存在远端；fetch 后从 origin/<head> 恢复候选。
+  const knownBranches = new Set([...worktreeBranches, ...listBranches()]);
+  for (const pullRequest of pullRequests) {
+    if (knownBranches.has(pullRequest.headRefName)) continue;
+    const remoteRef = `origin/${pullRequest.headRefName}`;
+    const iterations = ownedIterations(branchActiveIterations(remoteRef, scene), listBranchChanges(remoteRef));
+    if (!iterations.length) continue;
+    candidates.push({
+      branch: pullRequest.headRefName,
+      worktree: null,
+      pullRequest,
+      orphan: true,
+      stage: 'remote-pr',
       iterations
     });
   }
@@ -195,6 +316,42 @@ function test() {
     { branch: 'feature/my', worktree: null, orphan: true }
   ]);
   if (worktreeVsOrphan.outcome !== 'matched') throw new Error('同一分支的 worktree 与 orphan 候选必须合并为 matched');
+
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-delivery-unit-'));
+  try {
+    const iterationDirectory = path.join(fixture, 'wego-app/scenes/bcg/工作台/_iterations/bcg001-测试-20260904');
+    fs.mkdirSync(iterationDirectory, { recursive: true });
+    const iterationFile = path.join(iterationDirectory, 'iteration.json');
+    fs.writeFileSync(iterationFile, JSON.stringify({
+      identity: { iteration_id: 'bcg001', primary_scene: '工作台', related_scenes: ['应用中心'] },
+      status: 'in-development',
+      brief_file: 'bcg001-测试-20260904.md',
+      affected_scenes: ['工作台', '应用中心', '我的'],
+      affected_runtime: ['wego-app/js/shared.js']
+    }));
+    const discovered = activeIterations({ path: fixture }, '我的');
+    if (discovered.length !== 1 || discovered[0].id !== 'bcg001') {
+      throw new Error('必须从分类目录递归发现 affected_scenes 命中的活动迭代');
+    }
+    const iterationRelative = path.relative(fixture, iterationFile).split(path.sep).join('/');
+    const owned = ownedIterations(discovered, [iterationRelative], fixture);
+    if (owned.length !== 1) throw new Error('迭代目录发生变化时必须识别为当前分支交付单元');
+    const inherited = ownedIterations(discovered, [], fixture);
+    if (inherited.length !== 0) throw new Error('仅从 main 继承且本分支无相关变化的活动迭代不得重复认领');
+
+    const resolved = resolve('我的', {
+      listWorktrees: () => [{ path: fixture, branch: 'feature/test' }],
+      listPullRequests: () => [{ number: 9, headRefName: 'feature/test', baseRefName: 'main', url: 'test' }],
+      listBranches: () => ['feature/test'],
+      listWorktreeChanges: () => [iterationRelative],
+      listBranchChanges: () => []
+    });
+    if (resolved.outcome !== 'matched' || resolved.candidates[0].iterations[0].id !== 'bcg001') {
+      throw new Error('分类目录与跨场景活动迭代必须解析为 matched');
+    }
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
 
   console.log('交付单元核对测试通过');
 }

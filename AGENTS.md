@@ -45,7 +45,7 @@
 
 <!-- rule-id: requirement-input-must-create-iteration-first -->
 - 业务需求（自然语言、参考图、Figma）必须先经 `wego-product` 创建迭代并提交简要简报（立项确认 + 薄档 submit-brief 即原型授权），不得跳过直接做页面；终局确认（confirm-brief）与验收合一，简报状态规则以 `wego-product/references/iteration-workflow.md` 为唯一权威。
-- 立项确认 + 已提交简要简报即原型授权；终局确认（AI 补全终版 spec.md + 验收账本全绿 + 用户过目）与验收合一，通过后方可冻结；`wego-design` 不补造业务事实、不改设计系统本体；验收以源码一致性、真实交互和浏览器视口为准；组件/规范问题验收时提出交 `wego-uxsystem-iterate`。
+- 立项确认 + 已提交简要简报即原型授权；终局确认（AI 补全终版 spec.md + 验收账本全绿 + 用户过目确认最终材料）与验收合一，通过后方可冻结；`wego-design` 不补造业务事实、不改设计系统本体；验收以源码一致性、真实交互和浏览器视口为准；设计阶段发现组件/规范问题时停止场景级绕过并交 `wego-uxsystem-iterate` 核定。
 
 ## Git 与交付硬约束
 

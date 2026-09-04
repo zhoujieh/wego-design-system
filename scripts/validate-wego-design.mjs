@@ -13,8 +13,21 @@ function gitNames(gitArgs) {
     : [];
 }
 
+function branchDiffNames() {
+  for (const base of ['origin/main', 'main']) {
+    const existsResult = spawnSync('git', ['rev-parse', '--verify', '--quiet', base], { cwd: process.cwd(), encoding: 'utf8' });
+    if (existsResult.status !== 0) continue;
+    const result = spawnSync('git', ['-c', 'core.quotepath=false', 'diff', '--name-only', `${base}...HEAD`], { cwd: process.cwd(), encoding: 'utf8' });
+    if (result.status === 0) {
+      return (result.stdout || '').split('\n').map(item => item.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
 function changedFiles() {
   return [...new Set([
+    ...branchDiffNames(),
     ...gitNames(['diff', '--name-only']),
     ...gitNames(['diff', '--cached', '--name-only']),
     ...gitNames(['ls-files', '--others', '--exclude-standard'])
