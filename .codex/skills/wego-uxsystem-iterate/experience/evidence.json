@@ -617,6 +617,36 @@
     {
       "id": "ev-043",
       "date": "2026-09-04",
+      "summary": "本地迭代不应每改一个细节就推送或更新 PR，应先累计小问题，到交付节点再集中更新同一个 PR",
+      "source": "user-correction",
+      "scene": "github-delivery-pr-update-cadence",
+      "tags": [
+        "PR节奏",
+        "本地迭代",
+        "交付节点",
+        "在线预览",
+        "wego-github-delivery"
+      ],
+      "kind": "experience",
+      "observation": "用户追溯并纠正规则：现有工作流把完成一轮实现后自动推送、每次推送后返回在线预览写成默认路径，执行上容易演变成每改一次就推送 PR。",
+      "mechanism": "旧口径把本地迭代完成、checkpoint、在线预览和 PR 更新绑定过紧，缺少明确的交付节点定义，导致连续小反馈无法自然留在本地累计。",
+      "rule": "本地迭代默认先累计小问题和 checkpoint；只有首次可验收版本、一组反馈集中处理完成、用户明确要求更新 PR/在线预览，或多人协作需要远端同步时，才推送并创建/更新同一个 PR。",
+      "scope": [
+        "wego-github-delivery",
+        "wego-design",
+        "wego-uxsystem-iterate",
+        "README 用户流程"
+      ],
+      "verification": [
+        "AGENTS.md 增加 local-iteration-batches-pr-updates 硬约束",
+        "wego-github-delivery 和 wego-design 不再写每轮自动推送",
+        "README 和技能路由改为本地累计到交付节点再更新 PR"
+      ],
+      "novelty": "既有规则只要求同一需求复用同一个 PR，并要求不得为每个细节制造提交；没有把不得每个细节推送 PR、交付节点边界和在线预览返回时机统一成正式规则。"
+    },
+    {
+      "id": "ev-044",
+      "date": "2026-09-04",
       "summary": "非 CSS 字段不能沿用 CSS 回放通道，持久化恢复必须按字段语义分派",
       "source": "rework",
       "scene": "wego-scene-walkthrough-test-文本字段持久化",
@@ -641,7 +671,7 @@
       "novelty": "原规则只覆盖 CSS 样式记录，没有定义非 CSS 字段的恢复通道。"
     },
     {
-      "id": "ev-044",
+      "id": "ev-045",
       "date": "2026-09-04",
       "summary": "布局顺序变化后旧坐标不再代表原元素，后续交互必须重新定位目标",
       "source": "rework",
@@ -667,7 +697,7 @@
       "novelty": "现有测试流程只要求首次定位，没有覆盖布局变更后的目标重定位。"
     },
     {
-      "id": "ev-045",
+      "id": "ev-046",
       "date": "2026-09-04",
       "summary": "关键分支未进入冒烟路径时，真实缺陷会在主回归全绿的情况下长期漏检",
       "source": "rework",
@@ -693,7 +723,7 @@
       "novelty": "已有冒烟仅覆盖顺序移动结果，没有覆盖同档顺延这一独立实现路径。"
     },
     {
-      "id": "ev-046",
+      "id": "ev-047",
       "date": "2026-09-04",
       "summary": "一次用户动作产生多条底层记录时，撤销与持久化必须使用同一事务标识成组处理",
       "source": "rework",
@@ -719,7 +749,7 @@
       "novelty": "现有共享记录有 sharedKey，但没有覆盖同一动作跨不同记录类型的统一事务边界。"
     },
     {
-      "id": "ev-047",
+      "id": "ev-048",
       "date": "2026-09-04",
       "summary": "程序恢复滚动会异步触发可信 scroll 事件，抑制逻辑必须覆盖事件派发窗口",
       "source": "rework",
@@ -745,7 +775,7 @@
       "novelty": "现有滚动恢复只防同步重入，没有处理浏览器异步派发事件。"
     },
     {
-      "id": "ev-048",
+      "id": "ev-049",
       "date": "2026-09-04",
       "summary": "会被运行时修改的类名不能作为持久化定位锚点，记录必须使用不随修改变化的身份",
       "source": "rework",
@@ -771,7 +801,7 @@
       "novelty": "既有稳定选择器只排除了状态类，没有覆盖被编辑的资源类。"
     },
     {
-      "id": "ev-049",
+      "id": "ev-050",
       "date": "2026-09-04",
       "summary": "共享变更必须由组件语义限定作用域，并把同步实例绑定为一个事务",
       "source": "user-correction",
@@ -799,7 +829,7 @@
       "novelty": "既有共享样式同步依赖 CSS 属性和目标组件类，没有覆盖嵌套资源类的作用域识别。"
     },
     {
-      "id": "ev-050",
+      "id": "ev-051",
       "date": "2026-09-04",
       "summary": "包含 fixed 子面板的宿主使用 transform 居中会改变定位参照，应改用显式坐标或脱离变换层",
       "source": "user-correction",
@@ -825,7 +855,7 @@
       "novelty": "现有工具栏定位规则只约束视觉位置，没有约束 transform 对 fixed 后代坐标系的影响。"
     },
     {
-      "id": "ev-051",
+      "id": "ev-052",
       "date": "2026-09-04",
       "summary": "同一受限高度 flex 面板内的主次滚动区必须显式分配收缩权，避免关键选择区被挤压",
       "source": "user-correction",
@@ -851,7 +881,7 @@
       "novelty": "现有面板只为内容区设置 min-height:0，没有为关键选择区声明不可收缩的空间预算。"
     },
     {
-      "id": "ev-052",
+      "id": "ev-053",
       "date": "2026-09-04",
       "summary": "复合颜色控件更新内部状态后必须同步全部派生预览节点，不能只同步数据模型",
       "source": "user-correction",
@@ -878,7 +908,7 @@
       "novelty": "已有颜色同步经验关注目标元素与输入值，没有覆盖控件内部派生预览节点。"
     },
     {
-      "id": "ev-053",
+      "id": "ev-054",
       "date": "2026-09-04",
       "summary": "批量刷新面板状态时必须按字段值类型渲染，避免实色逻辑覆盖渐变等复合显示",
       "source": "user-correction",
