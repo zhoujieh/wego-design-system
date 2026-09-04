@@ -3,6 +3,45 @@
 .quote-page [hidden] {
   display: none;
 }
+
+/* 组件通过 data-state 提供透明度/缩放过渡；hidden 会让元素直接 display:none，
+ * 打开时没有可过渡的起始帧，因此在场景层补充一次入场动画。 */
+@keyframes quote-popmenu-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes quote-guide-popover-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 0.96;
+    transform: scale(1);
+  }
+}
+
+.quote-page .popmenu[data-state="open"] {
+  animation: quote-popmenu-enter var(--duration-normal) var(--ease-enter) both;
+}
+
+.quote-page .quote-guide-popover[data-state="open"] {
+  animation: quote-guide-popover-enter var(--duration-normal) var(--ease-enter) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote-page .popmenu[data-state="open"],
+  .quote-page .quote-guide-popover[data-state="open"] {
+    animation: none;
+  }
+}
 /** 导出报价单场景样式（shop244）。仅承载场景根作用域的区域关系、滚动、浮层与业务胶水。
  *  全部颜色/圆角/间距引用设计系统 token，不引入 raw color 与 CSS nesting。 */
 
@@ -286,15 +325,17 @@
 }
 .quote-image-group__summary {
   flex: 0 0 auto;
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  color: var(--text-tertiary);
+  padding-inline-end: var(--spacer-8);
+  border-inline-end: var(--stroke-hairline) solid var(--border-neutral-l2);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-secondary);
 }
 .quote-image-group__grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacer-8);
-  padding: var(--spacer-8);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--spacer-2);
+  padding: var(--spacer-2);
 }
 .quote-image-cell {
   position: relative;
@@ -412,6 +453,7 @@
   left: calc(var(--size-40) + var(--spacer-4));
   z-index: 40;
   min-width: var(--size-104);
+  transform-origin: bottom left;
 }
 
 /* ===== 引导气泡（报价记录入口） ===== */
@@ -449,6 +491,9 @@
 }
 .quote-selected-item__remove {
   flex: 0 0 auto;
+}
+.quote-selected-item__remove .btn__icon {
+  font-size: var(--body-xl-font-size);
 }
 .quote-selected-empty {
   padding: var(--spacer-24) var(--spacer-16);
