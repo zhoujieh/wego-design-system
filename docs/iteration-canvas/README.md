@@ -35,4 +35,5 @@
 
 - 实验实现：`wego-app/scenes/infras/迭代画布/`（routeId `iteration-canvas`）
 - 支撑能力：`wego-app/js/app.js` 的 `window.WegoApp.renderSceneTo`
+- **spec 范本库**：`docs/sdd-prd/帮卖弹窗spec.md`（验收场景 + FR 边界 7 类 + 业务规则表）、`shop243 鸿蒙 1.3` spec（B1 7 项边界 + BR 状态流转/枚举表 + Figma 画板映射）——画布以消费者身份解析 spec 已有结构，无需 spec 新增 states 字段
 - 后续演进：沉淀为通用技能，迭代收尾时读取 `_iterations/<id>/` 自动生成迭代画布
