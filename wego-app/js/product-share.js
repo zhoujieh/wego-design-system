@@ -653,6 +653,7 @@
                 openProductShare(ctx, {
                   contentType: 'miniprogram',
                   title: '分享小程序链接',
+                  content: content,
                   config: {
                     channels: ['wechat', 'moments', 'copy'],
                     showHeaderActions: false,

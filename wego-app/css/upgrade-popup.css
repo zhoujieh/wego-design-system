@@ -44,6 +44,30 @@
   overflow: visible;
 }
 
+/* 叉号关闭按钮（仅可关闭型显示，右上角悬浮于插画之上） */
+.gray-popup__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  color: #8a8a8a;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.gray-popup__close:active {
+  background: rgba(255, 255, 255, 1);
+}
+
 .gray-popup__header-img {
   width: 100%;
   height: auto;

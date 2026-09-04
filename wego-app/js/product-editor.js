@@ -49,7 +49,7 @@
     return {
       name: '', shortName: '', sku: '', takePrice: '', salePrice: '', groupPrice: '',
       wholesalePrice: '', packPrice: '', specs: [], colors: [], stock: '', weight: '',
-      tags: [], source: [], freight: '', remark: '', subAccount: '', images: [], resale: null
+      tags: [], source: [], freight: '', remark: '', subAccount: '', images: [], videos: [], resale: null
     };
   }
 
@@ -74,9 +74,13 @@
   }
 
   function imagesHtml() {
-    return formState.images.map(function (src, idx) {
+    var html = formState.images.map(function (src, idx) {
       return '<div class="publish-product__img-item"><img src="' + esc(src) + '" alt="" /><button type="button" class="publish-product__img-remove" data-remove-img="' + idx + '" aria-label="移除">×</button></div>';
     }).join('');
+    html += formState.videos.map(function (src, idx) {
+      return '<div class="publish-product__img-item"><video class="publish-product__img-video" src="' + esc(src) + '" controls muted playsinline></video><button type="button" class="publish-product__img-remove" data-remove-video="' + idx + '" aria-label="移除">×</button></div>';
+    }).join('');
+    return html;
   }
 
   function resaleSummary() {
@@ -187,6 +191,7 @@
       html += '<button type="button" class="publish-product__picker-item" data-pick-image="' + esc(src) + '"><img src="' + esc(src) + '" alt="" /></button>';
     });
     html += '</div>'
+      + '<button type="button" class="publish-product__picker-local" data-dom-id="pick-local">从本地相册选取</button>'
       + '<button type="button" class="actionsheet__cancel" data-dom-id="close-picker">取 消</button>'
       + '</div></div>';
     return html;
@@ -258,6 +263,12 @@
       var maxOrder = 0;
       (DB.dynamics || []).concat(published).forEach(function (d) { if (Number(d.published_order) > maxOrder) maxOrder = Number(d.published_order); });
 
+      var mediaList = formState.images.map(function (src) {
+        return { media_id: 'm-' + ts, media_type: 'image', poster_or_src: src };
+      }).concat(formState.videos.map(function (src) {
+        return { media_id: 'mv-' + ts, media_type: 'video', poster_or_src: src };
+      }));
+
       var newDynamic = {
         dynamic_id: 'dyn-pub-' + ts,
         publisher_id: CURRENT_USER.user_id,
@@ -265,7 +276,7 @@
         published_order: maxOrder + 1,
         content_type: 'product',
         text_content: formState.remark || '',
-        media_list: formState.images.map(function (src) { return { media_id: 'm-' + ts, media_type: 'image', poster_or_src: src }; }),
+        media_list: mediaList,
         related_product_ids: [productId],
         resale: formState.resale && formState.resale.distribution_type ? formState.resale : null,
         _product: {
@@ -289,7 +300,8 @@
 
     function doPublish() {
       if (!saveProduct()) return;
-      ctx.toast('发布成功');
+      var successMsg = mode === 'forward' ? '转发成功' : (mode === 'edit' ? '保存成功' : '发布成功');
+      ctx.toast(successMsg);
       ctx.closeOverlay();
       /* overlay 模式：标记待跳转，等本模态退场（onDestroy）后再 navigate，
          避开 closeOverlay(history.back) 与 navigate 的历史竞争（与类型选择面板同款处理） */
@@ -312,6 +324,9 @@
         refreshTagList(key);
       } else if (t.hasAttribute('data-remove-img')) {
         formState.images.splice(Number(t.getAttribute('data-remove-img')), 1);
+        refreshImages();
+      } else if (t.hasAttribute('data-remove-video')) {
+        formState.videos.splice(Number(t.getAttribute('data-remove-video')), 1);
         refreshImages();
       } else if (t.hasAttribute('data-public-toggle')) {
         var isPublic = t.textContent === '公开';
@@ -383,7 +398,7 @@
         id: 'pub-' + Date.now(),
         title: formState.name || '',
         images: formState.images.slice(),
-        videos: [],
+        videos: formState.videos.slice(),
         isOwn: true
       };
     }
@@ -421,12 +436,21 @@
 
     if (quickShareBtn) {
       quickShareBtn.addEventListener('click', function () {
-        /* 发布前校验 + 保存（不关闭页面）；通过后才执行快捷分享 */
-        if (!saveProduct()) return;
+        /* 快捷分享：先只做表单校验（不入库），分享成功后才保存入库；
+           避免分享因「暂无图片」等失败时产品已写入动态（B8） */
+        collectForm();
+        if (!formState.name) { ctx.toast('请填写产品名'); return; }
+        if (!formState.salePrice) { ctx.toast('请填写售价'); return; }
+        if (window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('save')) {
+          ctx.toast('发布失败，请稍后重试');
+          return;
+        }
         if (window.WegoApp && window.WegoApp.simulateShare) {
           var ch = window.WegoApp.getQuickChannel();
           window.WegoApp.simulateShare(ctx, ch, collectShareContent(), {
             onSuccess: function () {
+              /* 分享完成才视为发布，入库后收口 */
+              if (!saveProduct()) return;
               onShareComplete();
             }
           });
@@ -477,6 +501,50 @@
               refreshImages();
             });
           });
+          /* 本地相册：真实调用系统相册（file input，图片+视频多选）。
+             选取后先以 objectURL 立即预览，再转 base64 用于发布持久化（图片压缩本期不处理）。 */
+          var localBtn = pRoot.querySelector('[data-dom-id="pick-local"]');
+          if (localBtn) {
+            localBtn.addEventListener('click', function () {
+              var input = document.createElement('input');
+              input.type = 'file';
+              input.accept = 'image/*,video/*';
+              input.multiple = true;
+              input.addEventListener('change', function () {
+                var files = input.files;
+                if (!files || !files.length) return;
+                Array.prototype.forEach.call(files, function (file) {
+                  if (!file.type) return;
+                  var isVideo = file.type.indexOf('video/') === 0;
+                  var isImage = file.type.indexOf('image/') === 0;
+                  if (!isVideo && !isImage) return;
+                  var objectUrl = URL.createObjectURL(file);
+                  var list = isVideo ? formState.videos : formState.images;
+                  if (list.indexOf(objectUrl) >= 0) return;
+                  list.push(objectUrl);
+                  /* 转 base64：替换 objectURL，保证刷新后仍可预览、发布可持久化 */
+                  var reader = new FileReader();
+                  reader.onload = function () {
+                    var target = isVideo ? formState.videos : formState.images;
+                    var i = target.indexOf(objectUrl);
+                    if (i >= 0) {
+                      target[i] = reader.result;
+                      refreshImages();
+                    }
+                  };
+                  reader.onerror = function () {
+                    var target = isVideo ? formState.videos : formState.images;
+                    var i = target.indexOf(objectUrl);
+                    if (i >= 0) { target.splice(i, 1); refreshImages(); }
+                  };
+                  reader.readAsDataURL(file);
+                });
+                pickerCtx.close();
+                refreshImages();
+              });
+              input.click();
+            });
+          }
           var cancel = pRoot.querySelector('[data-dom-id="close-picker"]');
           if (cancel) cancel.addEventListener('click', function () { pickerCtx.close(); });
         }

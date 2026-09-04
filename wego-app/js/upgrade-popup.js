@@ -30,10 +30,19 @@
   };
 
   /* 升级弹窗显示状态 */
+  /* 本地日期 YYYY-MM-DD（不用 toISOString，避免 UTC 时区导致每天 00:00-07:59 时段守卫失效） */
+  function getLocalDateStr() {
+    var d = new Date();
+    var mm = String(d.getMonth() + 1);
+    var dd = String(d.getDate());
+    if (mm.length < 2) mm = '0' + mm;
+    if (dd.length < 2) dd = '0' + dd;
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
   function shouldShowUpgradePopup(type) {
     var key = 'wego.upgrade-popup.' + type;
     var record = DB.get(key);
-    var today = new Date().toISOString().slice(0, 10);
+    var today = getLocalDateStr();
     if (type === 'dismissible') {
       return !record || record.lastShownDate !== today;
     }
@@ -41,7 +50,7 @@
   }
   function markUpgradePopupShown(type) {
     var key = 'wego.upgrade-popup.' + type;
-    var today = new Date().toISOString().slice(0, 10);
+    var today = getLocalDateStr();
     if (type === 'dismissible') {
       DB.set(key, { lastShownDate: today });
     } else {
@@ -55,6 +64,7 @@
     var forcedClass = isForced ? ' gray-popup-modal--forced' : '';
     return '<div class="modal modal--fullscreen gray-popup-modal' + forcedClass + '" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="发现新版本">'
       + '<div class="modal__panel gray-popup__panel">'
+      + (isForced ? '' : '<button type="button" class="gray-popup__close" data-action="gray-close" aria-label="关闭">✕</button>')
       + '<div class="gray-popup__header"><img src="./lib/assets/image/update.png" alt="" class="gray-popup__header-img"></div>'
       + '<div class="gray-popup__body">'
       + '<ol class="gray-popup__list">'
@@ -83,6 +93,7 @@
         var root = overlayCtx.root;
         var confirmBtn = root.querySelector('[data-action="gray-confirm"]');
         var laterBtn = root.querySelector('[data-action="gray-later"]');
+        var closeBtn = root.querySelector('[data-action="gray-close"]');
 
         if (confirmBtn) {
           confirmBtn.addEventListener('click', function () {
@@ -92,6 +103,11 @@
         }
         if (laterBtn) {
           laterBtn.addEventListener('click', function () {
+            ctx.closeOverlay();
+          });
+        }
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function () {
             ctx.closeOverlay();
           });
         }
