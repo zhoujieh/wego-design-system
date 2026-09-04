@@ -95,22 +95,24 @@
 
 /* ===== 商品列表（按产品-列表行） ===== */
 .quote-product-list {
-  padding: var(--spacer-8) var(--spacer-16);
+  padding: var(--spacer-8);
   --layout-flow-gap: var(--spacer-8);
   justify-content: flex-start;
 }
 .quote-product-row {
-  display: flex;
-  align-items: stretch;
-  gap: var(--spacer-12);
-  padding: var(--spacer-12) var(--spacer-16);
-  background: var(--bg-surface);
   border-radius: var(--radius-8);
+  overflow: hidden;
+}
+.quote-product-row .cell__body {
+  align-items: stretch;
+  gap: var(--spacer-8);
+  padding-block: var(--spacer-12);
+  padding-inline: var(--spacer-8);
 }
 .quote-product-row__select {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
+  margin-left: var(--spacer-8);
+  padding-left: 0;
+  min-width: var(--size-24);
 }
 .quote-product-row__img {
   flex: 0 0 auto;
@@ -129,36 +131,31 @@
 }
 .quote-product-row__copy {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacer-4);
+  align-items: flex-start;
+  gap: 0;
   min-width: 0;
 }
 .quote-product-row__title {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: var(--spacer-4);
+  display: -webkit-box;
   font-size: var(--body-md-font-size);
   line-height: var(--body-md-line-height);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .quote-row__no {
-  flex: 0 0 auto;
   color: var(--text-secondary);
   font-weight: var(--font-weight-semibold);
 }
 .quote-row__divider {
-  flex: 0 0 auto;
   color: var(--border-neutral-l2);
 }
 .quote-row__name {
   min-width: 0;
-  display: -webkit-box;
-  overflow: hidden;
-  white-space: normal;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 .quote-product-row__spec {
   font-size: var(--body-xs-font-size);
@@ -352,16 +349,12 @@
 
 /* ===== 底部批量栏 ===== */
 .quote-bottom-bar .quote-bar-count-btn {
-  color: var(--text-brand);
-  font-weight: var(--font-weight-medium);
-}
-.quote-bottom-bar .quote-bar-count-btn:active {
-  background: var(--bg-state-pressed);
+  min-width: 0;
 }
 .quote-bottom-bar .quote-bar-count-btn .wego-iconfont-s {
   font-size: var(--size-16);
 }
-.quote-bottom-bar .quote-bar-count-btn.is-open .wego-iconfont-s {
+.quote-bottom-bar .quote-bar-count-btn.is-open .bottom-action-bar__selection-caret {
   transform: rotate(180deg);
 }
 .quote-bottom-bar {
@@ -383,60 +376,33 @@
   z-index: var(--z-popover);
 }
 
-/* ===== 查看已选 sheet 内容 ===== */
+/* ===== 查看已选 modal 内容 ===== */
+.quote-selected-modal {
+  --modal-frame-x-height: 70vh;
+}
 .quote-selected-list {
-  max-height: 50vh;
-  overflow-y: auto;
-  padding: var(--spacer-4) var(--spacer-16) var(--safe-area-bottom-content);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-8);
+  padding: 0;
 }
 .quote-selected-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-12);
-  padding: var(--spacer-8) 0;
+  min-height: 88px;
 }
 .quote-selected-item__img {
-  flex: 0 0 auto;
-  width: var(--size-48);
-  height: var(--size-48);
-  overflow: hidden;
+  width: var(--size-64);
+  height: var(--size-64);
 }
 .quote-selected-item__info {
-  flex: 1 1 auto;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-2);
 }
 .quote-selected-item__title {
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-  color: var(--text-default);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
 }
 .quote-selected-item__meta {
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
 }
 .quote-selected-item__remove {
   flex: 0 0 auto;
-  height: var(--size-28);
-  padding: 0 var(--spacer-8);
-  border: none;
-  border-radius: var(--radius-4);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-}
-.quote-selected-item__remove:active {
-  background: var(--bg-state-pressed);
 }
 .quote-selected-empty {
   padding: var(--spacer-24) var(--spacer-16);
