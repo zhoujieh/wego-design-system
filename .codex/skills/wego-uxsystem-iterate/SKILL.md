@@ -19,7 +19,7 @@ L1/L2/L3 经验权威源只能维护在本技能目录及 `.codex/skills/wego-sc
 - 组件、Token、Preview 或 UI Kit：读[组件与 UI Kit 迭代](./references/workflow.md)、[资源同步矩阵](./references/sync-matrix.runtime.md)及受影响的权威源和消费者。
 - 消费规则、守卫或系统缺口：只读直接受影响的规则、源码和运行时消费者。涉及分支、PR、预览或交付收口时，同步读取 `wego-github-delivery` 的交付规则。
 - 经验沉淀或工作流维护：读[工作流迭代](./references/workflow-iteration.md)、[工作流同步矩阵](./references/sync-matrix.md)、交付单元 `.tasks/experience-inbox.json` 草稿；先把纯需求/普通缺陷分流出去，再用 `node scripts/refine-experience.mjs --related <关键词>` 核对是否已有同类规则；新经验按结构化质量字段写入并由 `--check` 守门。
-- 走查工具测试/回归/验收/排查（改走查 js/css 后回归、5 项交互验收、走查相关 PR 验证）：先读场景技能[wego-scene-walkthrough-test](../wego-scene-walkthrough-test/SKILL.md)，按固定流程与回归脚本执行。
+- 走查工具测试/回归/验收/排查（改走查 js/css 后回归、交互矩阵验收、走查相关 PR 验证）：先读场景技能[wego-scene-walkthrough-test](../wego-scene-walkthrough-test/SKILL.md)，按固定流程与回归脚本执行。
 
 ## 输出与交接
 
