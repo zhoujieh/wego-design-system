@@ -12,6 +12,8 @@
 | 颜色字段触发 | style-panel shadowRoot → `[data-color-trigger][data-field="fillHex"]`（填充）/ `[data-field="strokeHex"]`（描边） |
 | iconfont 入口 | style-panel shadowRoot → `[data-action="iconfont"]`（仅选中已注册 iconfont 元素时存在） |
 | iconfont 面板 | style-panel shadowRoot → `[data-iconfont-panel]`；图标项为 `[data-iconfont-class]`，当前项为 `.is-current` |
+| 工具栏 | `wego-walkthrough` shadowRoot → `[data-toolbar]`；桌面固定态含 `.is-fixed` |
+| 工具入口 Tooltip | 工具按钮 `[data-tooltip]`；单例提示层 `[data-toolbar-tooltip]` |
 
 ## 颜色选择器（wego-wt-color-picker）
 

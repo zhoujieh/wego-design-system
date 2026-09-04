@@ -1,6 +1,6 @@
 ---
 name: "wego-scene-walkthrough-test"
-description: 走查工具自动化测试与回归。改动 wego-app/js/walkthrough-tool.js 或 wego-app/css/walkthrough-tool.css 后回归；颜色 HSL、渐变、数值拖动、顺序移动、悬停元信息、连点选择、iconfont 替换等交互验收；走查工具相关 PR 验证与交互异常排查。触发词：走查工具测试/回归/验收、walkthrough 测试、走查工具功能检查、走查工具 bug 排查。
+description: 走查工具自动化测试与回归。改动 wego-app/js/walkthrough-tool.js 或 wego-app/css/walkthrough-tool.css 后回归；颜色 HSL、渐变、数值拖动、顺序移动、悬停元信息、连点选择、iconfont 替换、工具栏定位与 Tooltip 等交互验收；走查工具相关 PR 验证与交互异常排查。触发词：走查工具测试/回归/验收、walkthrough 测试、走查工具功能检查、走查工具 bug 排查。
 ---
 
 # 走查工具自动化测试
@@ -13,7 +13,7 @@ description: 走查工具自动化测试与回归。改动 wego-app/js/walkthrou
 1. 环境：读 references/env.md。
 2. 进入走查：DOM 读 references/dom-map.md；点 `[data-fab-btn]` 展开选中元素，`wego-wt-style-panel` 打开。
 3. 功能步骤读 references/test-steps.md；每项必测**回显+撤销/重做+刷新持久化**闭环。
-4. 优先跑 `scripts/wt-smoke.cjs` 冒烟；iconfont 变更再跑 `scripts/wt-iconfont.cjs` 专项。
+4. 优先跑 `scripts/wt-smoke.cjs` 冒烟；iconfont 变更跑 `scripts/wt-iconfont.cjs`，工具栏变更跑 `scripts/wt-toolbar.cjs`。
 5. 证据：每条断言记「操作+DOM+localStorage+时间戳」；截图仅佐证。
 
 ## 交付前检查清单
@@ -23,6 +23,7 @@ description: 走查工具自动化测试与回归。改动 wego-app/js/walkthrou
 - ④ 顺序移动：移动按钮/方向键换位（moveFlexItem+orderBaselines+共享同步+moveKey）；撤销/重做；刷新保持；拖拽换位已移除。[ev-046, ev-050]
 - ⑤ 元信息：红虚线 `line.guide`+宽×高气泡 `highlight .label`+gap 洋红 `rect.gap-bg`/padding 蓝 `rect.pad-bg`/margin 绿 `rect.mar-bg`；8px 网格已移除。[ev-042]
 - ⑦ iconfont：入口仅在选中已注册图标时出现；纯图标网格可滚动；同组件结构且原图标一致时整组同步，图标无自身组件类则按重复父组件相对路径匹配；修改记录、撤销/重做、删除、刷新回放整组闭环。[ev-055, ev-056]
+- ⑧ 工具栏：桌面固定屏幕水平居中、位于可见 bottom-nav 上方 16px 且不可拖动；矮视口同样避让；移动端保留历史定位与拖动；展开/收起统一叉图标；全部工具入口 Tooltip 文案与上方定位完整。[ev-057]
 - 无页面报错（pageerror/console.error）。
 - 置信度：先排除环境假象再判 bug；低置信度待确认，高置信度才修复。
 

@@ -65,10 +65,18 @@
 6. 撤销、重做、删除修改组、重置和刷新回放均须整组生效。
 7. 运行 `scripts/wt-iconfont.cjs`，本地与在线均须全量通过且无 `pageerror` / `console.error`。
 
+## ⑧ 工具栏定位与 Tooltip
+1. 桌面 1280×960：收起态和展开态中心与视口水平中心一致；即使 localStorage 有旧拖动坐标也忽略，`[data-toolbar]` 为 `.is-fixed`，拖动后位置不变。
+2. 可见 `.bottom-nav` 贴视口底部时，工具栏底边与导航顶边至少间隔 16px；1082×490 矮视口重复验证居中与避让。
+3. 收起入口与展开态收起入口使用同一叉图标；有修改数量时叉图标仍保留，数量只显示为角标。
+4. 展开入口 Tooltip 为“展开工具栏”；展开态依次为“收起工具栏 / 走查模式 / 批注模式 / 数据模拟 / 修改记录 / 调试日志 / 更多工具”，均显示在入口上方且无重复原生 title。
+5. 移动端保留 `wego.wgf-position` 历史坐标与现有拖动逻辑，不添加 `.is-fixed`，不显示桌面 hover Tooltip。
+6. 运行 `scripts/wt-toolbar.cjs`，本地与在线均须全量通过且无 `pageerror` / `console.error`。
+
 ## 回归基线脚本
-完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）、`scripts/wt-iconfont.cjs`（⑦）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟，再跑 iconfont 专项。
+完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）、`scripts/wt-iconfont.cjs`（⑦）、`scripts/wt-toolbar.cjs`（⑧）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟，再跑对应专项。
 
 ## 评测闭环（技能自评）
-- 回归评测集：`scripts/wt-smoke.cjs` + `scripts/wt-iconfont.cjs` 是技能回归评测集，每次技能迭代后必须重跑（本地 + 在线）。
+- 回归评测集：`scripts/wt-smoke.cjs` + `scripts/wt-iconfont.cjs` + `scripts/wt-toolbar.cjs` 是技能回归评测集，每次技能迭代后必须重跑（本地 + 在线）。
 - 触发评测：用「走查工具测试/回归/验收/排查」等模拟 prompt 验证 description 命中（对应官方 skill-creator 触发率+通过率双指标）。
 - 技能交付前用一次真实业务走查（完整闭环）实测本技能，确认四段结构能指导跑通，再交付。
