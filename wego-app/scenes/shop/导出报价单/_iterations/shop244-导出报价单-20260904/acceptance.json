@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "scope_revision": 1,
-  "updated_at": "2026-09-04T12:39:16.383Z",
+  "updated_at": "2026-09-04T19:01:53.762Z",
   "items": [
     {
       "dimension": "entry_points",
@@ -96,8 +96,8 @@
     },
     {
       "dimension": "states",
-      "label": "空状态（选品）：搜索/筛选无匹配 → 「暂无相关结果」，保留搜索整栏；只有初始态商品数据为空时隐藏搜索整栏。",
-      "anchor": "873f345915d5c2ca866fb11dc1a0f2dbc9050fdd13a045e8e5dece4e5ba420a1",
+      "label": "空状态（选品）：搜索/筛选无匹配 → 无图标 Result 显示「未搜索到相关商品」，保留搜索整栏且不显示结果区清空搜索入口；只有初始态商品数据为空时隐藏搜索整栏。",
+      "anchor": "53b191074718870523315dead7eb4751fb477ed72658a6e10d91ead8e4fc2726",
       "status": "unverified",
       "evidence": ""
     },
