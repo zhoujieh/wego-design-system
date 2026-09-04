@@ -323,7 +323,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             + '<div class="cell__body">'
             + '<div class="wg-image wg-image--md wg-image--rounded-sm quote-selected-item__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.img) + '" alt="' + escapeHtml(row.p.title) + '"></div>'
             + '<div class="cell__content quote-selected-item__info"><div class="cell__title-row"><span class="cell__title quote-selected-item__title">' + row.label + '</span></div><div class="cell__subtitle quote-selected-item__meta">' + escapeHtml(row.p.item_no) + '</div></div>'
-            + '<div class="cell__action"><button type="button" class="btn btn--weak btn--sm btn--icon-only quote-selected-item__remove" data-component-slug="button" data-remove-selected data-key="' + escapeHtml(row.key) + '" aria-label="移除"><i class="btn__icon wego-iconfont-s icon-lajitong16" aria-hidden="true"></i></button></div>'
+            + '<div class="cell__action"><button type="button" class="btn btn--weak btn--sm btn--icon-only quote-selected-item__remove" data-component-slug="button" data-remove-selected data-key="' + escapeHtml(row.key) + '" aria-label="移除"><i class="btn__icon wego-iconfont-s icon-shanchu" aria-hidden="true"></i></button></div>'
             + '</div>'
             + '</div>';
         }).join('') || '<div class="quote-selected-empty">暂无可展示的已选商品</div>';
@@ -428,7 +428,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var rows = batchSelectableRows();
         if (!rows.length) {
           closeAllMenus();
-          ctx.toast('暂无可选商品');
           renderList();
           return;
         }
@@ -439,9 +438,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         });
         closeAllMenus();
         renderList();
-        if (!batchState.complete && batchState.available < batchState.target) {
-          ctx.toast('当前筛选结果仅有 ' + batchState.available + ' 项');
-        }
       }
 
       function setBatchSelectValue(value) {
@@ -487,7 +483,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
                   if (key && state.selected[key]) delete state.selected[key];
                   renderList();
                   refreshSelectedModal();
-                  ctx.toast('已移除 1 项');
                 });
               });
             }
