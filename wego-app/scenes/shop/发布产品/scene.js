@@ -78,7 +78,6 @@ const PUBLISH_TEMPLATE = `
         <div class="form-group__title">商品图片</div>
         <div class="form-group__content"><div class="publish-product__image-wrap">
           <div class="publish-product__images" data-image-list></div>
-          <button type="button" class="publish-product__img-add" data-dom-id="open-image-picker" aria-label="添加图片"><i class="wego-iconfont-s icon-shangchuantupian" aria-hidden="true"></i><span>添加图片</span></button>
         </div></div>
       </div>
 

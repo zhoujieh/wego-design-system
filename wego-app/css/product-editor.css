@@ -110,16 +110,19 @@
   padding: var(--spacer-12) var(--spacer-16);
 }
 
+/* 已选图片 + 添加入口同一网格布局：
+   - 列数按当前屏幕宽度实时自适应（auto-fill + minmax），整行拉满、右侧不留空白（仅保留容器左右间距）
+   - 添加入口由 imagesHtml 并入网格末尾，位置永远在最后 */
 .publish-product__images {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: var(--spacer-8);
 }
 
 .publish-product__img-item {
   position: relative;
-  width: var(--size-76);
-  height: var(--size-76);
+  width: 100%;
+  aspect-ratio: 1;
   border-radius: var(--radius-8);
   overflow: hidden;
   background: var(--bg-subtle);
@@ -149,8 +152,8 @@
 }
 
 .publish-product__img-add {
-  width: var(--size-76);
-  height: var(--size-76);
+  width: 100%;
+  aspect-ratio: 1;
   border: 1px dashed var(--border-neutral-l2);
   border-radius: var(--radius-8);
   background: var(--bg-subtle);
@@ -162,6 +165,8 @@
   justify-content: center;
   gap: var(--spacer-4);
   font-size: var(--body-xs-font-size);
+  box-sizing: border-box;
+  padding: 0;
 }
 
 .publish-product__img-add .wego-iconfont-s {
@@ -332,17 +337,52 @@
   width: 100%;
 }
 
-/* ── 图片选择 ── */
-.publish-product__picker-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* ── 选图来源 actionsheet（从手机相册选 / 从微购相册选）── */
+.publish-product__picker-source {
+  padding: var(--spacer-8) 0;
+}
+.publish-product__picker-source-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--spacer-8);
-  padding: var(--spacer-16);
-  max-height: 320px;
-  overflow-y: auto;
+  padding: var(--spacer-14) var(--spacer-16);
+  border: none;
+  background: transparent;
+  font-size: var(--body-lg-font-size);
+  color: var(--text-default);
+  text-align: left;
+  cursor: pointer;
+}
+.publish-product__picker-source-item:active {
+  background: var(--bg-fill, rgba(0, 0, 0, 0.04));
+}
+.publish-product__picker-arrow {
+  font-style: normal;
+  color: var(--text-tertiary);
+  font-size: var(--body-lg-font-size);
 }
 
-.publish-product__picker-item {
+/* ── 微购相册选图面板：header 固定 + 网格独立滚动 + 底部确定，杜绝内容重叠 ── */
+.publish-product__album-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: 74vh;
+  box-sizing: border-box;
+}
+.publish-product__album-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: var(--spacer-8);
+  padding: var(--spacer-16);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.publish-product__album-item {
+  position: relative;
   padding: 0;
   border: none;
   background: var(--bg-subtle);
@@ -351,27 +391,45 @@
   cursor: pointer;
   aspect-ratio: 1;
 }
-
-.publish-product__picker-item img {
+.publish-product__album-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
-
-/* 本地相册入口按钮（选图面板内，位于图片网格与取消之间） */
-.publish-product__picker-local {
-  margin: 0 var(--spacer-16) var(--spacer-12);
-  padding: var(--spacer-12);
-  border: 1px dashed var(--border-strong, #d0d0d0);
-  border-radius: var(--radius-8);
-  background: var(--bg-subtle);
-  color: var(--text-link, #3478f6);
-  font-size: var(--body-md-font-size);
-  cursor: pointer;
-  width: calc(100% - var(--spacer-32));
+.publish-product__album-item.is-selected {
+  box-shadow: inset 0 0 0 2px var(--border-brand);
 }
-.publish-product__picker-local:active {
-  background: var(--bg-fill, rgba(0, 0, 0, 0.04));
+.publish-product__album-item.is-selected::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-brand);
+  color: #fff;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+.publish-product__album-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-12);
+  padding: var(--spacer-12) var(--spacer-16) calc(var(--spacer-16) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border-neutral-l1);
+}
+.publish-product__album-cancel {
+  margin: 0;
+  padding: var(--spacer-10) var(--spacer-16);
+}
+.publish-product__album-confirm {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
 }
 
 /* 发布页本地相册视频预览项 */

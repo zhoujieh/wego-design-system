@@ -18,11 +18,12 @@
 
   var PUBLISHED_KEY = 'wego.album-feed.published';
 
+  /* 微购相册素材库：收集全部种子产品的所有图片（去重），供「从微购相册选」展示 */
   var ASSET_IMAGES = [];
   PRODUCTS.forEach(function (p) {
-    if (p.image_list && p.image_list[0] && ASSET_IMAGES.indexOf(p.image_list[0]) < 0) {
-      ASSET_IMAGES.push(p.image_list[0]);
-    }
+    (p.image_list || []).forEach(function (src) {
+      if (src && ASSET_IMAGES.indexOf(src) < 0) ASSET_IMAGES.push(src);
+    });
   });
 
   function loadPublished() {
@@ -80,6 +81,8 @@
     html += formState.videos.map(function (src, idx) {
       return '<div class="publish-product__img-item"><video class="publish-product__img-video" src="' + esc(src) + '" controls muted playsinline></video><button type="button" class="publish-product__img-remove" data-remove-video="' + idx + '" aria-label="移除">×</button></div>';
     }).join('');
+    /* 添加入口与已选图片同网格布局、永远在最后 */
+    html += '<button type="button" class="publish-product__img-add" data-dom-id="open-image-picker" aria-label="添加图片"><i class="wego-iconfont-s icon-shangchuantupian" aria-hidden="true"></i><span>添加图片</span></button>';
     return html;
   }
 
@@ -116,7 +119,6 @@
         <div class="form-group__title">商品图片</div>
         <div class="form-group__content"><div class="publish-product__image-wrap">
           <div class="publish-product__images" data-image-list></div>
-          <button type="button" class="publish-product__img-add" data-dom-id="open-image-picker" aria-label="添加图片"><i class="wego-iconfont-s icon-shangchuantupian" aria-hidden="true"></i><span>添加图片</span></button>
         </div></div>
       </div>
 
@@ -182,17 +184,34 @@
   </div>
 </div>`;
 
-  function imagePickerTemplate() {
-    var html = '<div class="actionsheet" role="dialog" aria-modal="true" data-component-slug="actionsheet">'
+  /* 选图来源 actionsheet：从手机相册选 / 从微购相册选 */
+  function pickerSourceTemplate() {
+    return '<div class="actionsheet" role="dialog" aria-modal="true" data-component-slug="actionsheet">'
       + '<div class="actionsheet__panel">'
-      + '<div class="actionsheet__header">选择商品图片</div>'
-      + '<div class="publish-product__picker-grid">';
+      + '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">选择商品图片</span></div>'
+      + '<div class="publish-product__picker-source">'
+      + '<button type="button" class="publish-product__picker-source-item" data-dom-id="pick-phone"><span>从手机相册选</span><i class="publish-product__picker-arrow" aria-hidden="true">›</i></button>'
+      + '<button type="button" class="publish-product__picker-source-item" data-dom-id="pick-album"><span>从微购相册选</span><i class="publish-product__picker-arrow" aria-hidden="true">›</i></button>'
+      + '</div>'
+      + '<div class="actionsheet__cancel-gap"></div>'
+      + '<button type="button" class="actionsheet__cancel" data-dom-id="close-source">取 消</button>'
+      + '</div></div>';
+  }
+
+  /* 微购相册选图面板：展示全部种子图片，多选 + 底部确定 */
+  function albumPickerTemplate() {
+    var html = '<div class="actionsheet" role="dialog" aria-modal="true" data-component-slug="actionsheet">'
+      + '<div class="actionsheet__panel publish-product__album-panel">'
+      + '<div class="actionsheet__header actionsheet__header--text"><span class="actionsheet__header-text">从微购相册选择</span></div>'
+      + '<div class="publish-product__album-grid" data-album-grid>';
     ASSET_IMAGES.forEach(function (src) {
-      html += '<button type="button" class="publish-product__picker-item" data-pick-image="' + esc(src) + '"><img src="' + esc(src) + '" alt="" /></button>';
+      html += '<button type="button" class="publish-product__album-item" data-pick-album="' + esc(src) + '" aria-pressed="false"><img src="' + esc(src) + '" alt="" loading="lazy" decoding="async" /></button>';
     });
     html += '</div>'
-      + '<button type="button" class="publish-product__picker-local" data-dom-id="pick-local">从本地相册选取</button>'
-      + '<button type="button" class="actionsheet__cancel" data-dom-id="close-picker">取 消</button>'
+      + '<div class="publish-product__album-footer">'
+      + '<button type="button" class="actionsheet__cancel publish-product__album-cancel" data-dom-id="close-album">取 消</button>'
+      + '<button type="button" class="btn btn--strong publish-product__album-confirm" data-dom-id="album-confirm">确定(<span data-album-count>0</span>)</button>'
+      + '</div>'
       + '</div></div>';
     return html;
   }
@@ -238,7 +257,12 @@
 
     function refreshImages() {
       var wrap = root.querySelector('[data-image-list]');
-      if (wrap) wrap.innerHTML = imagesHtml();
+      if (wrap) {
+        wrap.innerHTML = imagesHtml();
+        /* 添加入口由 imagesHtml 动态渲染在网格末尾，每次渲染后重新绑定点击 */
+        var addBtn = wrap.querySelector('[data-dom-id="open-image-picker"]');
+        if (addBtn) addBtn.addEventListener('click', function () { openImagePicker(); });
+      }
     }
 
     function refreshResale() {
@@ -247,11 +271,12 @@
     }
 
     /* 发布前校验 + 保存当前产品（不关闭页面、不提示成功）。
-       分享/快捷分享前置复用：校验通过后才保存并继续分享，取消分享保持页面继续编辑。 */
+       分享/快捷分享前置复用：校验通过后才保存并继续分享，取消分享保持页面继续编辑。
+       校验规则：标题与图片（含视频）至少填一项即可保存；都为空时提示。售价等其余字段非必填。 */
     function saveProduct() {
       collectForm();
-      if (!formState.name) { ctx.toast('请填写产品名'); return false; }
-      if (!formState.salePrice) { ctx.toast('请填写售价'); return false; }
+      var hasMedia = !!(formState.images && formState.images.length) || !!(formState.videos && formState.videos.length);
+      if (!formState.name && !hasMedia) { ctx.toast('请填写标题或选择图片'); return false; }
       if (window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('save')) {
         ctx.toast('发布失败，请稍后重试');
         return false;
@@ -439,8 +464,8 @@
         /* 快捷分享：先只做表单校验（不入库），分享成功后才保存入库；
            避免分享因「暂无图片」等失败时产品已写入动态（B8） */
         collectForm();
-        if (!formState.name) { ctx.toast('请填写产品名'); return; }
-        if (!formState.salePrice) { ctx.toast('请填写售价'); return; }
+        var hasMedia = !!(formState.images && formState.images.length) || !!(formState.videos && formState.videos.length);
+        if (!formState.name && !hasMedia) { ctx.toast('请填写标题或选择图片'); return; }
         if (window.WegoApp.faultInjection && window.WegoApp.faultInjection.isEnabled('save')) {
           ctx.toast('发布失败，请稍后重试');
           return;
@@ -461,7 +486,7 @@
       var skuEl = root.querySelector('[data-form-field="f-sku"]');
       if (skuEl) skuEl.value = 'SP' + String(Date.now()).slice(-6);
     });
-    if (addImageBtn) addImageBtn.addEventListener('click', function () { openImagePicker(); });
+    /* 添加入口由 refreshImages 动态渲染并绑定（见 refreshImages），此处不再重复绑定 */
     if (resaleEntryEl) resaleEntryEl.addEventListener('click', function () { openResaleSheet(); });
 
     function openResaleSheet() {
@@ -486,70 +511,105 @@
       });
     }
 
-    function openImagePicker() {
-      ctx.openSheet(imagePickerTemplate(), {
-        label: '选择商品图片',
+    /* 手机相册：真实调用系统相册（file input，图片+视频多选），点击后直接拉起不再二次选择。
+       选取后先以 objectURL 立即预览，再转 base64 用于发布持久化（图片压缩本期不处理）。 */
+    function openPhonePicker() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,video/*';
+      input.multiple = true;
+      input.addEventListener('change', function () {
+        var files = input.files;
+        if (!files || !files.length) return;
+        Array.prototype.forEach.call(files, function (file) {
+          if (!file.type) return;
+          var isVideo = file.type.indexOf('video/') === 0;
+          var isImage = file.type.indexOf('image/') === 0;
+          if (!isVideo && !isImage) return;
+          var objectUrl = URL.createObjectURL(file);
+          var list = isVideo ? formState.videos : formState.images;
+          if (list.indexOf(objectUrl) >= 0) return;
+          list.push(objectUrl);
+          /* 转 base64：替换 objectURL，保证刷新后仍可预览、发布可持久化 */
+          var reader = new FileReader();
+          reader.onload = function () {
+            var target = isVideo ? formState.videos : formState.images;
+            var i = target.indexOf(objectUrl);
+            if (i >= 0) {
+              target[i] = reader.result;
+              refreshImages();
+            }
+          };
+          reader.onerror = function () {
+            var target = isVideo ? formState.videos : formState.images;
+            var i = target.indexOf(objectUrl);
+            if (i >= 0) { target.splice(i, 1); refreshImages(); }
+          };
+          reader.readAsDataURL(file);
+        });
+        refreshImages();
+      });
+      input.click();
+    }
+
+    /* 微购相册选图面板：展示全部种子图片，多选 + 底部「确定(n)」合并 */
+    function openAlbumPicker() {
+      var selected = [];
+      ctx.openSheet(albumPickerTemplate(), {
+        label: '从微购相册选择',
         init: function (pickerCtx) {
           var pRoot = pickerCtx.root;
-          pRoot.querySelectorAll('[data-pick-image]').forEach(function (b) {
+          var countEl = pRoot.querySelector('[data-album-count]');
+          function refreshCount() {
+            if (countEl) countEl.textContent = selected.length;
+          }
+          pRoot.querySelectorAll('[data-pick-album]').forEach(function (b) {
             b.addEventListener('click', function () {
-              var src = b.getAttribute('data-pick-image');
-              if (formState.images.indexOf(src) < 0) formState.images.push(src);
-              /* 关闭图片选择面板自身（pickerCtx.close），不能调用外层 ctx.closeOverlay()——
-                 overlay 模式下外层 closeOverlay 被绑定为关闭发布产品模态，会把正在编辑的表单一并关掉 */
-              pickerCtx.close();
-              refreshImages();
+              var src = b.getAttribute('data-pick-album');
+              var i = selected.indexOf(src);
+              if (i >= 0) {
+                selected.splice(i, 1);
+                b.classList.remove('is-selected');
+                b.setAttribute('aria-pressed', 'false');
+              } else {
+                selected.push(src);
+                b.classList.add('is-selected');
+                b.setAttribute('aria-pressed', 'true');
+              }
+              refreshCount();
             });
           });
-          /* 本地相册：真实调用系统相册（file input，图片+视频多选）。
-             选取后先以 objectURL 立即预览，再转 base64 用于发布持久化（图片压缩本期不处理）。 */
-          var localBtn = pRoot.querySelector('[data-dom-id="pick-local"]');
-          if (localBtn) {
-            localBtn.addEventListener('click', function () {
-              var input = document.createElement('input');
-              input.type = 'file';
-              input.accept = 'image/*,video/*';
-              input.multiple = true;
-              input.addEventListener('change', function () {
-                var files = input.files;
-                if (!files || !files.length) return;
-                Array.prototype.forEach.call(files, function (file) {
-                  if (!file.type) return;
-                  var isVideo = file.type.indexOf('video/') === 0;
-                  var isImage = file.type.indexOf('image/') === 0;
-                  if (!isVideo && !isImage) return;
-                  var objectUrl = URL.createObjectURL(file);
-                  var list = isVideo ? formState.videos : formState.images;
-                  if (list.indexOf(objectUrl) >= 0) return;
-                  list.push(objectUrl);
-                  /* 转 base64：替换 objectURL，保证刷新后仍可预览、发布可持久化 */
-                  var reader = new FileReader();
-                  reader.onload = function () {
-                    var target = isVideo ? formState.videos : formState.images;
-                    var i = target.indexOf(objectUrl);
-                    if (i >= 0) {
-                      target[i] = reader.result;
-                      refreshImages();
-                    }
-                  };
-                  reader.onerror = function () {
-                    var target = isVideo ? formState.videos : formState.images;
-                    var i = target.indexOf(objectUrl);
-                    if (i >= 0) { target.splice(i, 1); refreshImages(); }
-                  };
-                  reader.readAsDataURL(file);
-                });
-                pickerCtx.close();
-                refreshImages();
-              });
-              input.click();
+          var confirm = pRoot.querySelector('[data-dom-id="album-confirm"]');
+          if (confirm) confirm.addEventListener('click', function () {
+            selected.forEach(function (src) {
+              if (formState.images.indexOf(src) < 0) formState.images.push(src);
             });
-          }
-          var cancel = pRoot.querySelector('[data-dom-id="close-picker"]');
+            pickerCtx.close();
+            refreshImages();
+          });
+          var cancel = pRoot.querySelector('[data-dom-id="close-album"]');
           if (cancel) cancel.addEventListener('click', function () { pickerCtx.close(); });
         }
       });
     }
+
+    function openImagePicker() {
+      ctx.openSheet(pickerSourceTemplate(), {
+        label: '选择商品图片',
+        init: function (pickerCtx) {
+          var pRoot = pickerCtx.root;
+          var phoneBtn = pRoot.querySelector('[data-dom-id="pick-phone"]');
+          if (phoneBtn) phoneBtn.addEventListener('click', function () { pickerCtx.close(); openPhonePicker(); });
+          var albumBtn = pRoot.querySelector('[data-dom-id="pick-album"]');
+          if (albumBtn) albumBtn.addEventListener('click', function () { pickerCtx.close(); openAlbumPicker(); });
+          var cancel = pRoot.querySelector('[data-dom-id="close-source"]');
+          if (cancel) cancel.addEventListener('click', function () { pickerCtx.close(); });
+        }
+      });
+    }
+
+    /* 初始化渲染图片网格（含末位添加入口），保证空态也有添加按钮 */
+    refreshImages();
   }
 
   /* 公共入口：作为 overlay 模态打开发布产品（与「点搜索」同源机制），来源页（动态/我的）保持挂载、内容不卸载。

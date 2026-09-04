@@ -44,28 +44,32 @@
   overflow: visible;
 }
 
-/* 叉号关闭按钮（仅可关闭型显示，右上角悬浮于插画之上） */
+/* 叉号关闭按钮（仅可关闭型显示）
+   - 位置：弹窗面板底部下方居中（absolute 不占位），弹窗内容整体保持屏幕居中
+   - 样式（对齐设计稿）：默认白色半透明圆底 + 深色叉，点击时背景透明色加深 */
 .gray-popup__close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 28px;
-  height: 28px;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
-  color: #8a8a8a;
-  background: rgba(255, 255, 255, 0.9);
+  padding: 0;
+  color: #2a2a2a;
+  background: rgba(255, 255, 255, 0.5);
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  z-index: 2;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  z-index: 3;
+  transition: background 0.15s ease;
 }
 .gray-popup__close:active {
-  background: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .gray-popup__header-img {
