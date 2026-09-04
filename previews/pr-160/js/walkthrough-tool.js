@@ -2763,6 +2763,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const onPointerDown = (e) => {
         e.preventDefault();
         e.stopPropagation();
+        // 拖动开始前先 blur 面板内输入框：SV/色相/不透明度拖动是显式改色操作，
+        // 若 HEX/RGB/HSL 输入框仍持有焦点，_updateFormatInput 的焦点守卫会阻止回显，
+        // 导致选点已移动但 HEX 数值不变（用户感知"颜色没同步"）。
+        const ae = document.activeElement;
+        if (ae && this._shadow.contains(ae) && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) {
+          ae.blur();
+        }
         this._dragType = type;
         const rect = el.getBoundingClientRect();
         onMove(e.clientX, e.clientY, rect);
@@ -4736,10 +4743,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           swatch.style.background = hexOpacityToRgba(this._data.colorHex || '#000000', this._data.colorOpacity ?? 100);
         }
       }
-      // 同步颜色输入框
-      const input = this._shadow.querySelector(`[data-field="${field}"]`);
-      if (input && gradient && gradient.stops && gradient.stops[0]) {
-        input.value = gradient.stops[0].hex;
+      // 同步颜色输入框（精确匹配 input：同 data-field 下还有 color-button / token-btn，
+      // 裸 querySelector 会先命中 button 导致 value 写入无效；实色模式同样需要回显）
+      const input = this._shadow.querySelector(`input[data-field="${field}"]`);
+      if (input) {
+        if (gradient && gradient.stops && gradient.stops[0]) {
+          input.value = gradient.stops[0].hex;
+        } else if (!gradient) {
+          input.value = this._data[field] || '';
+        }
       }
     }
 
