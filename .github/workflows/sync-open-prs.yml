@@ -35,7 +35,7 @@ jobs:
             elif echo "$result" | grep -Eqi 'merge[_ -]?conflict|merge conflict'; then
               echo "PR #$number 存在冲突，打 needs-sync 标签"
               gh pr edit "$number" --repo "$GITHUB_REPOSITORY" --add-label needs-sync
-            elif echo "$result" | grep -Eqi 'not behind|already up.to.date'; then
+            elif echo "$result" | grep -Eqi 'not behind|already up.to.date|no new commits on the base branch'; then
               echo "PR #$number 已是最新，无需同步"
               gh pr edit "$number" --repo "$GITHUB_REPOSITORY" --remove-label needs-sync >/dev/null 2>&1 || true
             else

@@ -569,6 +569,20 @@
         "allow_update_branch",
         "wego-github-delivery"
       ]
+    },
+    {
+      "id": "ev-041",
+      "date": "2026-09-04",
+      "summary": "PUT update-branch 修复后，实际同步已成功更新 PR #175/#172 并识别 PR #160 冲突；继续复验发现已是最新的 PR 返回 422 'There are no new commits on the base branch'，应视为成功无操作而非失败。仓库同时缺少规则依赖的 needs-sync 标签，已创建标签并补齐无操作分支识别。",
+      "source": "ci-failure",
+      "scene": "workflow-integrity-open-pr-sync",
+      "tags": [
+        "GitHub Actions",
+        "update-branch",
+        "幂等",
+        "needs-sync",
+        "wego-github-delivery"
+      ]
     }
   ]
 }
