@@ -1407,6 +1407,58 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return candidates.filter(el => isExempt || declaresProperty(el, property));
   }
 
+  /** 找出 iconfont 的共享实例：优先按图标自身的重复组件类匹配；
+   *  图标自身只有 wego-iconfont-s/icon-* 时，回退到最近的重复父组件，按相对子节点路径找对应图标。
+   *  两条路径都要求候选当前图标类与目标原图标一致，避免同名图标跨不同组件全页面扩散。 */
+  function findSharedIconfontElements(targetEl, oldClasses) {
+    if (!targetEl || !targetEl.classList) return { componentClass: '', elements: [] };
+    const accepted = new Set((Array.isArray(oldClasses) ? oldClasses : [oldClasses]).filter(Boolean));
+    if (!accepted.size) return { componentClass: '', elements: [] };
+    const isVisible = (el) => !!(el && el.isConnected && el.getClientRects && el.getClientRects().length);
+    const matchesIcon = (el) => el !== targetEl && isVisible(el) && el.tagName === targetEl.tagName && accepted.has(getIconfontClass(el));
+
+    const ownClass = pickComponentClass(targetEl);
+    if (ownClass) {
+      let peers = [];
+      try { peers = Array.from(document.querySelectorAll('.' + CSS.escape(ownClass))).filter(matchesIcon); } catch (e) {}
+      if (peers.length && peers.length + 1 <= MAX_SHARED_STYLE_COUNT) {
+        return { componentClass: ownClass, elements: peers };
+      }
+    }
+
+    let ancestor = targetEl.parentElement;
+    while (ancestor && ancestor !== document.body && ancestor !== document.documentElement) {
+      const componentClass = pickComponentClass(ancestor);
+      if (componentClass) {
+        const path = [];
+        let node = targetEl;
+        while (node && node !== ancestor) {
+          const parent = node.parentElement;
+          if (!parent) break;
+          path.unshift(Array.from(parent.children).indexOf(node));
+          node = parent;
+        }
+        if (node === ancestor && path.length) {
+          let anchors = [];
+          try { anchors = Array.from(document.querySelectorAll('.' + CSS.escape(componentClass))).filter(isVisible); } catch (e) {}
+          const peers = anchors.map(anchor => {
+            let candidate = anchor;
+            for (const index of path) {
+              candidate = candidate && candidate.children ? candidate.children[index] : null;
+              if (!candidate) break;
+            }
+            return candidate;
+          }).filter(matchesIcon);
+          if (peers.length && peers.length + 1 <= MAX_SHARED_STYLE_COUNT) {
+            return { componentClass, elements: peers };
+          }
+        }
+      }
+      ancestor = ancestor.parentElement;
+    }
+    return { componentClass: '', elements: [] };
+  }
+
   /** 快照元素（或伪元素）的计算样式原始值，用于「改回即无变更」判定 */
   function snapshotStyle(cs) {
     return {
@@ -6389,6 +6441,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._closeIconfontPanel();
         return;
       }
+      const existingRecord = state.changes.find(c =>
+        c.selector === this._selector && !c.target && c.property === 'icon-class');
+      const sharedMatch = findSharedIconfontElements(el, [oldClass, existingRecord && existingRecord.oldValue]);
+      const sharedKey = sharedMatch.elements.length ? sharedMatch.componentClass + '::icon-class' : '';
+      const shared = !!sharedKey;
       if (!setIconfontClass(el, nextClass, oldClass)) return;
       bus.emit('style-change', {
         selector: this._selector,
@@ -6400,8 +6457,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         oldValue: oldClass,
         newValue: nextClass,
         el,
-        shared: false,
-        sharedKey: '',
+        shared,
+        sharedKey,
+      });
+      sharedMatch.elements.forEach(peer => {
+        const peerOldClass = getIconfontClass(peer);
+        if (!peerOldClass || !setIconfontClass(peer, nextClass, peerOldClass)) return;
+        bus.emit('style-change', {
+          selector: generateSelector(peer),
+          elementTag: peer.tagName.toLowerCase(),
+          elementText: (peer.textContent || '').trim().substring(0, 50),
+          elementClass: getFirstStableClass(peer),
+          elementClasses: getStableClasses(peer),
+          property: 'icon-class',
+          oldValue: peerOldClass,
+          newValue: nextClass,
+          el: peer,
+          shared: true,
+          sharedKey,
+          noUndo: true,
+        });
       });
       const trigger = this._shadow.querySelector('[data-action="iconfont"]');
       if (trigger) trigger.innerHTML = `<span aria-hidden="true">${escapeHtml(getIconfontGlyph(nextClass))}</span>`;
@@ -6409,7 +6484,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         btn.classList.toggle('is-current', btn.dataset.iconfontClass === nextClass);
       });
       this._closeIconfontPanel();
-      bus.emit('toast', { message: '已替换 iconfont 图标' });
+      bus.emit('toast', {
+        message: shared ? `已替换 iconfont 图标并同步 ${sharedMatch.elements.length + 1} 个共享元素` : '已替换 iconfont 图标',
+      });
     }
 
     /** 多层效果：添加一层（描边→位置/宽/色；投影→x/y/blur/spread/色） */
@@ -7820,6 +7897,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._initComponents();
       this._bindEvents();
       this._restorePosition();
+      window.addEventListener('resize', this._onToolbarViewportChange);
       this._restoreFaultState();
       state.currentRoute = getCurrentRoute();
       window.addEventListener('hashchange', this._onHashChange);
@@ -7852,6 +7930,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 移除全局监听器，避免组件销毁后闭包持有 this 造成泄漏、重建后事件重复处理
       window.removeEventListener('hashchange', this._onHashChange);
       window.removeEventListener('pagehide', this._onPageHide);
+      window.removeEventListener('resize', this._onToolbarViewportChange);
       document.removeEventListener('pointerdown', this._onDocPointerDown, true);
       document.removeEventListener('keydown', this._onDocKeyDown);
       if (this._tabObserver) { this._tabObserver.disconnect(); this._tabObserver = null; }
@@ -7903,12 +7982,36 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             cursor: grabbing;
             transition: none;
           }
+          .toolbar-container.is-fixed {
+            cursor: default;
+          }
           .toolbar-container.is-collapsed {
             width: 48px;
           }
           .toolbar-container.is-expanded {
             width: auto;
           }
+          .toolbar-tooltip {
+            position: absolute;
+            z-index: 10020;
+            min-height: 28px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 9px;
+            border-radius: 6px;
+            background: rgba(20, 20, 20, 0.92);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+            color: #fff;
+            font-size: 11px;
+            line-height: 16px;
+            white-space: nowrap;
+            pointer-events: none;
+            transform: translateX(-50%);
+          }
+          .toolbar-tooltip[hidden] { display: none; }
 
           .toolbar-clip {
             display: inline-flex;
@@ -8094,14 +8197,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .fab-btn .fab-icon { display: inline-flex; align-items: center; justify-content: center; }
           .fab-btn .fab-count {
             display: none;
-            font-size: 15px;
-            font-weight: 600;
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            min-width: 16px;
+            height: 16px;
+            box-sizing: border-box;
+            padding: 0 4px;
+            border-radius: 999px;
+            background: #ff6b35;
+            border: 2px solid rgba(30,30,30,0.85);
+            font-size: 9px;
+            font-weight: 700;
             color: #fff;
             line-height: 1;
             white-space: nowrap;
+            align-items: center;
+            justify-content: center;
           }
-          .fab-btn[data-has-count="true"] .fab-icon { display: none; }
-          .fab-btn[data-has-count="true"] .fab-count { display: inline-flex; }
+          .fab-btn[data-has-count="true"] .fab-count { display: flex; }
+          .fab-btn[data-has-count="true"] .fab-dot { display: none; }
 
           /* 子面板 */
           .subpanel {
@@ -8304,39 +8419,40 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         <div class="toolbar-container is-collapsed" data-toolbar>
           <div class="toolbar-clip">
             <!-- 收起态：圆形按钮 -->
-            <button class="fab-btn" data-fab-btn data-has-indicator="false" data-has-count="false">
-              <span class="fab-icon">${ICONS.pointer}</span>
+            <button class="fab-btn" data-fab-btn data-has-indicator="false" data-has-count="false" data-tooltip="展开工具栏" aria-label="展开工具栏">
+              <span class="fab-icon">${ICONS.close}</span>
               <span class="fab-count" data-fab-count hidden>0</span>
               <span class="fab-dot"></span>
             </button>
             <!-- 展开态：工具条内容 -->
             <div class="toolbar-main" data-toolbar-main style="display:none;">
-              <button class="collapse-btn" data-collapse-btn title="收起">${ICONS.chevronLeft}</button>
-              <button class="tool-btn" data-tool="walkthrough" data-active="false" title="走查模式">
+              <button class="collapse-btn" data-collapse-btn data-tooltip="收起工具栏" aria-label="收起工具栏">${ICONS.close}</button>
+              <button class="tool-btn" data-tool="walkthrough" data-active="false" data-tooltip="走查模式" aria-label="走查模式">
                 ${ICONS.pointer}
               </button>
-              <button class="tool-btn" data-tool="annotation" data-active="false" title="批注模式">
+              <button class="tool-btn" data-tool="annotation" data-active="false" data-tooltip="批注模式" aria-label="批注模式">
                 ${ICONS.annotation}
               </button>
-              <button class="tool-btn" data-tool="datamock" data-active="false" title="数据模拟">
+              <button class="tool-btn" data-tool="datamock" data-active="false" data-tooltip="数据模拟" aria-label="数据模拟">
                 ${ICONS.database}
                 <span class="badge-dot"></span>
               </button>
               <div class="divider"></div>
-              <button class="tool-btn" data-tool="overview" data-has-count="false" title="配置列表">
+              <button class="tool-btn" data-tool="overview" data-has-count="false" data-tooltip="修改记录" aria-label="修改记录">
                 <span class="tool-icon" data-overview-icon>${ICONS.list}</span>
                 <span class="tool-count" data-overview-count hidden>0</span>
               </button>
               <div class="divider"></div>
-              <button class="tool-btn" data-action="debug-log" title="调试日志">
+              <button class="tool-btn" data-action="debug-log" data-tooltip="调试日志" aria-label="调试日志">
                 ${ICONS.bug}
               </button>
-              <button class="tool-btn" data-tool="more" title="更多">
+              <button class="tool-btn" data-tool="more" data-tooltip="更多工具" aria-label="更多工具">
                 ${ICONS.more}
               </button>
             </div>
           </div>
         </div>
+        <div class="toolbar-tooltip" data-toolbar-tooltip hidden></div>
         <!-- 数据模拟子面板 -->
         <div class="subpanel" data-subpanel="datamock">
           <div class="subpanel-header">
@@ -8421,6 +8537,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._components.toolbar = this._shadow.querySelector('[data-toolbar]');
       this._components.toolbarMain = this._shadow.querySelector('[data-toolbar-main]');
       this._components.fabBtn = this._shadow.querySelector('[data-fab-btn]');
+      this._components.toolbarTooltip = this._shadow.querySelector('[data-toolbar-tooltip]');
       this._components.overviewCount = this._shadow.querySelector('[data-overview-count]');
       this._components.fabCount = this._shadow.querySelector('[data-fab-count]');
       this._components.annotationMarkerLayer = this._shadow.querySelector('[data-annotation-marker-layer]');
@@ -8438,7 +8555,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _bindEvents() {
       const toolbar = this._components.toolbar;
       // 拖动
-      toolbar.addEventListener('pointerdown', (e) => this._startDrag(e, toolbar));
+      if (IS_MOBILE_UA) {
+        toolbar.addEventListener('pointerdown', (e) => this._startDrag(e, toolbar));
+      } else {
+        toolbar.classList.add('is-fixed');
+      }
+      this._bindToolbarTooltips();
       // 收起态按钮点击展开
       this._components.fabBtn.addEventListener('click', (e) => {
         if (this._suppressClick) { e.preventDefault(); e.stopPropagation(); this._suppressClick = false; return; }
@@ -8576,6 +8698,42 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       document.addEventListener('keydown', this._onDocKeyDown);
     }
 
+    _bindToolbarTooltips() {
+      if (IS_MOBILE_UA) return;
+      this._shadow.querySelectorAll('[data-tooltip]').forEach(btn => {
+        btn.addEventListener('mouseenter', () => this._showToolbarTooltip(btn));
+        btn.addEventListener('mouseleave', () => this._hideToolbarTooltip());
+        btn.addEventListener('focus', () => this._showToolbarTooltip(btn));
+        btn.addEventListener('blur', () => this._hideToolbarTooltip());
+        btn.addEventListener('click', () => this._hideToolbarTooltip());
+      });
+    }
+
+    _showToolbarTooltip(btn) {
+      if (IS_MOBILE_UA || !btn) return;
+      const tooltip = this._components.toolbarTooltip;
+      const label = btn.dataset.tooltip || '';
+      if (!tooltip || !label) return;
+      tooltip.textContent = label;
+      tooltip.hidden = false;
+      const btnRect = btn.getBoundingClientRect();
+      const hostRect = this.getBoundingClientRect();
+      const tipRect = tooltip.getBoundingClientRect();
+      let left = btnRect.left - hostRect.left + btnRect.width / 2;
+      const minLeft = tipRect.width / 2 + 8 - hostRect.left;
+      const maxLeft = window.innerWidth - 8 - tipRect.width / 2 - hostRect.left;
+      left = Math.max(minLeft, Math.min(left, maxLeft));
+      let top = btnRect.top - hostRect.top - tipRect.height - 8;
+      if (hostRect.top + top < 8) top = btnRect.bottom - hostRect.top + 8;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+
+    _hideToolbarTooltip() {
+      const tooltip = this._components.toolbarTooltip;
+      if (tooltip) tooltip.hidden = true;
+    }
+
     // 全局监听器（类字段箭头函数，保证 disconnected 时能 removeEventListener）
     _onHashChange = () => this._handleRouteChange();
     _onPageHide = () => this._flushSave();
@@ -8683,6 +8841,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     // ── 拖动 ──────────────────────────────────────────────
     _startDrag(e, toolbar) {
+      if (!IS_MOBILE_UA) return;
       if (e.button !== undefined && e.button !== 0) return;
       // 记录拖动起始状态。不在此处 setPointerCapture：
       // setPointerCapture 会把后续 click 事件重定向到 toolbar，
@@ -8761,6 +8920,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _savePosition() {
+      if (!IS_MOBILE_UA) return;
       const rect = this.getBoundingClientRect();
       try {
         localStorage.setItem('wego.wgf-position', JSON.stringify({ x: rect.left, y: rect.top }));
@@ -8768,6 +8928,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _restorePosition() {
+      if (!IS_MOBILE_UA) {
+        this._positionDesktopToolbar();
+        return;
+      }
       try {
         const raw = localStorage.getItem('wego.wgf-position');
         if (raw) {
@@ -8790,6 +8954,32 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this.style.right = 'auto';
     }
 
+    /** 桌面端固定居中靠下：优先放在可见底部导航上方 16px，无底部导航时距视口底部 24px。 */
+    _positionDesktopToolbar() {
+      if (IS_MOBILE_UA) return;
+      let bottom = 24;
+      try {
+        const navs = Array.from(document.querySelectorAll('.bottom-nav, [data-component-slug="bottom-nav"]'));
+        const docked = navs
+          .map(nav => ({ nav, rect: nav.getBoundingClientRect() }))
+          .filter(item => item.nav.getClientRects().length && item.rect.height > 0 && item.rect.bottom >= window.innerHeight - 4)
+          .sort((a, b) => b.rect.top - a.rect.top)[0];
+        if (docked) bottom = Math.max(24, window.innerHeight - docked.rect.top + 16);
+      } catch (e) {}
+      this.style.left = '50%';
+      this.style.right = 'auto';
+      this.style.top = 'auto';
+      this.style.bottom = bottom + 'px';
+      this.style.transform = 'translateX(-50%)';
+    }
+
+    _onToolbarViewportChange = () => {
+      if (!IS_MOBILE_UA) {
+        this._positionDesktopToolbar();
+        this._updateSubpanelPosition();
+      }
+    };
+
     _getExpandDirection() {
       const rect = this.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -8801,7 +8991,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const toolbar = this._components.toolbar;
       const main = this._components.toolbarMain;
       const fab = this._components.fabBtn;
+      const desktopFixed = !IS_MOBILE_UA;
       if (!toolbar || !main || !fab || this._collapsed === collapsed) return;
+      this._hideToolbarTooltip();
 
       // 移除已有 transitionend 监听器，避免上一次残留干扰本次
       if (this._collapsedTransitionEnd) {
@@ -8815,7 +9007,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 展开时基于当前位置判断方向并保存；收起时复用展开时保存的方向，
       // 避免展开态中心比收起态偏左导致方向误判（收起后位置偏移）
       let dir;
-      if (!collapsed) {
+      if (desktopFixed) {
+        dir = 'right';
+        this._anchorDir = dir;
+      } else if (!collapsed) {
         dir = this._getExpandDirection();
         this._anchorDir = dir;
       } else {
@@ -8833,9 +9028,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         fab.style.display = 'none';
         main.style.display = 'inline-flex';
         main.style.flexDirection = dir === 'left' ? 'row-reverse' : 'row';
-        // 收起按钮箭头方向：右侧展开(row-reverse，按钮在最右)显示向右箭头，左侧展开显示向左箭头
+        // 展开/收起统一使用叉图标，不再随展开方向改变
         const collapseBtn = this._shadow.querySelector('[data-collapse-btn]');
-        if (collapseBtn) collapseBtn.innerHTML = dir === 'left' ? ICONS.chevronRight : ICONS.chevronLeft;
+        if (collapseBtn) collapseBtn.innerHTML = ICONS.close;
       }
 
       // 3. 测量目标态宽度
@@ -8856,11 +9051,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       //    右侧(dir=left)：以起始态右边缘为锚点，展开向左扩展、收起向右收缩
       //    左侧(dir=right)向右展开：边界检查，避免右侧超出视口
       let startLeft = null, endLeft = null;
-      if (dir === 'left') {
+      if (!desktopFixed && dir === 'left') {
         const rightEdge = startHostRect.left + startWidth;
         startLeft = rightEdge - startWidth;
         endLeft = Math.max(8, rightEdge - endWidth);
-      } else if (!collapsed) {
+      } else if (!desktopFixed && !collapsed) {
         const maxLeft = window.innerWidth - endWidth - 8;
         if (startHostRect.left + endWidth > window.innerWidth - 8 && startHostRect.left > maxLeft) {
           startLeft = Math.max(8, maxLeft);
@@ -8901,6 +9096,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         toolbar.style.width = collapsed ? '48px' : '';
         toolbar.style.transition = '';
         this.style.transition = '';
+        if (desktopFixed) this._positionDesktopToolbar();
         toolbar.removeEventListener('transitionend', onEnd);
         if (this._collapsedTransitionEnd === onEnd) this._collapsedTransitionEnd = null;
       };
@@ -10369,10 +10565,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (item.groupRecords && item.groupRecords.length) {
         item.groupRecords.forEach(rec => {
           const el = queryTargetEl(rec.selector);
-          try { applyStyleProperty(el, rec.property, rec.newValue); } catch (e) {}
-          const rec2 = { ...rec, id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4) };
-          state.changes.push(rec2);
-          if (el) changeElRefs.set(rec2.id, el);
+          this._applyPropertyValue(rec.selector, rec.target || '', rec.property, rec.newValue);
+          const existing = state.changes.find(c =>
+            c.selector === rec.selector && (c.target || '') === (rec.target || '') && c.property === rec.property);
+          if (existing) {
+            existing.newValue = rec.newValue;
+            existing.shared = rec.shared;
+            existing.sharedKey = rec.sharedKey;
+            existing.timestamp = Date.now();
+            if (el) changeElRefs.set(existing.id, el);
+          } else {
+            const rec2 = { ...rec, id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4) };
+            state.changes.push(rec2);
+            if (el) changeElRefs.set(rec2.id, el);
+          }
         });
         state.undoStack.push(item);
         this._syncAfterRecordsChanged();
@@ -10496,6 +10702,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     /** 路由切换统一收尾：旧场景落盘与浮层清理 → 新场景数据加载 → 标记重绘 */
     _handleRouteChange() {
       const nextRoute = getCurrentRoute();
+      if (!IS_MOBILE_UA) this._positionDesktopToolbar();
       // 同路由的 hash 抖动（锚点、历史记录写回等）不做收尾与重载，避免误关正在输入的批注气泡、误清回放
       if (nextRoute === state.currentRoute) return;
       // 1. 旧场景收尾：关闭批注气泡（写回输入）、选中态、工具条子面板、样式面板、颜色选择器，
