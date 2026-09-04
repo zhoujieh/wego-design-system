@@ -2590,7 +2590,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._hsl.l = Math.round((1 - y) * 100);
         this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
         this._syncFromHsl();
-        this._emitChange();
+        this._emitChange({ preview: true });
       });
 
       // 色相条拖动
@@ -2599,7 +2599,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._hsl.h = Math.round(x * 360);
         this._hex = this._hslToHex(this._hsl.h, this._hsl.s, this._hsl.l);
         this._syncFromHsl();
-        this._emitChange();
+        this._emitChange({ preview: true });
       });
 
       // 不透明度拖动
@@ -2607,7 +2607,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
         this._opacity = Math.round(x * 100);
         this._syncOpacity();
-        this._emitChange();
+        this._emitChange({ preview: true });
       });
 
       // 不透明度数值输入
@@ -2691,8 +2691,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (val) val.textContent = this._angle + '°';
           const preview = this._shadow.querySelector('[data-stopbar-preview]');
           if (preview) preview.style.background = this._gradientCss();
-          this._emitChange();
+          this._emitChange({ preview: true });
         });
+        // 松手时统一提交一次（与 SV/色标拖动模型一致）
+        angleSlider.addEventListener('change', () => this._emitChange({ preview: false }));
       }
 
       // 线性/径向切换
@@ -2740,7 +2742,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             dot.style.left = stopRef.position + '%';
             const preview = this._shadow.querySelector('[data-stopbar-preview]');
             if (preview) preview.style.background = this._gradientCss();
-            this._emitChange();
+            this._emitChange({ preview: true });
           };
           const up = () => {
             document.removeEventListener('pointermove', move);
@@ -2750,7 +2752,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             this._stops.sort((a, b) => a.position - b.position);
             this._activeStop = this._stops.indexOf(stopRef);
             this._render();
-            this._emitChange();
+            this._emitChange({ preview: false });
           };
           document.addEventListener('pointermove', move);
           document.addEventListener('pointerup', up);
@@ -2779,7 +2781,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           onMove(ev.clientX, ev.clientY, rect);
         };
         const onPointerUp = () => {
-          if (this._dragType === type) this._dragType = null;
+          if (this._dragType === type) {
+            this._dragType = null;
+            // 拖动结束：提交最终值（样式面板侧据此记录一次变更、触发共享同步），
+            // 与数值拖动"拖动中 preview / 松手统一提交"模型一致，避免高频 getComputedStyle
+            // 与逐帧记录导致页面闪烁、无效果守卫误判清除 background-image
+            this._emitChange({ preview: false });
+          }
           document.removeEventListener('pointermove', onPointerMove);
           document.removeEventListener('pointerup', onPointerUp);
           document.removeEventListener('pointercancel', onPointerUp);
@@ -2956,7 +2964,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._render();
       this._emitChange();
     }
-    _emitChange() {
+    _emitChange(opts) {
+      opts = opts || {};
       if (this._mode === 'gradient') {
         // 渐变模式下把当前编辑色同步回激活色标
         const s = this._stops[this._activeStop];
@@ -2976,9 +2985,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           type: this._gradType,
           angle: this._angle,
           stops: this._stops.map(x => ({ hex: x.hex, opacity: x.opacity, position: x.position })),
-        });
+        }, opts);
       } else {
-        this._callback(this._hex, this._opacity, null);
+        this._callback(this._hex, this._opacity, null, opts);
       }
     }
   }
@@ -6013,7 +6022,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             hex,
             opacity,
             ...gradOpts,
-            callback: (newHex, newOpacity, gradient) => {
+            callback: (newHex, newOpacity, gradient, opts) => {
+              opts = opts || {};
+              const isPreview = opts.preview === true;
               if (gradient) {
                 // 渐变结果：写入渐变状态并应用
                 if (field === 'fillHex') {
@@ -6023,6 +6034,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                   this._data.gradientAngle = gradient.angle;
                   this._data.fillHex = gradient.stops[0].hex;
                   this._data.fillOpacity = gradient.stops[0].opacity;
+                  // 拖动中（preview）：只应用 background-image，不记录变更、不触发共享同步，
+                  // 避免高频 getComputedStyle 重排与逐帧记录导致页面闪烁、无效果守卫误判清除渐变
+                  if (isPreview && wasGradient) {
+                    this._applyField('gradientStops', null);
+                    this._updateColorSwatches('fillHex', gradient);
+                    return;
+                  }
                   // gradientEnabled 由 _onFieldChange 统一写入（此处不预赋值，便于其值变化守卫判断首次切换）
                   this._onFieldChange('gradientEnabled', 'true');
                   if (!wasGradient) { this._render(); this._bindEvents(); return; }
@@ -6032,6 +6050,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                   this._data.colorGradient = { type: gradient.type, angle: gradient.angle, stops: gradient.stops };
                   this._data.colorHex = gradient.stops[0].hex;
                   this._data.colorOpacity = gradient.stops[0].opacity;
+                  if (isPreview && wasGradient) {
+                    this._applyField('colorGradient', this._data.colorGradient);
+                    this._updateColorSwatches('colorHex', gradient);
+                    return;
+                  }
                   this._onFieldChange('colorGradient', this._data.colorGradient);
                   if (!wasGradient) { this._render(); this._bindEvents(); return; }
                   this._updateColorSwatches('colorHex', gradient);
@@ -6041,11 +6064,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               // 实色：关闭渐变状态
               if (field === 'fillHex') {
                 const wasGradient = this._data.gradientEnabled === true || this._data.gradientEnabled === 'true';
+                if (isPreview && !wasGradient) {
+                  this._data.fillHex = newHex;
+                  this._data.fillOpacity = String(newOpacity);
+                  this._applyField(field, newHex);
+                  this._applyField(opacityField, String(newOpacity));
+                  this._updateColorSwatches(field, null);
+                  return;
+                }
                 // gradientEnabled 由 _onFieldChange 统一写入（此处不预赋值，便于其值变化守卫判断首次切换）
                 this._onFieldChange('gradientEnabled', 'false');
                 if (wasGradient) { this._render(); this._bindEvents(); return; }
               } else if (field === 'colorHex') {
                 const wasGradient = !!this._data.colorGradient;
+                if (isPreview && !wasGradient) {
+                  this._data.colorHex = newHex;
+                  this._data.colorOpacity = String(newOpacity);
+                  this._applyField(field, newHex);
+                  this._applyField(opacityField, String(newOpacity));
+                  this._updateColorSwatches(field, null);
+                  return;
+                }
                 this._data.colorGradient = null;
                 if (wasGradient) {
                   this._onFieldChange('colorGradient', null);
