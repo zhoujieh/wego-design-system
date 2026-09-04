@@ -181,10 +181,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   }
 
   /** 生成工单头部环境/PR 元信息：在线预览输出 PR 号；本地预览输出环境标记（便于 Agent 区分定位路径） */
-  function getPreviewMetaLine() {
-    const pr = getCurrentPrNumber();
-    if (pr) return `**PR:** #${pr}`;
-    return `**环境：本地预览（无 PR）**`;
+  function getPreviewMetaLine(viewport, pr = getCurrentPrNumber()) {
+    const viewportText = viewport ? ` · ${viewport}` : '';
+    if (pr) return `PR #${pr}${viewportText}`;
+    return `本地预览（无 PR）${viewportText}`;
   }
 
   /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部）
@@ -3737,13 +3737,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _buildPrompt() {
       const route = this._route || 'default';
-      const routeLabel = getCurrentRouteLabel();
+      const routeLabel = route === 'default' ? getCurrentRouteLabel() : getRouteLabel(route);
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const changes = this._changes || [];
       const annotations = this._annotations || [];
       if (changes.length === 0 && annotations.length === 0) {
-        const metaLine = getPreviewMetaLine();
-        return `## 走查变更单 #/${routeLabel}\n${metaLine}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const metaLine = getPreviewMetaLine(viewport, this._promptPrNumber || getCurrentPrNumber());
+        return `## 走查工单 #/${routeLabel}\n${metaLine}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
@@ -3808,17 +3808,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
       };
-      // 辅助：提取业务类锚点（组件类之外的业务类；从完整稳定类列表挑"非组件类且非通用组件基类"的类）
-      const getBusinessClass = (g) => {
-        const componentClass = g.componentClass;
-        const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
-        if (!classes.length) return '';
-        // 业务类 = 非组件类、非通用组件基类（btn/icon/card…）的类；组件类与业务类同元素时才能区分
-        const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
-        if (biz) return biz;
-        // 全部是通用组件类或与组件类相同 → 无独立业务类，返回空避免误标
-        return '';
-      };
       // 辅助：格式化 flex 值为友好描述
       const formatFlexLabel = (v) => {
         if (!v) return '-';
@@ -3828,14 +3817,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
       };
-      const metaLine = getPreviewMetaLine();
+      const metaLine = getPreviewMetaLine(viewport, this._promptPrNumber || getCurrentPrNumber());
       const lines = [
-        `## 走查变更单 #/${routeLabel}`,
+        `## 走查工单 #/${routeLabel}`,
         metaLine,
-        `**Viewport:** ${viewport}`,
         '',
-        '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
-        '> 修复后动作：AI 按本工程单修改源码完成后，调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
+        '> 执行：按可见结果改源码，优先语义类；修后跑对应回归，经验信号写入 `.tasks/experience-inbox.json`。',
         '',
       ];
       const machine = [];
@@ -3844,7 +3831,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const styleGroups = groupList.filter(g => g.changes.length > 0);
       const noteOnlyGroups = pureAnnotations;
       if (styleGroups.length) {
-        lines.push(`### 样式变更（${styleGroups.length} 组）`);
+        lines.push(`### 样式（${styleGroups.length} 组）`);
         lines.push('');
       }
       // 元素顺序调整（功能 4 reorder 变更）
@@ -3865,7 +3852,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const classAnchor = getClassAnchor(g);
         const role = shortAnchor || classAnchor || g.elementTag;
         // 标题行
-        let title = `#### ${i + 1}. ${role}`;
+        let title = `${i + 1}. ${role}`;
         if (classAnchor) title += ` · .${classAnchor}`;
         if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
         lines.push(title);
@@ -3883,57 +3870,29 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const changeLines = [];
         // 加类
         addClassChanges.forEach(c => {
-          changeLines.push(`- 加结构类 \`${c.intentClass}\``);
+          changeLines.push(`   add-class: ${c.intentClass}`);
         });
         iconChanges.forEach(c => {
-          changeLines.push(`- 替换图标：\`${c.oldValue}\` → \`${c.newValue}\``);
+          changeLines.push(`   icon: ${c.oldValue} -> ${c.newValue}`);
         });
         // 顺序移动
         orderChanges.forEach(c => {
           const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
           const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
-          changeLines.push(`- 顺序：${posTxt}${orderTxt}`);
+          changeLines.push(`   order: ${posTxt}${orderTxt}`);
         });
         // 其他样式
         otherChanges.forEach(c => {
           const propLabel = c.property === 'flex' ? '宽度' : c.property;
           const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-          // 源码是否已声明：未声明 → 标注"新增"；已声明 → 展示源码值（优先 token 原文，其次原值）
-          const srcDeclared = !!c.sourceDeclared;
-          const srcVal = c.sourceValue || c.oldValue;
-          const curLabel = srcDeclared
-            ? (c.property === 'flex' ? formatFlexLabel(srcVal) : (srcVal || '-'))
-            : '（未声明）';
-          const tag = srcDeclared ? '' : '新增 ';
-          changeLines.push(`- ${tag}${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+          changeLines.push(`   ${propLabel}: ${valLabel}`);
         });
         if (changeLines.length) {
-          lines.push('- 变更：');
-          changeLines.forEach(l => lines.push('  ' + l));
+          changeLines.forEach(l => lines.push(l));
         }
-        // 改法
-        const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
-        const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
-        const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
-        const iconSnippet = iconChanges.map(c => `\`${c.oldValue}\` → \`${c.newValue}\``).join('，');
-        let fixLine = '- 改法：';
-        if (iconSnippet && !classAnchor && !cssSnippet && !orderSnippet && !addSnippet) {
-          fixLine += `将目标元素的图标类 ${iconSnippet}`;
-        } else if (classAnchor) {
-          const businessClass = getBusinessClass(g);
-          fixLine += `修改 \`.${classAnchor}\``;
-          if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
-          if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
-          if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
-          if (iconSnippet) fixLine += `，替换图标类 ${iconSnippet}`;
-        } else {
-          fixLine += `在源码对应 CSS 中设置：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
-          if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
-        }
-        lines.push(fixLine);
         // 组内备注
         if (g.annotation) {
-          lines.push(`- 备注：${g.annotation}`);
+          lines.push(`   备注：${g.annotation}`);
         }
         lines.push('');
         // 完整选择器备选
@@ -4016,8 +3975,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const scenes = this._loadAllScenesChanges();
       if (scenes.length === 0) {
-        const metaLine = getPreviewMetaLine();
-        return `## 走查变更单（跨场景汇总）\n${metaLine}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const metaLine = getPreviewMetaLine(viewport);
+        return `## 走查工单（跨场景汇总）\n${metaLine}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 只有一个场景时，直接用单场景格式
       if (scenes.length === 1) {
@@ -4025,26 +3984,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const savedChanges = this._changes;
         const savedAnnotations = this._annotations;
         const savedRoute = this._route;
+        const savedPromptPrNumber = this._promptPrNumber;
         this._changes = s.changes;
         this._annotations = s.annotations;
         this._route = s.routeId;
+        this._promptPrNumber = s.prNumber || null;
         // 临时覆盖 getCurrentRouteLabel 用场景名
         const prompt = this._buildPrompt();
         this._changes = savedChanges;
         this._annotations = savedAnnotations;
         this._route = savedRoute;
+        this._promptPrNumber = savedPromptPrNumber;
         return prompt;
       }
       // 多场景：按场景分组输出（PR 号取场景数据中的记录，优先当前场景；无记录时回退 URL 解析，均无则标本地预览）
       const scenePr = scenes.find(s => s.prNumber)?.prNumber || getCurrentPrNumber();
-      const metaLine = scenePr ? `**PR:** #${scenePr}` : getPreviewMetaLine();
+      const metaLine = getPreviewMetaLine(viewport, scenePr);
       const lines = [
-        `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景）`,
+        `## 走查工单（跨场景汇总，共 ${scenes.length} 个场景）`,
         metaLine,
-        `**Viewport:** ${viewport}`,
         '',
-        '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
-        '> 修复后动作：AI 按本工程单修改源码完成后，调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
+        '> 执行：按可见结果改源码，优先语义类；修后跑对应回归，经验信号写入 `.tasks/experience-inbox.json`。',
         '',
       ];
       const allMachine = [];
@@ -4063,14 +4023,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const fixedMatch = v.match(/^0 0 (\d+px)$/);
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
-      };
-      const getBusinessClass = (g) => {
-        const componentClass = g.componentClass;
-        const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
-        if (!classes.length) return '';
-        const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
-        if (biz) return biz;
-        return '';
       };
       scenes.forEach((scene, sceneIdx) => {
         lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}）`);
@@ -4117,7 +4069,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const styleGroups = groupList.filter(g => g.changes.length > 0);
         const noteOnlyGroups = pureAnnotations;
         if (styleGroups.length) {
-          lines.push(`#### 样式变更（${styleGroups.length} 组）`);
+          lines.push(`#### 样式（${styleGroups.length} 组）`);
           lines.push('');
         }
         styleGroups.forEach((g, i) => {
@@ -4125,7 +4077,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
           const classAnchor = getClassAnchor(g);
           const role = shortAnchor || classAnchor || g.elementTag;
-          let title = `##### ${i + 1}. ${role}`;
+          let title = `${i + 1}. ${role}`;
           if (classAnchor) title += ` · .${classAnchor}`;
           if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
           lines.push(title);
@@ -4140,49 +4092,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const orderChanges = cssChanges.filter(c => c.property === 'order');
           const otherChanges = cssChanges.filter(c => c.property !== 'order');
           const changeLines = [];
-          addClassChanges.forEach(c => { changeLines.push(`- 加结构类 \`${c.intentClass}\``); });
-          iconChanges.forEach(c => { changeLines.push(`- 替换图标：\`${c.oldValue}\` → \`${c.newValue}\``); });
+          addClassChanges.forEach(c => { changeLines.push(`   add-class: ${c.intentClass}`); });
+          iconChanges.forEach(c => { changeLines.push(`   icon: ${c.oldValue} -> ${c.newValue}`); });
           orderChanges.forEach(c => {
             const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
             const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
-            changeLines.push(`- 顺序：${posTxt}${orderTxt}`);
+            changeLines.push(`   order: ${posTxt}${orderTxt}`);
           });
           otherChanges.forEach(c => {
             const propLabel = c.property === 'flex' ? '宽度' : c.property;
             const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-            // 源码是否已声明：未声明 → 标注"新增"；已声明 → 展示源码值（优先 token 原文，其次原值）
-            const srcDeclared = !!c.sourceDeclared;
-            const srcVal = c.sourceValue || c.oldValue;
-            const curLabel = srcDeclared
-              ? (c.property === 'flex' ? formatFlexLabel(srcVal) : (srcVal || '-'))
-              : '（未声明）';
-            const tag = srcDeclared ? '' : '新增 ';
-            changeLines.push(`- ${tag}${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+            changeLines.push(`   ${propLabel}: ${valLabel}`);
           });
           if (changeLines.length) {
-            lines.push('- 变更：');
-            changeLines.forEach(l => lines.push('  ' + l));
+            changeLines.forEach(l => lines.push(l));
           }
-          const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
-          const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
-          const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
-          const iconSnippet = iconChanges.map(c => `\`${c.oldValue}\` → \`${c.newValue}\``).join('，');
-          let fixLine = '- 改法：';
-          if (iconSnippet && !classAnchor && !cssSnippet && !orderSnippet && !addSnippet) {
-            fixLine += `将目标元素的图标类 ${iconSnippet}`;
-          } else if (classAnchor) {
-            const businessClass = getBusinessClass(g);
-            fixLine += `修改 \`.${classAnchor}\``;
-            if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
-            if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
-            if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
-            if (iconSnippet) fixLine += `，替换图标类 ${iconSnippet}`;
-          } else {
-            fixLine += `在源码对应 CSS 中设置：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
-            if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
-          }
-          lines.push(fixLine);
-          if (g.annotation) lines.push(`- 备注：${g.annotation}`);
+          if (g.annotation) lines.push(`   备注：${g.annotation}`);
           lines.push('');
           allFullSelectors.push({ scene: scene.routeLabel, idx: i + 1, classAnchor, selector: g.selector });
           allMachine.push({
