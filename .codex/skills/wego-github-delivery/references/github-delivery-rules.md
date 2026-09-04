@@ -131,7 +131,7 @@ PR 已存在时，用户继续提出小问题，回到本地迭代累计修改�
 
 PR 合并、PR 关闭或交付单元确认废弃后，必须**逐项执行并确认**以下五步，不得遗漏任何一步：
 
-1. **完成经验收口扫描** — 检查 `.tasks/experience-inbox.json`；有草稿先分流沉淀，无草稿明示无信号，清空后才继续。
+1. **完成经验收口扫描** — 检查 `.tasks/experience-inbox.json`；有草稿先分流需求/普通缺陷并执行经验质量门，只有合格因果规则沉淀；处理并清空后才继续。
 2. **停止本地预览服务并删除服务记录** — 确认 `.tasks/preview-servers/` 中对应记录已清除，进程已退出。
 3. **删除远端分支** — PR 合并时自动删除；手动关闭或废弃时执行 `git push origin --delete <branch>`。
 4. **删除本地 worktree** — 执行 `git worktree remove <path>`，确认 `git worktree list` 中已无该 worktree。
