@@ -236,6 +236,106 @@ function getIconClass(className) {
       return !panel.shadowRoot.querySelector('[data-action="iconfont"]');
     });
     check('非 iconfont 元素不显示图标入口', nonIcon, 'hidden');
+
+    const sharedSetup = await page.evaluate(() => {
+      const app = document.querySelector('wego-walkthrough');
+      const icons = Array.from(document.querySelectorAll('.album-feed__more .wego-iconfont-s'))
+        .filter(node => node.getClientRects().length);
+      const target = icons[0];
+      if (!target) return null;
+      const unrelated = document.createElement('i');
+      unrelated.className = target.className + ' wt-test-unrelated-icon';
+      unrelated.style.cssText = 'position:fixed;left:4px;top:4px;width:20px;height:20px;display:block';
+      document.body.appendChild(unrelated);
+      app._selectElement(target);
+      const panel = app.shadowRoot.querySelector('wego-wt-style-panel');
+      const root = panel.shadowRoot;
+      const oldClass = Array.from(target.classList).find(c => /^icon-[A-Za-z0-9_-]+$/.test(c));
+      root.querySelector('[data-action="iconfont"]').click();
+      const option = Array.from(root.querySelectorAll('[data-iconfont-class]'))
+        .find(btn => btn.dataset.iconfontClass !== oldClass);
+      const nextClass = option ? option.dataset.iconfontClass : '';
+      if (option) option.click();
+      return { oldClass, nextClass, count: icons.length };
+    });
+    if (!sharedSetup || !sharedSetup.nextClass) throw new Error('未找到共享 iconfont 测试元素');
+    await page.waitForTimeout(500);
+    const sharedChanged = await page.evaluate(({ nextClass, count }) => {
+      const icons = Array.from(document.querySelectorAll('.album-feed__more .wego-iconfont-s'))
+        .filter(node => node.getClientRects().length);
+      const key = Object.keys(localStorage).find(k => k.startsWith('wego.walkthrough.data.'));
+      const data = key ? JSON.parse(localStorage.getItem(key) || '{}') : {};
+      const records = (data.changes || []).filter(c => c.property === 'icon-class');
+      const keys = new Set(records.map(c => c.sharedKey).filter(Boolean));
+      const unrelated = document.querySelector('.wt-test-unrelated-icon');
+      return {
+        allChanged: icons.length === count && icons.every(icon => icon.classList.contains(nextClass)),
+        unrelatedUntouched: !!unrelated && !unrelated.classList.contains(nextClass),
+        records: records.length,
+        sharedKeys: keys.size,
+      };
+    }, sharedSetup);
+    check('图标替换同步全部共享元素', sharedChanged.allChanged, `${sharedSetup.count} 个元素`);
+    check('不同组件的同名图标不被同步', sharedChanged.unrelatedUntouched, '未扩散');
+    check('共享图标合并为一个修改组', sharedChanged.records === sharedSetup.count && sharedChanged.sharedKeys === 1,
+      JSON.stringify(sharedChanged));
+
+    const sharedOverview = await page.evaluate(() => {
+      const app = document.querySelector('wego-walkthrough');
+      const overview = app.shadowRoot.querySelector('wego-wt-overview-panel');
+      const key = Object.keys(localStorage).find(k => k.startsWith('wego.walkthrough.data.'));
+      const data = key ? JSON.parse(localStorage.getItem(key) || '{}') : {};
+      overview.open(data.changes || [], data.sceneRoute || '', null, data.annotations || []);
+      const badge = overview.shadowRoot.querySelector('.shared-badge')?.textContent || '';
+      overview.close();
+      return badge;
+    });
+    check('配置列表显示共享元素数量', sharedOverview.includes(String(sharedSetup.count)), sharedOverview);
+
+    await page.evaluate(() => {
+      const root = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel').shadowRoot;
+      root.querySelector('[data-action="undo"]').click();
+    });
+    await page.waitForTimeout(400);
+    const sharedUndone = await page.evaluate(oldClass =>
+      Array.from(document.querySelectorAll('.album-feed__more .wego-iconfont-s'))
+        .filter(node => node.getClientRects().length)
+        .every(icon => icon.classList.contains(oldClass)), sharedSetup.oldClass);
+    check('一次撤销还原全部共享图标', sharedUndone, sharedSetup.oldClass);
+
+    await page.evaluate(() => {
+      const root = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel').shadowRoot;
+      root.querySelector('[data-action="redo"]').click();
+    });
+    await page.waitForTimeout(500);
+    const sharedRedone = await page.evaluate(nextClass =>
+      Array.from(document.querySelectorAll('.album-feed__more .wego-iconfont-s'))
+        .filter(node => node.getClientRects().length)
+        .every(icon => icon.classList.contains(nextClass)), sharedSetup.nextClass);
+    check('一次重做恢复全部共享图标', sharedRedone, sharedSetup.nextClass);
+
+    await page.reload({ waitUntil: 'networkidle', timeout: 60000 });
+    await page.waitForTimeout(1800);
+    const sharedReplayed = await page.evaluate(({ nextClass, count }) => {
+      const icons = Array.from(document.querySelectorAll('.album-feed__more .wego-iconfont-s'))
+        .filter(node => node.getClientRects().length);
+      return icons.length === count && icons.every(icon => icon.classList.contains(nextClass));
+    }, sharedSetup);
+    check('刷新后恢复全部共享图标', sharedReplayed, sharedSetup.nextClass);
+
+    await page.evaluate(() => {
+      const app = document.querySelector('wego-walkthrough');
+      app.shadowRoot.querySelector('[data-fab-btn]').click();
+      app.shadowRoot.querySelector('[data-tool="overview"]').click();
+      const overview = app.shadowRoot.querySelector('wego-wt-overview-panel');
+      overview.shadowRoot.querySelector('[data-delete-group]').click();
+    });
+    await page.waitForTimeout(500);
+    const sharedDeleted = await page.evaluate(oldClass =>
+      Array.from(document.querySelectorAll('.album-feed__more .wego-iconfont-s'))
+        .filter(node => node.getClientRects().length)
+        .every(icon => icon.classList.contains(oldClass)), sharedSetup.oldClass);
+    check('删除共享修改组后还原全部图标', sharedDeleted, sharedSetup.oldClass);
   } catch (error) {
     check('脚本执行无异常', false, error.message.slice(0, 240));
   }

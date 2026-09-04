@@ -60,9 +60,10 @@
 1. 选中含 `wego-iconfont-s` 与已注册 `icon-*` 类的元素 → 样式面板正常打开，标题栏右侧出现 `[data-action="iconfont"]`；普通元素不出现入口。
 2. 点击入口 → `[data-iconfont-panel]` 展开；图标项只渲染字形，不显示名称文本；目录数量与已加载 `iconfont.css` 一致，面板可纵向滚动。
 3. 重复点击 `.iconfont-option.is-current` → 不产生 `icon-class` 修改记录；点击其它图标 → 仅替换图标类，`wego-iconfont-s` 与业务结构类保留。
-4. 修改记录写入 `property: icon-class`、原图标类与新图标类；定位选择器不得含可变的 `icon-*` 类。
-5. 撤销恢复原图标、重做恢复新图标；等待防抖落盘后刷新，图标替换仍回放；删除修改项后恢复原图标。
-6. 运行 `scripts/wt-iconfont.cjs`，本地与在线均须全量通过且无 `pageerror` / `console.error`。
+4. 同一组件结构且原图标一致的可见实例须全部同步；图标自身无重复组件类时，按最近重复父组件的相对子节点路径匹配；不得把不同组件中碰巧同名的图标一起修改。
+5. 修改记录写入 `property: icon-class`、原图标类与新图标类；定位选择器不得含可变的 `icon-*` 类；共享记录须合并显示“共享 N 个元素”。
+6. 撤销、重做、删除修改组、重置和刷新回放均须整组生效。
+7. 运行 `scripts/wt-iconfont.cjs`，本地与在线均须全量通过且无 `pageerror` / `console.error`。
 
 ## 回归基线脚本
 完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）、`scripts/wt-iconfont.cjs`（⑦）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟，再跑 iconfont 专项。

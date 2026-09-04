@@ -1407,6 +1407,58 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return candidates.filter(el => isExempt || declaresProperty(el, property));
   }
 
+  /** 找出 iconfont 的共享实例：优先按图标自身的重复组件类匹配；
+   *  图标自身只有 wego-iconfont-s/icon-* 时，回退到最近的重复父组件，按相对子节点路径找对应图标。
+   *  两条路径都要求候选当前图标类与目标原图标一致，避免同名图标跨不同组件全页面扩散。 */
+  function findSharedIconfontElements(targetEl, oldClasses) {
+    if (!targetEl || !targetEl.classList) return { componentClass: '', elements: [] };
+    const accepted = new Set((Array.isArray(oldClasses) ? oldClasses : [oldClasses]).filter(Boolean));
+    if (!accepted.size) return { componentClass: '', elements: [] };
+    const isVisible = (el) => !!(el && el.isConnected && el.getClientRects && el.getClientRects().length);
+    const matchesIcon = (el) => el !== targetEl && isVisible(el) && el.tagName === targetEl.tagName && accepted.has(getIconfontClass(el));
+
+    const ownClass = pickComponentClass(targetEl);
+    if (ownClass) {
+      let peers = [];
+      try { peers = Array.from(document.querySelectorAll('.' + CSS.escape(ownClass))).filter(matchesIcon); } catch (e) {}
+      if (peers.length && peers.length + 1 <= MAX_SHARED_STYLE_COUNT) {
+        return { componentClass: ownClass, elements: peers };
+      }
+    }
+
+    let ancestor = targetEl.parentElement;
+    while (ancestor && ancestor !== document.body && ancestor !== document.documentElement) {
+      const componentClass = pickComponentClass(ancestor);
+      if (componentClass) {
+        const path = [];
+        let node = targetEl;
+        while (node && node !== ancestor) {
+          const parent = node.parentElement;
+          if (!parent) break;
+          path.unshift(Array.from(parent.children).indexOf(node));
+          node = parent;
+        }
+        if (node === ancestor && path.length) {
+          let anchors = [];
+          try { anchors = Array.from(document.querySelectorAll('.' + CSS.escape(componentClass))).filter(isVisible); } catch (e) {}
+          const peers = anchors.map(anchor => {
+            let candidate = anchor;
+            for (const index of path) {
+              candidate = candidate && candidate.children ? candidate.children[index] : null;
+              if (!candidate) break;
+            }
+            return candidate;
+          }).filter(matchesIcon);
+          if (peers.length && peers.length + 1 <= MAX_SHARED_STYLE_COUNT) {
+            return { componentClass, elements: peers };
+          }
+        }
+      }
+      ancestor = ancestor.parentElement;
+    }
+    return { componentClass: '', elements: [] };
+  }
+
   /** 快照元素（或伪元素）的计算样式原始值，用于「改回即无变更」判定 */
   function snapshotStyle(cs) {
     return {
@@ -6389,6 +6441,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._closeIconfontPanel();
         return;
       }
+      const existingRecord = state.changes.find(c =>
+        c.selector === this._selector && !c.target && c.property === 'icon-class');
+      const sharedMatch = findSharedIconfontElements(el, [oldClass, existingRecord && existingRecord.oldValue]);
+      const sharedKey = sharedMatch.elements.length ? sharedMatch.componentClass + '::icon-class' : '';
+      const shared = !!sharedKey;
       if (!setIconfontClass(el, nextClass, oldClass)) return;
       bus.emit('style-change', {
         selector: this._selector,
@@ -6400,8 +6457,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         oldValue: oldClass,
         newValue: nextClass,
         el,
-        shared: false,
-        sharedKey: '',
+        shared,
+        sharedKey,
+      });
+      sharedMatch.elements.forEach(peer => {
+        const peerOldClass = getIconfontClass(peer);
+        if (!peerOldClass || !setIconfontClass(peer, nextClass, peerOldClass)) return;
+        bus.emit('style-change', {
+          selector: generateSelector(peer),
+          elementTag: peer.tagName.toLowerCase(),
+          elementText: (peer.textContent || '').trim().substring(0, 50),
+          elementClass: getFirstStableClass(peer),
+          elementClasses: getStableClasses(peer),
+          property: 'icon-class',
+          oldValue: peerOldClass,
+          newValue: nextClass,
+          el: peer,
+          shared: true,
+          sharedKey,
+          noUndo: true,
+        });
       });
       const trigger = this._shadow.querySelector('[data-action="iconfont"]');
       if (trigger) trigger.innerHTML = `<span aria-hidden="true">${escapeHtml(getIconfontGlyph(nextClass))}</span>`;
@@ -6409,7 +6484,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         btn.classList.toggle('is-current', btn.dataset.iconfontClass === nextClass);
       });
       this._closeIconfontPanel();
-      bus.emit('toast', { message: '已替换 iconfont 图标' });
+      bus.emit('toast', {
+        message: shared ? `已替换 iconfont 图标并同步 ${sharedMatch.elements.length + 1} 个共享元素` : '已替换 iconfont 图标',
+      });
     }
 
     /** 多层效果：添加一层（描边→位置/宽/色；投影→x/y/blur/spread/色） */
@@ -10369,10 +10446,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (item.groupRecords && item.groupRecords.length) {
         item.groupRecords.forEach(rec => {
           const el = queryTargetEl(rec.selector);
-          try { applyStyleProperty(el, rec.property, rec.newValue); } catch (e) {}
-          const rec2 = { ...rec, id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4) };
-          state.changes.push(rec2);
-          if (el) changeElRefs.set(rec2.id, el);
+          this._applyPropertyValue(rec.selector, rec.target || '', rec.property, rec.newValue);
+          const existing = state.changes.find(c =>
+            c.selector === rec.selector && (c.target || '') === (rec.target || '') && c.property === rec.property);
+          if (existing) {
+            existing.newValue = rec.newValue;
+            existing.shared = rec.shared;
+            existing.sharedKey = rec.sharedKey;
+            existing.timestamp = Date.now();
+            if (el) changeElRefs.set(existing.id, el);
+          } else {
+            const rec2 = { ...rec, id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4) };
+            state.changes.push(rec2);
+            if (el) changeElRefs.set(rec2.id, el);
+          }
         });
         state.undoStack.push(item);
         this._syncAfterRecordsChanged();

@@ -22,7 +22,7 @@ description: 走查工具自动化测试与回归。改动 wego-app/js/walkthrou
 - ③ 数值拖动：Shift ×5、Alt 微调；点击全选直接输入；撤销/重做后元素与 input 同步。
 - ④ 顺序移动：移动按钮/方向键换位（moveFlexItem+orderBaselines+共享同步+moveKey）；撤销/重做；刷新保持；拖拽换位已移除。[ev-044, ev-048]
 - ⑤ 元信息：红虚线 `line.guide`+宽×高气泡 `highlight .label`+gap 洋红 `rect.gap-bg`/padding 蓝 `rect.pad-bg`/margin 绿 `rect.mar-bg`；8px 网格已移除。[ev-040]
-- ⑦ iconfont：入口仅在选中已注册图标时出现；纯图标网格可滚动；替换只改图标类并记录旧值/新值；撤销/重做、删除、刷新回放闭环。[ev-053]
+- ⑦ iconfont：入口仅在选中已注册图标时出现；纯图标网格可滚动；同组件结构且原图标一致时整组同步，图标无自身组件类则按重复父组件相对路径匹配；修改记录、撤销/重做、删除、刷新回放整组闭环。[ev-053, ev-054]
 - 无页面报错（pageerror/console.error）。
 - 置信度：先排除环境假象再判 bug；低置信度待确认，高置信度才修复。
 
