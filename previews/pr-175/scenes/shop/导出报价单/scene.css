@@ -197,7 +197,7 @@
   min-width: 0;
 }
 .quote-product-row__spec {
-  font-size: var(--body-xs-font-size);
+  font-size: var(--body-md-font-size);
   line-height: var(--body-xs-line-height);
   color: var(--text-tertiary);
 }
@@ -489,9 +489,10 @@
   font-size: var(--body-xl-font-size);
 }
 .quote-selected-empty {
-  padding: var(--spacer-24) var(--spacer-16);
+  height: auto;
+  padding: calc(var(--spacer-48) + var(--spacer-48) + var(--spacer-4));
   text-align: center;
-  color: var(--text-tertiary);
-  font-size: var(--body-sm-font-size);
+  color: var(--text-default);
+  font-size: var(--body-lg-font-size);
   line-height: var(--body-sm-line-height);
 }

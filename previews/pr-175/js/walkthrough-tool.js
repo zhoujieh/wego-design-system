@@ -259,15 +259,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** 按记录的选择器找元素；精确匹配失败时剔除易变状态类后重试，兼容历史数据 */
   function queryTargetEl(selector) {
     if (!selector) return null;
+    const pickVisible = (list) => {
+      const items = Array.from(list || []).filter(el => el && el.isConnected && !isWalkthroughElement(el));
+      return items.find(el => {
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      }) || items[0] || null;
+    };
     let el = null;
-    try { el = document.querySelector(selector); } catch (e) { return null; }
+    try { el = pickVisible(document.querySelectorAll(selector)); } catch (e) { return null; }
     if (el) return el;
     try {
       const relaxed = selector.replace(/\.([A-Za-z0-9_-]+)/g, (m, cls) =>
         (VOLATILE_CLASS_RE.test(cls) || isRegisteredIconfontClass(cls)) ? '' : m);
       if (relaxed !== selector) {
-        const list = document.querySelectorAll(relaxed);
-        if (list.length) return list[0];
+        el = pickVisible(document.querySelectorAll(relaxed));
+        if (el) return el;
       }
     } catch (e) { /* ignore */ }
     return null;
@@ -1031,7 +1038,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       el.style.color = value;
       return { property, oldValue, newValue: value };
     }
-    el.style[property] = value;
+    el.style.setProperty(property, value);
     return { property, oldValue, newValue: value };
   }
 
@@ -3707,6 +3714,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _afterPromptCopied() {
       bus.emit('toast', { message: '已复制 Prompt' });
+      this.close();
       bus.emit('reset-changes');
     }
 
@@ -6967,6 +6975,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 尺寸（宽度/高度）归入同一「size」共享组：配置列表合并为一条「尺寸」记录
       const sharedKey = componentClass + '::' + ((result.property === 'width' || result.property === 'height') ? 'size' : result.property);
       const sharedCount = synced.length + 1;
+      debugLog.add('STYLE', `共享样式同步: ${result.property} ${result.oldValue || '-'} -> ${result.newValue || '-'} count=${sharedCount} key=${sharedKey}`);
       synced.forEach(el => {
         let applied = false;
         try { applyStyleProperty(el, result.property, result.newValue); applied = true; } catch (e) {}
@@ -8205,6 +8214,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 离开页面前把防抖窗口内未落盘的最后修改立即写入
       window.addEventListener('pagehide', this._onPageHide);
       this._loadChanges();
+      this._bindReplayDomObserver();
       // 迁移修复前遗留的 default 场景残留数据（主 tab 识别修复前的历史数据）：
       // 按选择器在 DOM 中定位元素 → 从 host-tab 面板映射 routeId → 归并到正确场景。
       // 场景为异步渲染，未命中的变更会在方法内延时重试补迁。
@@ -8226,8 +8236,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       document.removeEventListener('pointerdown', this._onDocPointerDown, true);
       document.removeEventListener('keydown', this._onDocKeyDown);
       if (this._tabObserver) { this._tabObserver.disconnect(); this._tabObserver = null; }
+      if (this._replayDomObserver) { this._replayDomObserver.disconnect(); this._replayDomObserver = null; }
       if (this._tabChangeTimer) { clearTimeout(this._tabChangeTimer); this._tabChangeTimer = null; }
       if (this._migrateTimer) { clearTimeout(this._migrateTimer); this._migrateTimer = null; }
+      if (this._inlineReplayTimer) { clearTimeout(this._inlineReplayTimer); this._inlineReplayTimer = null; }
     }
 
     // ── 渲染 ──────────────────────────────────────────────
@@ -10548,6 +10560,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._revertChange(existing);
           state.changes = state.changes.filter(c => c.id !== existing.id);
           changeElRefs.delete(existing.id);
+          debugLog.add('STYLE', `移除净零样式记录: ${change.property} selector=${change.selector}`);
           this._syncAfterRecordsChanged();
         }
         return;
@@ -10583,6 +10596,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.displayNew = change.displayNew || existing.displayNew || '';
         Object.assign(existing, deriveIntent(existing, change.el));
         if (change.el) changeElRefs.set(existing.id, change.el);
+        debugLog.add('STYLE', `更新样式记录: ${change.property} ${change.oldValue || '-'} -> ${change.newValue || '-'} selector=${change.selector}`);
       } else {
         const srcInfo = (change.el && !change.target && change.property !== 'text-content' && change.property !== 'icon-class')
           ? readSourceDeclaration(change.el, change.property)
@@ -10611,6 +10625,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Object.assign(rec, deriveIntent(rec, change.el));
         state.changes.push(rec);
         if (change.el) changeElRefs.set(rec.id, change.el);
+        debugLog.add('STYLE', `新增样式记录: ${change.property} ${change.oldValue || '-'} -> ${change.newValue || '-'} selector=${change.selector}`);
       }
       this._syncAfterRecordsChanged();
     }
@@ -10989,6 +11004,31 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       debugLog.add('RESET', '跨场景重置完成');
     }
 
+    /** 页面弹层/折叠区等动态 DOM 重建后，按当前场景修改记录补回内联样式 */
+    _bindReplayDomObserver() {
+      if (typeof MutationObserver === 'undefined' || this._replayDomObserver || !document.body) return;
+      this._replayDomObserver = new MutationObserver((mutations) => {
+        if (!state.changes.length) return;
+        const hasPageNode = mutations.some(m => Array.from(m.addedNodes || []).some(node => {
+          if (!node || node.nodeType !== 1) return false;
+          return !isWalkthroughElement(node);
+        }));
+        if (!hasPageNode) return;
+        this._scheduleInlineReplay('dom-childlist');
+      });
+      this._replayDomObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    _scheduleInlineReplay(reason) {
+      if (this._inlineReplayTimer) clearTimeout(this._inlineReplayTimer);
+      this._inlineReplayTimer = setTimeout(() => {
+        this._inlineReplayTimer = null;
+        if (!state.changes.length) return;
+        debugLog.add('STYLE', `动态 DOM 触发样式回放: route=${state.currentRoute} changes=${state.changes.length} reason=${reason}`);
+        this._replayInlineChanges(0);
+      }, 80);
+    }
+
     /** 路由切换统一收尾：旧场景落盘与浮层清理 → 新场景数据加载 → 标记重绘 */
     _handleRouteChange() {
       const nextRoute = getCurrentRoute();
@@ -11131,6 +11171,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         try { el.style.setProperty(c.property, c.newValue); } catch (e) {}
       });
+      if (pending.length || reorders.length) {
+        const missed = Math.max(0, pending.length - matched);
+        debugLog.add('STYLE', `样式回放: route=${state.currentRoute} round=${round} matched=${matched}/${pending.length} reorder=${reorderMatched}/${reorders.length}${missed ? ' missed=' + missed : ''}`);
+      }
       // 批注标记随回放重试一起重绘：场景脚本异步挂载/内部面板激活时，首次同步可能还找不到可见锚点
       let annMatched = 0;
       if (this._annotationMode) {
@@ -11181,6 +11225,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           changes: state.changes,
           annotations: state.annotations,
         }));
+        debugLog.add('STYLE', `样式记录落盘: key=${key} changes=${state.changes.length} annotations=${state.annotations.length}`);
       } catch (e) {}
     }
 
