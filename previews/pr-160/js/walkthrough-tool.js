@@ -218,8 +218,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
   /** 选择器中应剔除的易变状态类（激活/展开/选中等运行时态，场景重建后会变化导致选择器失效） */
   const VOLATILE_CLASS_RE = /(^|--|-)(active|open|closed|hidden|visible|selected|current|focus|focused|hover|pressed|dragging|expanded|collapsed|disabled|loading|entering|leaving|shown|show)$/i;
+  const ICONFONT_CLASS_RE = /^icon-[A-Za-z0-9_-]+$/;
+  function isRegisteredIconfontClass(c) {
+    if (!ICONFONT_CLASS_RE.test(c || '')) return false;
+    const catalog = getIconfontCatalog();
+    if (!iconfontClassSetCache || iconfontClassSetCache.size !== catalog.length) {
+      iconfontClassSetCache = new Set(catalog.map(item => item.className));
+    }
+    return iconfontClassSetCache.has(c);
+  }
   function isStableSelectorClass(c) {
-    return !!c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt') && !VOLATILE_CLASS_RE.test(c);
+    return !!c && !c.startsWith('wt-') && !c.startsWith('wego-') && !c.startsWith('data-wt') &&
+      !isRegisteredIconfontClass(c) && !VOLATILE_CLASS_RE.test(c);
   }
   /** 提取元素完整稳定类列表（保留全部业务/组件类，供施工单区分组件类与业务类；易变状态类剔除） */
   function getStableClasses(el) {
@@ -253,7 +263,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     try { el = document.querySelector(selector); } catch (e) { return null; }
     if (el) return el;
     try {
-      const relaxed = selector.replace(/\.([A-Za-z0-9_-]+)/g, (m, cls) => VOLATILE_CLASS_RE.test(cls) ? '' : m);
+      const relaxed = selector.replace(/\.([A-Za-z0-9_-]+)/g, (m, cls) =>
+        (VOLATILE_CLASS_RE.test(cls) || isRegisteredIconfontClass(cls)) ? '' : m);
       if (relaxed !== selector) {
         const list = document.querySelectorAll(relaxed);
         if (list.length) return list[0];
@@ -417,6 +428,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
   /** 运行意图识别，返回 { intent, intentClass, skipCss, note } */
   function deriveIntent(rec, el) {
+    if (rec && rec.property === 'icon-class') {
+      return { intent: 'replace-icon', intentClass: '', skipCss: true, note: '替换 iconfont 图标类' };
+    }
     for (const rule of CLASS_INTENTS) {
       try {
         if (rule.test(el, rec)) {
@@ -496,6 +510,97 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (document.querySelectorAll(selector).length === 1) return selector;
     } catch (e) { /* ignore */ }
     return buildNthChain(el);
+  }
+
+  // ============================================================
+  // iconfont 图标目录与替换
+  // ============================================================
+
+  let iconfontCatalogCache = null;
+  let iconfontClassSetCache = null;
+
+  /** 把 CSS content 值转换成可直接显示的字形字符（兼容 CSSOM 返回转义串或真实字符） */
+  function decodeCssContent(value) {
+    let raw = String(value || '').trim();
+    if (!raw || raw === 'none' || raw === 'normal') return '';
+    if ((raw[0] === '"' && raw[raw.length - 1] === '"') ||
+        (raw[0] === "'" && raw[raw.length - 1] === "'")) {
+      raw = raw.slice(1, -1);
+    }
+    raw = raw.replace(/\\([0-9a-fA-F]{1,6})\s?/g, (m, hex) => {
+      try { return String.fromCodePoint(parseInt(hex, 16)); } catch (e) { return ''; }
+    });
+    return raw.replace(/\\([\\"'])/g, '$1');
+  }
+
+  /** 从页面已加载样式表读取全部 .icon-*:before 规则，供样式面板纯图标选择器使用 */
+  function getIconfontCatalog() {
+    if (iconfontCatalogCache && iconfontCatalogCache.length) return iconfontCatalogCache;
+    const byClass = new Map();
+    const walkRules = (rules) => {
+      if (!rules) return;
+      for (let i = 0; i < rules.length; i++) {
+        const rule = rules[i];
+        try {
+          if (rule.selectorText && rule.style) {
+            const content = decodeCssContent(rule.style.getPropertyValue('content'));
+            if (!content) continue;
+            const re = /\.([A-Za-z0-9_-]+)\s*:{1,2}before\b/g;
+            let match;
+            while ((match = re.exec(rule.selectorText))) {
+              const className = match[1];
+              if (ICONFONT_CLASS_RE.test(className) && !byClass.has(className)) {
+                byClass.set(className, { className, glyph: content });
+              }
+            }
+          } else if (rule.cssRules) {
+            walkRules(rule.cssRules);
+          }
+        } catch (e) { /* 跨域或不支持读取的样式表跳过 */ }
+      }
+    };
+    try {
+      for (let i = 0; i < document.styleSheets.length; i++) {
+        try { walkRules(document.styleSheets[i].cssRules); } catch (e) { /* ignore */ }
+      }
+    } catch (e) { /* ignore */ }
+    iconfontCatalogCache = Array.from(byClass.values());
+    return iconfontCatalogCache;
+  }
+
+  function getIconfontClass(el) {
+    if (!el || !el.classList) return '';
+    const candidates = Array.from(el.classList).filter(c => ICONFONT_CLASS_RE.test(c));
+    if (!candidates.length) return '';
+    const catalog = getIconfontCatalog();
+    if (!catalog.length) return el.classList.contains('wego-iconfont-s') ? candidates[0] : '';
+    const registered = new Set(catalog.map(item => item.className));
+    return candidates.find(c => registered.has(c)) || '';
+  }
+
+  function getIconfontGlyph(className) {
+    const hit = getIconfontCatalog().find(item => item.className === className);
+    return hit ? hit.glyph : '';
+  }
+
+  /** 仅替换已注册的图标类，保留尺寸、颜色和业务结构类 */
+  function setIconfontClass(el, className, previousClass) {
+    if (!el || !el.classList || !className || !ICONFONT_CLASS_RE.test(className)) return false;
+    const catalog = getIconfontCatalog();
+    const registered = new Set(catalog.map(item => item.className));
+    if (registered.size && !registered.has(className)) return false;
+    if (registered.size) {
+      Array.from(el.classList).forEach(c => {
+        if (registered.has(c) && c !== className) el.classList.remove(c);
+      });
+    } else if (previousClass && ICONFONT_CLASS_RE.test(previousClass)) {
+      el.classList.remove(previousClass);
+    } else {
+      const current = getIconfontClass(el);
+      if (current) el.classList.remove(current);
+    }
+    el.classList.add(className);
+    return true;
   }
 
   // ============================================================
@@ -980,6 +1085,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     if (p === 'size') return '尺寸';
     if (p === 'flex') return '宽度';
     if (p === 'order') return '顺序';
+    if (p === 'icon-class') return '图标';
     return p;
   }
 
@@ -3691,6 +3797,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         lines.push(title);
         // 变更列表
         const addClassChanges = g.changes.filter(c => c.intent === 'add-class');
+        const iconChanges = g.changes.filter(c => c.property === 'icon-class');
         const cssMap = new Map();
         g.changes.filter(c => !c.skipCss).forEach(c => {
           const k = c.property + '||' + c.newValue;
@@ -3703,6 +3810,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 加类
         addClassChanges.forEach(c => {
           changeLines.push(`- 加结构类 \`${c.intentClass}\``);
+        });
+        iconChanges.forEach(c => {
+          changeLines.push(`- 替换图标：\`${c.oldValue}\` → \`${c.newValue}\``);
         });
         // 顺序移动
         orderChanges.forEach(c => {
@@ -3731,15 +3841,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
         const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
         const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
+        const iconSnippet = iconChanges.map(c => `\`${c.oldValue}\` → \`${c.newValue}\``).join('，');
         let fixLine = '- 改法：';
-        if (classAnchor) {
+        if (iconSnippet && !classAnchor && !cssSnippet && !orderSnippet && !addSnippet) {
+          fixLine += `将目标元素的图标类 ${iconSnippet}`;
+        } else if (classAnchor) {
           const businessClass = getBusinessClass(g);
           fixLine += `修改 \`.${classAnchor}\``;
           if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
           if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
           if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
+          if (iconSnippet) fixLine += `，替换图标类 ${iconSnippet}`;
         } else {
           fixLine += `在源码对应 CSS 中设置：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+          if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
         }
         lines.push(fixLine);
         // 组内备注
@@ -3755,6 +3870,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementText: anchor,
           role,
           adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
+          icons: iconChanges.map(c => ({ from: c.oldValue, to: c.newValue })),
           css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue, sourceDeclared: !!c.sourceDeclared, sourceValue: c.sourceValue || '' })),
           annotation: g.annotation || '',
           shared: g.shared || false,
@@ -3940,6 +4056,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
           lines.push(title);
           const addClassChanges = g.changes.filter(c => c.intent === 'add-class');
+          const iconChanges = g.changes.filter(c => c.property === 'icon-class');
           const cssMap = new Map();
           g.changes.filter(c => !c.skipCss).forEach(c => {
             const k = c.property + '||' + c.newValue;
@@ -3950,6 +4067,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const otherChanges = cssChanges.filter(c => c.property !== 'order');
           const changeLines = [];
           addClassChanges.forEach(c => { changeLines.push(`- 加结构类 \`${c.intentClass}\``); });
+          iconChanges.forEach(c => { changeLines.push(`- 替换图标：\`${c.oldValue}\` → \`${c.newValue}\``); });
           orderChanges.forEach(c => {
             const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
             const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
@@ -3974,15 +4092,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
           const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
           const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
+          const iconSnippet = iconChanges.map(c => `\`${c.oldValue}\` → \`${c.newValue}\``).join('，');
           let fixLine = '- 改法：';
-          if (classAnchor) {
+          if (iconSnippet && !classAnchor && !cssSnippet && !orderSnippet && !addSnippet) {
+            fixLine += `将目标元素的图标类 ${iconSnippet}`;
+          } else if (classAnchor) {
             const businessClass = getBusinessClass(g);
             fixLine += `修改 \`.${classAnchor}\``;
             if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
             if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
             if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
+            if (iconSnippet) fixLine += `，替换图标类 ${iconSnippet}`;
           } else {
             fixLine += `在源码对应 CSS 中设置：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+            if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
           }
           lines.push(fixLine);
           if (g.annotation) lines.push(`- 备注：${g.annotation}`);
@@ -3995,6 +4118,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             elementText: anchor,
             role,
             adds: addClassChanges.map(c => c.intentClass).filter(Boolean),
+            icons: iconChanges.map(c => ({ from: c.oldValue, to: c.newValue })),
             css: cssChanges.map(c => ({ property: c.property, value: c.property === 'order' ? (c.orderValue || c.newValue) : c.newValue, sourceDeclared: !!c.sourceDeclared, sourceValue: c.sourceValue || '' })),
             annotation: g.annotation || '',
             shared: g.shared || false,
@@ -4284,6 +4408,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._target = ''; // '' | 'before' | 'after'
       this._commitTimer = null;
       this._tokenPanel = { open: false, type: '', trigger: null };
+      this._iconfontPanelOpen = false;
       this._sourceTokens = {}; // 字段 → 源码声明的 var(--xxx) 原文，供 token 面板默认选中
     }
     connectedCallback() {
@@ -4297,6 +4422,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     /** 切换编辑目标（元素本体 / ::before / ::after） */
     setTarget(target) {
       if (!this._targetEl || target === this._target) return;
+      this._closeIconfontPanel();
       this._target = target;
       // 伪元素：从已注入的 state.pseudoStyles 读取当前值，无则取计算值快照
       this._data = this._buildData(this._targetEl, target);
@@ -4312,6 +4438,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const prevEl = this._targetEl;
       const prevTarget = this._target;
       const prevData = this._data;
+      if (prevEl !== el) this._closeIconfontPanel();
       this._targetEl = el;
       this._selector = selector;
       this._target = target || '';
@@ -4344,6 +4471,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         target: target || '',
         before: targetEl ? isPseudoRendered(targetEl, 'before') : false,
         after: targetEl ? isPseudoRendered(targetEl, 'after') : false,
+        iconfont: !!getIconfontClass(targetEl),
         display: d.display || '',
         gradientEnabled: !!d.gradientEnabled,
         keys,
@@ -4365,6 +4493,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       const headerText = root.querySelector('.header-text');
       if (headerText) headerText.textContent = text || '';
+      const iconfontTrigger = root.querySelector('[data-action="iconfont"]');
+      if (iconfontTrigger) {
+        const iconClass = getIconfontClass(this._targetEl);
+        iconfontTrigger.innerHTML = `<span aria-hidden="true">${escapeHtml(getIconfontGlyph(iconClass))}</span>`;
+        iconfontTrigger.title = '替换 iconfont 图标';
+      }
       // 输入/选择字段值（含追加层 data-layer-field）
       root.querySelectorAll('input[data-field], select[data-field], input[data-layer-field]').forEach(node => {
         const field = node.dataset.field;
@@ -4515,6 +4649,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     close() {
+      this._closeIconfontPanel();
       this._targetEl = null;
       this.setAttribute('hidden', '');
     }
@@ -4765,9 +4900,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     }
 
     _render() {
+      this._iconfontPanelOpen = false;
       const d = this._data || {};
       const tag = this._targetEl ? this._targetEl.tagName.toLowerCase() : '';
       const text = this._targetEl ? (this._targetEl.textContent || '').trim().substring(0, 20) : '';
+      const currentIconClass = getIconfontClass(this._targetEl);
+      const iconfontCatalog = currentIconClass ? getIconfontCatalog() : [];
       const t = this._target || '';
       const hasBefore = this._targetEl ? isPseudoRendered(this._targetEl, 'before') : false;
       const hasAfter = this._targetEl ? isPseudoRendered(this._targetEl, 'after') : false;
@@ -4924,6 +5062,82 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           .undo-btn:hover:not(.is-disabled) { background: rgba(255,255,255,0.14); color: #fff; }
           .undo-btn.is-disabled { opacity: 0.28; cursor: default; background: transparent; color: rgba(255,255,255,0.4); }
+          .iconfont-trigger {
+            width: 28px;
+            height: 28px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.82);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+            font-size: 17px;
+            transition: background .15s ease, color .15s ease, border-color .15s ease;
+          }
+          .iconfont-trigger span,
+          .iconfont-option span {
+            font-family: "wego-iconfont-s" !important;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+          .iconfont-trigger:hover,
+          .iconfont-trigger.is-open {
+            background: rgba(0,185,107,0.14);
+            border-color: rgba(0,185,107,0.48);
+            color: #00d982;
+          }
+          .iconfont-panel {
+            min-height: 0;
+            max-height: 216px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            background: rgba(12,12,12,0.42);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.2) transparent;
+          }
+          .iconfont-panel[hidden] { display: none; }
+          .iconfont-panel::-webkit-scrollbar { width: 5px; }
+          .iconfont-panel::-webkit-scrollbar-thumb {
+            border-radius: 999px;
+            background: rgba(255,255,255,0.2);
+          }
+          .iconfont-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 6px;
+          }
+          .iconfont-option {
+            aspect-ratio: 1;
+            min-width: 0;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.78);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-size: 19px;
+          }
+          .iconfont-option:hover {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+          }
+          .iconfont-option.is-current {
+            border-color: #00b96b;
+            background: rgba(0,185,107,0.16);
+            color: #00d982;
+          }
           .section {
             display: flex;
             flex-direction: column;
@@ -5476,10 +5690,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <div class="header-tag">${tag || '—'}</div>
               ${text ? `<div class="header-text">${escapeHtml(text)}</div>` : ''}
             </div>
+            ${currentIconClass ? `<button class="iconfont-trigger" type="button" data-action="iconfont" title="替换 iconfont 图标" aria-expanded="false"><span aria-hidden="true">${escapeHtml(getIconfontGlyph(currentIconClass))}</span></button>` : ''}
             <button class="undo-btn" type="button" data-action="undo" title="撤销 (Ctrl+Z)">${ICONS.undo}</button>
             <button class="undo-btn" type="button" data-action="redo" title="重做 (Ctrl+Shift+Z)">${ICONS.redo}</button>
             <button class="close-btn" type="button" data-action="close">${ICONS.close}</button>
           </div>
+
+          ${currentIconClass ? `<div class="iconfont-panel" data-iconfont-panel hidden>
+            <div class="iconfont-grid">
+              ${iconfontCatalog.map(icon => `<button class="iconfont-option ${icon.className === currentIconClass ? 'is-current' : ''}" type="button" data-iconfont-class="${escapeHtml(icon.className)}" title="${escapeHtml(icon.className)}" aria-label="${escapeHtml(icon.className)}"><span aria-hidden="true">${escapeHtml(icon.glyph)}</span></button>`).join('')}
+            </div>
+          </div>` : ''}
 
           <div class="panel-body">
           ${hasBefore || hasAfter ? `
@@ -5825,6 +6046,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           // 用短暂时间窗抑制，避免把"恢复滚动"误判为用户滚动而关闭弹出层
           if (this._suppressScrollUntil && Date.now() < this._suppressScrollUntil) return;
           this._closeTokenPanel();
+          this._closeIconfontPanel();
           bus.emit('close-color-picker');
         });
       }
@@ -5840,6 +6062,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (undoBtn) undoBtn.addEventListener('click', () => bus.emit('undo'));
       const redoBtn = this._shadow.querySelector('[data-action="redo"]');
       if (redoBtn) redoBtn.addEventListener('click', () => bus.emit('redo'));
+      const iconfontTrigger = this._shadow.querySelector('[data-action="iconfont"]');
+      if (iconfontTrigger) {
+        iconfontTrigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this._toggleIconfontPanel();
+        });
+      }
+      this._shadow.querySelectorAll('[data-iconfont-class]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this._replaceIconfontClass(btn.dataset.iconfontClass);
+        });
+      });
       const app2 = document.querySelector('wego-walkthrough');
       if (app2 && typeof app2._updateUndoRedoUI === 'function') app2._updateUndoRedoUI();
       // 伪元素目标切换
@@ -5987,6 +6222,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
+          this._closeIconfontPanel();
           const field = btn.dataset.field;
           const opacityField = field.replace('Hex', 'Opacity');
           const hex = this._data[field] || '#000000';
@@ -6102,6 +6338,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-token-trigger]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
+          this._closeIconfontPanel();
           const type = btn.dataset.tokenTrigger;
           const field = btn.dataset.field;
           if (this._tokenPanel.open && this._tokenPanel.field === field) {
@@ -6111,6 +6348,68 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
         });
       });
+    }
+
+    _toggleIconfontPanel() {
+      const panel = this._shadow.querySelector('[data-iconfont-panel]');
+      const trigger = this._shadow.querySelector('[data-action="iconfont"]');
+      if (!panel || !trigger) return;
+      if (this._iconfontPanelOpen) {
+        this._closeIconfontPanel();
+        return;
+      }
+      this._closeTokenPanel();
+      bus.emit('close-color-picker');
+      panel.hidden = false;
+      trigger.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      this._iconfontPanelOpen = true;
+      this._updatePosition();
+      const current = panel.querySelector('.iconfont-option.is-current');
+      if (current) {
+        panel.scrollTop = Math.max(0, current.offsetTop - panel.clientHeight / 2 + current.offsetHeight / 2);
+      }
+    }
+
+    _closeIconfontPanel() {
+      const panel = this._shadow && this._shadow.querySelector('[data-iconfont-panel]');
+      const trigger = this._shadow && this._shadow.querySelector('[data-action="iconfont"]');
+      if (panel) panel.hidden = true;
+      if (trigger) {
+        trigger.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+      this._iconfontPanelOpen = false;
+    }
+
+    _replaceIconfontClass(nextClass) {
+      const el = this._targetEl;
+      const oldClass = getIconfontClass(el);
+      if (!el || !oldClass || !nextClass || oldClass === nextClass) {
+        this._closeIconfontPanel();
+        return;
+      }
+      if (!setIconfontClass(el, nextClass, oldClass)) return;
+      bus.emit('style-change', {
+        selector: this._selector,
+        elementTag: el.tagName.toLowerCase(),
+        elementText: (el.textContent || '').trim().substring(0, 50),
+        elementClass: getFirstStableClass(el),
+        elementClasses: getStableClasses(el),
+        property: 'icon-class',
+        oldValue: oldClass,
+        newValue: nextClass,
+        el,
+        shared: false,
+        sharedKey: '',
+      });
+      const trigger = this._shadow.querySelector('[data-action="iconfont"]');
+      if (trigger) trigger.innerHTML = `<span aria-hidden="true">${escapeHtml(getIconfontGlyph(nextClass))}</span>`;
+      this._shadow.querySelectorAll('[data-iconfont-class]').forEach(btn => {
+        btn.classList.toggle('is-current', btn.dataset.iconfontClass === nextClass);
+      });
+      this._closeIconfontPanel();
+      bus.emit('toast', { message: '已替换 iconfont 图标' });
     }
 
     /** 多层效果：添加一层（描边→位置/宽/色；投影→x/y/blur/spread/色） */
@@ -8358,25 +8657,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 1. 颜色选择器（最上层）
       const cp = this._components.colorPicker;
       if (cp && !cp.hasAttribute('hidden')) { cp.close(); return; }
-      // 2. 批注气泡
+      // 2. iconfont 图标面板（样式面板标题栏入口）
+      const sp = this._components.stylePanel;
+      if (sp && sp._iconfontPanelOpen) { sp._closeIconfontPanel(); return; }
+      // 3. 批注气泡
       const ab = this._components.annotationBubble;
       if (ab && !ab.hasAttribute('hidden')) { this._closeAnnotationBubble(); return; }
-      // 3. Token 选择面板（样式面板内部浮层）
-      const sp = this._components.stylePanel;
+      // 4. Token 选择面板（样式面板内部浮层）
       if (sp && sp._tokenPanel && sp._tokenPanel.open) { sp._closeTokenPanel(); return; }
-      // 4. 样式编辑面板（有选中元素）
+      // 5. 样式编辑面板（有选中元素）
       if (state.selectedElement) { this._clearSelection(); return; }
-      // 5. 调试日志面板
+      // 6. 调试日志面板
       if (this._components.debugPanel && !this._components.debugPanel.hasAttribute('hidden')) { this._closeDebugPanel(); return; }
-      // 6. 配置列表面板
+      // 7. 配置列表面板
       const ov = this._components.overviewPanel;
       if (ov && !ov.hasAttribute('hidden')) { ov.close(); return; }
-      // 7. 工具条子面板（数据模拟 / 更多）
+      // 8. 工具条子面板（数据模拟 / 更多）
       const anySubpanel = this._shadow.querySelector('[data-subpanel].is-open');
       if (anySubpanel) { this._closeSubpanels(); return; }
-      // 8. 走查模式
+      // 9. 走查模式
       if (this._walkthroughMode) { this._setWalkthroughMode(false); return; }
-      // 9. 批注模式
+      // 10. 批注模式
       if (this._annotationMode) { this._setAnnotationMode(false); return; }
     };
 
@@ -8731,6 +9032,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (this._components.colorPicker) this._components.colorPicker.close();
         if (this._components.stylePanel && this._components.stylePanel._closeTokenPanel) {
           this._components.stylePanel._closeTokenPanel();
+        }
+        if (this._components.stylePanel && this._components.stylePanel._closeIconfontPanel) {
+          this._components.stylePanel._closeIconfontPanel();
         }
       }
       this._updateToolbarState();
@@ -9573,6 +9877,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!state.originalStyles[snapKey]) {
         const cs = getComputedStyle(el);
         state.originalStyles[snapKey] = snapshotStyle(cs);
+        const iconClass = getIconfontClass(el);
+        if (iconClass) state.originalStyles[snapKey]['icon-class'] = iconClass;
       }
       // 为已渲染的伪元素建立原始样式快照（key 含 ::before/::after），
       // 使伪元素样式改回原值时也能自动删除变更记录。
@@ -9771,6 +10077,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           property: change.property,
           prevValue: existing ? existing.newValue : null,
           nextValue: change.newValue,
+          originalValue: existing ? existing.oldValue : change.oldValue,
           moveKey: change.moveKey || '',
         });
         if (state.undoStack.length > 100) state.undoStack.shift();
@@ -9791,7 +10098,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Object.assign(existing, deriveIntent(existing, change.el));
         if (change.el) changeElRefs.set(existing.id, change.el);
       } else {
-        const srcInfo = (change.el && !change.target && change.property !== 'text-content')
+        const srcInfo = (change.el && !change.target && change.property !== 'text-content' && change.property !== 'icon-class')
           ? readSourceDeclaration(change.el, change.property)
           : { declared: false, sourceValue: '' };
         const rec = {
@@ -9846,6 +10153,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         changeElRefs.delete(change.id);
         return;
       }
+      if (change.property === 'icon-class') {
+        try {
+          let el = changeElRefs.get(change.id);
+          if (!el || !el.isConnected) el = queryTargetEl(change.selector);
+          if (el) setIconfontClass(el, change.oldValue, change.newValue);
+        } catch (e) {}
+        changeElRefs.delete(change.id);
+        return;
+      }
       try {
         // 优先还原会话内实际改动的那个元素（避免 sticky 克隆等重复结构下 selector 歧义命中错误元素）；
         // 元素已不在文档中（如刷新后）则退回按 selector 解析
@@ -9871,6 +10187,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (property === 'text-content') {
           const el = queryTargetEl(selector);
           if (el) el.textContent = value || '';
+          return;
+        }
+        if (property === 'icon-class') {
+          const el = queryTargetEl(selector);
+          if (el) setIconfontClass(el, value, getIconfontClass(el));
           return;
         }
         if (target) {
@@ -10068,16 +10389,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.timestamp = Date.now();
       } else {
         const el = queryTargetEl(item.selector);
-        const srcInfo = (!item.target && el) ? readSourceDeclaration(el, item.property) : { declared: false, sourceValue: '' };
+        const srcInfo = (!item.target && el && item.property !== 'icon-class')
+          ? readSourceDeclaration(el, item.property)
+          : { declared: false, sourceValue: '' };
         const rec = {
           id: 'change-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
           selector: item.selector,
           target: item.target,
           elementTag: el ? el.tagName.toLowerCase() : '',
           elementText: el ? (el.textContent || '').trim().slice(0, 30) : '',
-          elementClasses: el ? Array.from(el.classList) : [],
+          elementClasses: el ? getStableClasses(el) : [],
           property: item.property,
-          oldValue: item.prevValue || '',
+          oldValue: item.originalValue != null ? item.originalValue : (item.prevValue || ''),
           newValue: item.nextValue,
           shared: false,
           sharedKey: '',
@@ -10290,9 +10613,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
       });
       const pending = state.changes.filter(c =>
-        c.type !== 'reorder' && !c.target && c.property && c.newValue !== '' && c.newValue != null && !c.skipCss
+        c.type !== 'reorder' && !c.target && c.property && c.newValue !== '' && c.newValue != null &&
+        (!c.skipCss || c.property === 'icon-class')
       );
       let matched = 0;
+      const hasIconfontChange = pending.some(c => c.property === 'icon-class');
       pending.forEach(c => {
         let el = null;
         try { el = queryTargetEl(c.selector); } catch (e) { el = null; }
@@ -10301,6 +10626,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (c.property === 'text-content') {
           // 文本改文案：用 textContent 恢复（text-content 非 CSS 属性，setProperty 无效）
           try { el.textContent = c.newValue; } catch (e) {}
+          return;
+        }
+        if (c.property === 'icon-class') {
+          if (setIconfontClass(el, c.newValue, c.oldValue)) changeElRefs.set(c.id, el);
           return;
         }
         try { el.style.setProperty(c.property, c.newValue); } catch (e) {}
@@ -10318,7 +10647,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._syncAnnotationMarkers();
       }
       // 最多重试 10 次（约 2s），覆盖场景脚本异步渲染完成的时机
-      if ((matched < pending.length || reorderMatched < reorders.length || annMatched < state.annotations.length) && round < 10) {
+      if ((matched < pending.length || reorderMatched < reorders.length || annMatched < state.annotations.length || hasIconfontChange) && round < 10) {
         if (this._replayTimer) clearTimeout(this._replayTimer);
         this._replayTimer = setTimeout(() => this._replayInlineChanges(round + 1), 200);
       }
