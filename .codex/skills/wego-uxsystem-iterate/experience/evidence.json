@@ -643,6 +643,296 @@
         "README 和技能路由改为本地累计到交付节点再更新 PR"
       ],
       "novelty": "既有规则只要求同一需求复用同一个 PR，并要求不得为每个细节制造提交；没有把不得每个细节推送 PR、交付节点边界和在线预览返回时机统一成正式规则。"
+    },
+    {
+      "id": "ev-044",
+      "date": "2026-09-04",
+      "summary": "非 CSS 字段不能沿用 CSS 回放通道，持久化恢复必须按字段语义分派",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-文本字段持久化",
+      "tags": [
+        "走查工具",
+        "text-content",
+        "持久化",
+        "_replayInlineChanges"
+      ],
+      "kind": "experience",
+      "observation": "文本修改在当前会话可见，但刷新后恢复失败；记录仍存在且没有页面报错。",
+      "mechanism": "统一回放逻辑把 text-content 当成 CSS 属性传给 style.setProperty，浏览器静默忽略。",
+      "rule": "持久化模型包含文本、属性或类名等非 CSS 字段时，回放、撤销和重做必须按字段语义分派到 textContent、属性或 classList，不能共用 CSS setProperty。",
+      "scope": [
+        "DOM 非 CSS 状态的持久化回放",
+        "撤销/重做与刷新恢复"
+      ],
+      "verification": [
+        "修改文本后刷新仍保持",
+        "撤销和重做分别恢复旧值与新值"
+      ],
+      "novelty": "原规则只覆盖 CSS 样式记录，没有定义非 CSS 字段的恢复通道。"
+    },
+    {
+      "id": "ev-045",
+      "date": "2026-09-04",
+      "summary": "布局顺序变化后旧坐标不再代表原元素，后续交互必须重新定位目标",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-顺序移动",
+      "tags": [
+        "走查工具",
+        "顺序移动",
+        "坐标",
+        "重取"
+      ],
+      "kind": "experience",
+      "observation": "元素换位后继续使用换位前坐标，自动化步骤命中了占据该位置的兄弟元素。",
+      "mechanism": "坐标描述的是视口位置而不是元素身份；顺序变化后位置与目标的对应关系失效。",
+      "rule": "任何会改变布局顺序或几何位置的操作完成后，后续步骤必须重新获取元素引用或 getBoundingClientRect，不得复用旧坐标。",
+      "scope": [
+        "拖拽或顺序调整后的自动化操作",
+        "依赖坐标的交互验证"
+      ],
+      "verification": [
+        "换位后重新取坐标能命中原目标",
+        "复用旧坐标的反例会命中兄弟元素"
+      ],
+      "novelty": "现有测试流程只要求首次定位，没有覆盖布局变更后的目标重定位。"
+    },
+    {
+      "id": "ev-046",
+      "date": "2026-09-04",
+      "summary": "关键分支未进入冒烟路径时，真实缺陷会在主回归全绿的情况下长期漏检",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-冒烟覆盖",
+      "tags": [
+        "走查工具",
+        "冒烟",
+        "覆盖盲区",
+        "移动按钮"
+      ],
+      "kind": "experience",
+      "observation": "移动按钮的同档换位分支长期未被冒烟执行，作用域错误和撤销粒度问题直到专项操作才暴露。",
+      "mechanism": "主回归只覆盖了功能名称，没有覆盖决定实现路径的关键分支条件。",
+      "rule": "冒烟矩阵必须按会改变代码路径的条件选取代表用例，至少覆盖正常路径、关键分支和一次失败反例，不能用功能点数量代替路径覆盖。",
+      "scope": [
+        "交互功能的冒烟回归设计",
+        "存在多分支实现的核心操作"
+      ],
+      "verification": [
+        "同档换位分支可稳定进入并完成撤销",
+        "故意破坏该分支时冒烟必须失败"
+      ],
+      "novelty": "已有冒烟仅覆盖顺序移动结果，没有覆盖同档顺延这一独立实现路径。"
+    },
+    {
+      "id": "ev-047",
+      "date": "2026-09-04",
+      "summary": "一次用户动作产生多条底层记录时，撤销与持久化必须使用同一事务标识成组处理",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-顺序移动",
+      "tags": [
+        "走查工具",
+        "顺序移动",
+        "moveKey",
+        "撤销单元"
+      ],
+      "kind": "experience",
+      "observation": "一次顺序移动同时修改目标、兄弟、顺延元素和共享实例，撤销时却需要多次操作且可能留下部分状态。",
+      "mechanism": "撤销栈按底层记录而不是按用户意图建模，导致一个交互被拆成多个不完整事务。",
+      "rule": "一个用户动作可能产生多条记录时，写入时必须附加共同事务键，撤销、重做、删除和刷新回放均按事务组处理。",
+      "scope": [
+        "批量同步与复合交互记录",
+        "撤销/重做/删除/持久化"
+      ],
+      "verification": [
+        "一次撤销恢复全部关联元素",
+        "一次重做与刷新回放恢复完整事务"
+      ],
+      "novelty": "现有共享记录有 sharedKey，但没有覆盖同一动作跨不同记录类型的统一事务边界。"
+    },
+    {
+      "id": "ev-048",
+      "date": "2026-09-04",
+      "summary": "程序恢复滚动会异步触发可信 scroll 事件，抑制逻辑必须覆盖事件派发窗口",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-滚动恢复",
+      "tags": [
+        "走查工具",
+        "滚动恢复",
+        "scroll异步",
+        "时间窗"
+      ],
+      "kind": "experience",
+      "observation": "面板重建后恢复 scrollTop，随后异步 scroll 监听把恢复动作误判为用户滚动并关闭浮层。",
+      "mechanism": "设置 scrollTop 与 scroll 事件派发不在同一同步调用栈，且合成事件的 isTrusted 不能可靠区分来源。",
+      "rule": "程序化恢复滚动且监听器会触发副作用时，使用覆盖异步派发的时间窗或临时移除监听器，不能依赖同步布尔标志或 isTrusted。",
+      "scope": [
+        "程序化滚动恢复",
+        "scroll 监听带关闭或提交副作用的浮层"
+      ],
+      "verification": [
+        "恢复滚动后浮层保持打开",
+        "时间窗结束后的真实用户滚动仍触发原副作用"
+      ],
+      "novelty": "现有滚动恢复只防同步重入，没有处理浏览器异步派发事件。"
+    },
+    {
+      "id": "ev-049",
+      "date": "2026-09-04",
+      "summary": "会被运行时修改的类名不能作为持久化定位锚点，记录必须使用不随修改变化的身份",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-iconfont替换",
+      "tags": [
+        "走查工具",
+        "iconfont",
+        "稳定选择器",
+        "刷新回放"
+      ],
+      "kind": "experience",
+      "observation": "替换 iconfont 类后，原选择器立即失效，导致再次编辑、刷新回放和删除记录无法定位元素。",
+      "mechanism": "持久化选择器包含了本次操作会移除的 icon-* 类，定位身份与被修改状态耦合。",
+      "rule": "记录类名替换时，选择器必须排除可变类并使用稳定父结构、data 属性或身份路径；历史选择器查询应提供移除可变类的兼容回退。",
+      "scope": [
+        "类名替换的持久化记录",
+        "刷新回放与记录删除"
+      ],
+      "verification": [
+        "替换后选择器仍命中同一元素",
+        "刷新、撤销、重做和删除均可恢复"
+      ],
+      "novelty": "既有稳定选择器只排除了状态类，没有覆盖被编辑的资源类。"
+    },
+    {
+      "id": "ev-050",
+      "date": "2026-09-04",
+      "summary": "共享变更必须由组件语义限定作用域，并把同步实例绑定为一个事务",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-iconfont共享同步",
+      "tags": [
+        "走查工具",
+        "iconfont",
+        "共享元素",
+        "父组件匹配",
+        "整组撤销"
+      ],
+      "kind": "experience",
+      "observation": "按图标类替换只改当前实例会漏同步；若按同名图标全局同步又会误改无关组件。",
+      "mechanism": "资源类描述视觉值而不描述组件角色，无法单独决定共享范围。",
+      "rule": "共享资源变更应同时匹配组件结构与原值；目标缺少自身组件类时按最近重复父组件的相对路径匹配，并将全部实例作为一个撤销与持久化事务。",
+      "scope": [
+        "重复组件中的资源或类名变更",
+        "共享实例同步与历史记录"
+      ],
+      "verification": [
+        "同组件同原值实例全部同步",
+        "无关组件同名资源保持不变",
+        "一次撤销、重做和刷新覆盖整组"
+      ],
+      "novelty": "既有共享样式同步依赖 CSS 属性和目标组件类，没有覆盖嵌套资源类的作用域识别。"
+    },
+    {
+      "id": "ev-051",
+      "date": "2026-09-04",
+      "summary": "包含 fixed 子面板的宿主使用 transform 居中会改变定位参照，应改用显式坐标或脱离变换层",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-工具栏浮层定位",
+      "tags": [
+        "走查工具",
+        "工具栏",
+        "fixed包含块",
+        "浮层定位"
+      ],
+      "kind": "experience",
+      "observation": "工具宿主用 translateX 居中后，配置列表离开视口，日志和更多面板相对入口错位。",
+      "mechanism": "非 none transform 会为 fixed 后代建立新的包含块，使其坐标不再相对视口。",
+      "rule": "宿主包含 fixed 浮层时不得用 transform 居中；应显式计算 left，或把 fixed 浮层挂到未变换的顶层容器。",
+      "scope": [
+        "包含 fixed 后代的浮动工具宿主",
+        "视口级弹层与锚点定位"
+      ],
+      "verification": [
+        "常规和矮视口分别打开全部浮层并检查视口边界",
+        "调整宿主位置后 fixed 面板仍锚定正确入口"
+      ],
+      "novelty": "现有工具栏定位规则只约束视觉位置，没有约束 transform 对 fixed 后代坐标系的影响。"
+    },
+    {
+      "id": "ev-052",
+      "date": "2026-09-04",
+      "summary": "同一受限高度 flex 面板内的主次滚动区必须显式分配收缩权，避免关键选择区被挤压",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-iconfont移动端尺寸",
+      "tags": [
+        "走查工具",
+        "iconfont",
+        "移动端",
+        "flex压缩"
+      ],
+      "kind": "experience",
+      "observation": "移动端 Safari 中图标选择区被长样式区挤压到约两行，虽然自身设置了 max-height 仍无法保证可用高度。",
+      "mechanism": "flex 子项默认 flex-shrink:1；max-height 只限制上限，不能阻止其在兄弟内容压力下继续缩小。",
+      "rule": "受限高度面板内有多个滚动区时，关键选择区使用 flex:0 0 加视口相对高度，次要内容区使用 min-height:0 与独立 overflow 滚动。",
+      "scope": [
+        "移动端受限高度复合面板",
+        "并列主次滚动区域"
+      ],
+      "verification": [
+        "不同移动端高度下关键区至少保持四行",
+        "次要区仍可独立滚动且整体不溢出视口"
+      ],
+      "novelty": "现有面板只为内容区设置 min-height:0，没有为关键选择区声明不可收缩的空间预算。"
+    },
+    {
+      "id": "ev-053",
+      "date": "2026-09-04",
+      "summary": "复合颜色控件更新内部状态后必须同步全部派生预览节点，不能只同步数据模型",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-渐变色标预览",
+      "tags": [
+        "走查工具",
+        "颜色选择器",
+        "渐变",
+        "预览同步"
+      ],
+      "kind": "experience",
+      "observation": "渐变模式下修改激活色标颜色后，页面元素样式已更新，但渐变预览条和激活色标圆点没有实时变化。",
+      "mechanism": "颜色控件的变更链路只更新 _stops 数据并提交外部样式，遗漏了由同一状态派生的本地预览 DOM。",
+      "rule": "复合控件状态更新时，同时刷新数据模型、对外应用值和所有派生预览节点；回归断言必须覆盖实际元素样式与控件内部预览。",
+      "scope": [
+        "复合颜色或渐变控件",
+        "由内部状态派生的预览节点"
+      ],
+      "verification": [
+        "修改色标颜色后 data-stopbar-preview 背景同步变化",
+        "激活 data-stop-dot 颜色同步变化",
+        "目标元素 backgroundImage 同步为新渐变"
+      ],
+      "novelty": "已有颜色同步经验关注目标元素与输入值，没有覆盖控件内部派生预览节点。"
+    },
+    {
+      "id": "ev-054",
+      "date": "2026-09-04",
+      "summary": "批量刷新面板状态时必须按字段值类型渲染，避免实色逻辑覆盖渐变等复合显示",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-渐变色块回显",
+      "tags": [
+        "走查工具",
+        "颜色同步",
+        "渐变",
+        "swatch"
+      ],
+      "kind": "experience",
+      "observation": "按钮填充设为渐变后，再修改其它颜色字段，填充行 swatch 被刷新成实色，造成填充似乎被清空的假象。",
+      "mechanism": "面板状态批量刷新对所有颜色字段复用实色渲染函数，未先判断字段当前值是渐变还是实色。",
+      "rule": "批量刷新字段 UI 时先按当前值类型分派渲染；渐变、文本渐变、实色等复合值必须使用各自回显路径，不能被通用实色分支覆盖。",
+      "scope": [
+        "字段状态批量刷新",
+        "同一面板混合实色与复合颜色值"
+      ],
+      "verification": [
+        "填充设为渐变后修改 strokeHex/colorHex/shadowHex",
+        "fillHex swatch 仍显示原渐变",
+        "目标元素填充与面板回显一致"
+      ],
+      "novelty": "已有规则要求改色后元素/input 同步，但没有约束批量 active 状态刷新中的字段类型分派。"
     }
   ]
 }
