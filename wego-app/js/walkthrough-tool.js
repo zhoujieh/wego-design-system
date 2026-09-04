@@ -2336,11 +2336,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .gradient-tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
           .gradient-stopbar {
             position: relative; height: 26px; border-radius: 6px;
-            background: var(--bg-surface); overflow: hidden;
+            background: var(--bg-surface);
             cursor: copy; user-select: none; -webkit-user-select: none;
           }
           .stopbar-preview {
             position: absolute; inset: 0; pointer-events: none;
+            border-radius: 6px; overflow: hidden;
           }
           .stop-dot {
             position: absolute; top: 50%; width: 14px; height: 14px;
@@ -2353,11 +2354,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             box-shadow: 0 0 0 2px var(--text-brand), 0 0 0 3px rgba(255,255,255,0.6);
           }
 
-          /* SV 二维取色面板 — 裁剪超出圆角的内容 */
+          /* SV 二维取色面板 — 不裁剪取色框：背景层自身有圆角，overflow 仅用于背景渐变即可 */
           .sv-panel {
             position: relative; width: 100%; height: 150px;
             border-radius: 8px; cursor: crosshair;
-            overflow: hidden;
             user-select: none; -webkit-user-select: none;
             touch-action: none;
           }
@@ -4768,6 +4768,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const fontWeightTokenName = this._tokenNameOf('fontWeight');
       const lineHeightIsToken = this._isTokenField('lineHeight');
       const lineHeightTokenName = this._tokenNameOf('lineHeight');
+      // 保存面板滚动位置，重建后恢复（走查问题 1：颜色等操作触发重建时不丢失滚动位置）
+      const prevScrollTop = (this._shadow.querySelector('.panel-body') || {}).scrollTop || 0;
       this._shadow.innerHTML = `
         <style>
           :host {
@@ -5760,6 +5762,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           </div>
         </div>
       `;
+      // 恢复面板滚动位置（重建导致 DOM 替换、scrollTop 归零）。
+      // scroll 事件在赋值后异步派发，设置短时间窗抑制，避免该异步事件被 scroll 监听误判为用户滚动
+      const panelBodyAfter = this._shadow.querySelector('.panel-body');
+      if (panelBodyAfter && prevScrollTop) {
+        this._suppressScrollUntil = Date.now() + 60;
+        panelBodyAfter.scrollTop = prevScrollTop;
+      }
     }
 
     _renderAlignMatrix(d) {
@@ -5786,6 +5795,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const panelBody = this._shadow.querySelector('.panel-body');
       if (panelBody) {
         panelBody.addEventListener('scroll', () => {
+          // 程序恢复滚动位置（_render 重建后 scrollTop 赋值）会异步派发 scroll 事件，
+          // 用短暂时间窗抑制，避免把"恢复滚动"误判为用户滚动而关闭弹出层
+          if (this._suppressScrollUntil && Date.now() < this._suppressScrollUntil) return;
           this._closeTokenPanel();
           bus.emit('close-color-picker');
         });
@@ -5992,9 +6004,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                   this._data.gradientStops = gradient.stops;
                   this._data.gradientType = gradient.type;
                   this._data.gradientAngle = gradient.angle;
-                  this._data.gradientEnabled = true;
                   this._data.fillHex = gradient.stops[0].hex;
                   this._data.fillOpacity = gradient.stops[0].opacity;
+                  // gradientEnabled 由 _onFieldChange 统一写入（此处不预赋值，便于其值变化守卫判断首次切换）
                   this._onFieldChange('gradientEnabled', 'true');
                   if (!wasGradient) { this._render(); this._bindEvents(); return; }
                   this._updateColorSwatches('fillHex', gradient);
@@ -6012,7 +6024,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               // 实色：关闭渐变状态
               if (field === 'fillHex') {
                 const wasGradient = this._data.gradientEnabled === true || this._data.gradientEnabled === 'true';
-                this._data.gradientEnabled = false;
+                // gradientEnabled 由 _onFieldChange 统一写入（此处不预赋值，便于其值变化守卫判断首次切换）
                 this._onFieldChange('gradientEnabled', 'false');
                 if (wasGradient) { this._render(); this._bindEvents(); return; }
               } else if (field === 'colorHex') {
@@ -6122,6 +6134,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         bus.emit('toast', { message: guard.reason });
         return;
       }
+      const prevFieldValue = this._data[field];
       this._data[field] = value;
       // 用户手动改过字段值后，源码 token 匹配失效（改完即脱离 token 语义）
       if (this._sourceTokens) delete this._sourceTokens[field];
@@ -6247,10 +6260,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._data[axis] = input.value;
         }
       }
-      // 影响面板结构显隐的字段（渐变开关→渐变面板 / 布局模式→网格控件）：重渲染以显示/收起对应控件
-      if (field === 'gradientEnabled' || field === 'layoutMode') {
+      // 影响面板结构显隐的字段（渐变开关→渐变面板 / 布局模式→网格控件）：重渲染以显示/收起对应控件。
+      // 渐变开关仅在 true/false 实际翻转时才重建面板：渐变编辑中的每次颜色操作都会经过 gradientEnabled，
+      // 值未变化时重建会重置面板滚动位置并造成无谓开销（走查问题 1）
+      if (field === 'layoutMode') {
         this._render();
         this._bindEvents();
+      } else if (field === 'gradientEnabled') {
+        const normGrad = (v) => v === true || v === 'true';
+        if (normGrad(prevFieldValue) !== normGrad(value)) {
+          this._render();
+          this._bindEvents();
+        }
       }
     }
 
