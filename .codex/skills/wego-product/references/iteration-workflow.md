@@ -12,11 +12,11 @@ wego-app/scenes/{分类}/{主业务场景}/_iterations/{iteration_id}-{title}-{Y
 └── freeze.json   # 仅明确冻结后存在
 ```
 
-迭代 ID 格式：`{分类}{3位数字}[-{修订号}]`，如 `shop001`、`bcg003-2`。分类代码：`shop`（相册云）、`bcg`（生意云）、`customer`（客户云）、`infras`（基础）。
+迭代 ID 格式：`{分类}{3位数字}[-{修订号}]`，如 `shop001`、`bcg003-2`，且新建时必须在仓库内唯一；历史重复 ID 保留归档但不得继续新增。分类代码：`shop`（相册云）、`bcg`（生意云）、`customer`（客户云）、`infras`（基础）。
 
 `init` 时 `--iteration-id` 可选：不传则根据场景自动判断分类并按分类内最大编号+1 自动生成（可用 `suggest-id --scene <场景>` 预查询）；用户主动指定时直接使用，支持 `-1`、`-2` 等修订号后缀。场景分类映射表维护在 `scripts/iteration-record.mjs` 的 `sceneCategoryMap`，新增场景时补充。
 
-同一需求在本地迭代、正式验收和反馈期间复用当前未冻结迭代。只有原迭代已冻结、已终止或用户明确开始独立需求时新建。
+同一需求在本地迭代、正式验收和反馈期间复用原迭代；已冻结后收到同范围调整，按下文先失效原型再继续。只有原迭代已终止或用户明确开始独立需求时新建。
 
 ## AI 维护的内容
 
@@ -45,9 +45,9 @@ spec.md 按[简报模板](./brief-template.md)填写，包含以下业务字段�
 - `states`：必要业务状态、进入条件和用户可感知结果。
 - `data_contract`：必须展示、读取或修改的数据及约束（用 ### 子标题）。
 - `assumptions`：低风险、可逆且已写明影响的假设。
-- `open_questions`：提交前必须解决的问题。
+- `open_questions`：原型循环可暂存、终局确认前必须解决的问题。
 
-提交前，目标、纳入范围、入口、关键路径、原型边界和状态必须非空，`data_contract` 必须是非空对象，`open_questions` 必须为空。`flow_id` 使用唯一 kebab-case；`mode` 只能是 `functional`、`simulated` 或 `stub`。
+薄档提交前，目标、纳入范围、入口和关键路径必须非空；终局确认前，原型边界和状态也必须非空，`data_contract` 必须是非空对象，`open_questions` 必须为空。`flow_id` 使用唯一 kebab-case；`mode` 只能是 `functional`、`simulated` 或 `stub`。
 
 ## 命令与状态
 

@@ -268,7 +268,7 @@
         </div>
         <div class="detail">
           <ul>
-            <li><span class="g">是（"验收通过""可以合并"）</span> → 进入终局确认：AI 补全终版 spec → 核对填写验收账本 → 展示补全 diff 与账本，用户过目确认后固化、验证并合并 main。</li>
+            <li><span class="g">是（"验收通过""可以合并"）</span> → 发起终局验收：AI 补全终版 spec → 核对填写验收账本 → 展示补全 diff 与账本；用户确认最终材料后才固化、验证并合并 main。</li>
             <li><span class="g">否（"改好了""继续""再调整"）</span> → 回到本地迭代累计修改，自动更新同一 PR，不合并。</li>
             <li>实现完成、检查通过、用户查看页面，都不等于合并授权。</li>
           </ul>
@@ -307,14 +307,14 @@
           <div class="num green">6</div>
           <div class="txt">
             <div class="tt">合并 + 收尾 <span class="skill">wego-github-delivery</span></div>
-            <div class="abs">合并 main · 四步收口清理</div>
+            <div class="abs">合并 main · 五步收口清理</div>
           </div>
           <div class="chev">⌄</div>
         </div>
         <div class="detail">
           <ul>
             <li>合并前再次同步 main、复验，通过后合并 PR 进 main。</li>
-            <li>四步收口：停预览服务删记录 → 删远端分支 → 删本地 worktree → 主 worktree 同步 main。</li>
+            <li>五步收口：经验扫描 → 停预览服务删记录 → 删远端分支 → 删本地 worktree → 主 worktree 同步 main。</li>
             <li>合并是异步事件，本地收口由后续启动巡检兜底补齐。</li>
           </ul>
         </div>
@@ -354,7 +354,7 @@
       <div class="smarrow">→</div>
       <div class="smnode"><div class="s">in-development</div><div class="t">原型循环，spec 随改随重提</div></div>
       <div class="smarrow">→</div>
-      <div class="smnode"><div class="s">prototyping</div><div class="t">设计实现 + 自动推 PR</div></div>
+      <div class="smnode"><div class="s">prototyping</div><div class="t">终局确认通过，待连续冻结</div></div>
       <div class="smarrow">→</div>
       <div class="smnode"><div class="s g">frozen</div><div class="t">历史快照 freeze.json</div></div>
     </div>

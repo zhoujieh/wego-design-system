@@ -42,7 +42,7 @@
 }
 ```
 
-- inbox 是**未判定草稿**，不是经验数据，不受"经验只能在 uxsystem 目录"约束；随交付单元 worktree 生灭（`.tasks/` 已 gitignore，清理脚本覆盖）。
+- inbox 是**未判定草稿**，不是经验数据，不受"经验只能在 uxsystem 目录"约束；随交付单元 worktree 生灭（`.tasks/` 已 gitignore）。通用临时产物清理和 worktree 自动清理必须保护未处理 inbox，只有本收口流程完成分流或明示无信号后才可清空。
 - 业务技能只写 inbox，不直接写 evidence / EXPERIENCE / 场景技能。
 
 ## 收口扫描（每交付单元只一次）

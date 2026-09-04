@@ -20,19 +20,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -u
-          gh pr list --state open --json number --jq '.[].number' | while read -r number; do
+          set -euo pipefail
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --json number --jq '.[].number' | while read -r number; do
             echo "=== 同步 PR #$number ==="
-            result=$(gh api \
-              --method POST \
-              -H "Accept: application/vnd.github+json" \
-              "/repos/${GITHUB_REPOSITORY}/pulls/${number}/update-branch" 2>&1) || true
-            if echo "$result" | grep -q '"message": "merge_conflict"'; then
+            if result=$(gh api \
+                --method POST \
+                -H "Accept: application/vnd.github+json" \
+                "/repos/${GITHUB_REPOSITORY}/pulls/${number}/update-branch" 2>&1); then
+              echo "PR #$number 已完成同步检查: $result"
+              gh pr edit "$number" --repo "$GITHUB_REPOSITORY" --remove-label needs-sync >/dev/null 2>&1 || true
+            elif echo "$result" | grep -Eqi 'merge[_ -]?conflict|merge conflict'; then
               echo "PR #$number 存在冲突，打 needs-sync 标签"
-              gh pr edit "$number" --add-label needs-sync || true
-            elif echo "$result" | grep -q "Updating pull request branch"; then
-              echo "PR #$number 已自动同步"
+              gh pr edit "$number" --repo "$GITHUB_REPOSITORY" --add-label needs-sync
+            elif echo "$result" | grep -Eqi 'not behind|already up.to.date'; then
+              echo "PR #$number 已是最新，无需同步"
+              gh pr edit "$number" --repo "$GITHUB_REPOSITORY" --remove-label needs-sync >/dev/null 2>&1 || true
             else
-              echo "PR #$number 返回: $result"
+              echo "PR #$number 同步失败: $result" >&2
+              exit 1
             fi
           done
