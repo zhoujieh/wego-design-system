@@ -348,8 +348,30 @@
 
 
 /* ===== 底部批量栏 ===== */
+.quote-bottom-bar .bottom-action-bar__inner {
+  gap: var(--spacer-8);
+}
+.quote-batch-control {
+  position: relative;
+  gap: 0;
+}
+.quote-bottom-bar .quote-select-check-btn {
+  width: var(--size-40);
+  min-width: var(--size-40);
+  padding: 0;
+  justify-content: center;
+}
+.quote-bottom-bar .quote-select-check-btn .bottom-action-bar__checkbox-field {
+  width: var(--size-24);
+  min-width: var(--size-24);
+}
+.quote-bottom-bar .quote-select-check-btn .bottom-action-bar__checkbox-field::before {
+  left: calc(-1 * var(--spacer-8));
+  width: var(--size-40);
+}
 .quote-bottom-bar .quote-bar-count-btn {
   min-width: 0;
+  padding: 0;
 }
 .quote-bottom-bar .quote-bar-count-btn .wego-iconfont-s {
   font-size: var(--size-16);
@@ -360,12 +382,36 @@
 .quote-bottom-bar {
   position: relative;
 }
+.quote-batch-divider {
+  width: var(--stroke-hairline);
+  height: var(--size-16);
+  margin-inline: var(--spacer-8);
+  background: var(--border-neutral-l2);
+  flex: 0 0 auto;
+}
+.quote-bottom-bar .quote-view-selected-btn {
+  min-width: 0;
+  max-width: none;
+  min-height: var(--size-40);
+  flex-direction: row;
+  padding: 0 var(--spacer-4);
+  color: var(--text-brand);
+}
+.quote-bottom-bar .quote-view-selected-btn .bottom-action-bar__action-label {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+.quote-bottom-bar .quote-view-selected-btn.is-disabled {
+  color: var(--text-disabled);
+  opacity: 0.4;
+  pointer-events: none;
+}
 .quote-count-menu {
   position: absolute;
   bottom: calc(100% + var(--spacer-4));
-  left: var(--spacer-16);
+  left: calc(var(--size-40) + var(--spacer-4));
   z-index: 40;
-  min-width: 132px;
+  min-width: var(--size-104);
 }
 
 /* ===== 引导气泡（报价记录入口） ===== */
