@@ -2957,6 +2957,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           s.hex = this._hex;
           s.opacity = this._opacity;
         }
+        // 同步渐变预览条与激活色标圆点（改色标颜色/色相/不透明度等实时刷新，避免预览滞后）
+        const preview = this._shadow.querySelector('[data-stopbar-preview]');
+        if (preview) preview.style.background = this._gradientCss();
+        const activeDot = this._shadow.querySelector('[data-stop-dot].active');
+        if (activeDot) activeDot.style.background = hexOpacityToRgba(this._hex, this._opacity);
       }
       if (!this._callback) return;
       if (this._mode === 'gradient') {
@@ -7196,9 +7201,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const opacity = d[opacityField] ?? 100;
         const swatch = btn.querySelector('.swatch');
         if (swatch) {
+          // 渐变/文本渐变字段保留渐变显示（fillHex 渐变、colorHex 文本渐变），避免被实色覆盖成"填充被清空"假象
+          const isFillGrad = field === 'fillHex' && (d.gradientEnabled === true || d.gradientEnabled === 'true');
+          const isColorGrad = field === 'colorHex' && d.colorGradient;
           swatch.style.background = tokenVal
             ? (resolveCssValue(tokenVal, 'color') || 'transparent')
-            : hexOpacityToRgba(val, opacity);
+            : (isFillGrad ? (buildGradient(d) || 'transparent')
+              : isColorGrad ? this._colorGradientCss(d.colorGradient)
+              : hexOpacityToRgba(val, opacity));
         }
       });
       // 颜色 Token 按钮状态 + opacity 输入框联动 + 输入框回显（统一处理4个颜色字段）
