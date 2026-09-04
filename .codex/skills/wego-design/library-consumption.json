@@ -100,7 +100,7 @@
   "appRuntime": {
     "host": "wego-app/index.html",
     "routes": "wego-app/js/routes.js",
-    "sceneDirectory": "wego-app/scenes/{中文业务场景}",
+    "sceneDirectory": "wego-app/scenes/{分类}/{中文业务场景}",
     "sceneFiles": ["scene.js", "scene.css"],
     "registration": "window.WegoApp.registerScene",
     "deliveryCopy": "wego-app/lib",

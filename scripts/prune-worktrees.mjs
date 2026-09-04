@@ -89,6 +89,41 @@ function isWorktreeClean(worktreePath) {
   return r.stdout.length === 0;
 }
 
+function protectedTaskState(worktreePath, mainWorktreePath = null) {
+  const reasons = [];
+  const inbox = path.join(worktreePath, '.tasks', 'experience-inbox.json');
+  if (fs.existsSync(inbox)) {
+    try {
+      const value = JSON.parse(fs.readFileSync(inbox, 'utf8'));
+      if (Array.isArray(value.candidates) && value.candidates.length) reasons.push('存在未处理经验草稿');
+    } catch {
+      reasons.push('经验草稿无法解析');
+    }
+  }
+  const previewDirectory = path.join(worktreePath, '.tasks', 'preview-servers');
+  if (fs.existsSync(previewDirectory) && fs.readdirSync(previewDirectory).some(entry => entry.endsWith('.json'))) {
+    reasons.push('存在受管预览服务记录');
+  }
+  if (mainWorktreePath && path.resolve(mainWorktreePath) !== path.resolve(worktreePath)) {
+    const centralPreviewDirectory = path.join(mainWorktreePath, '.tasks', 'preview-servers');
+    if (fs.existsSync(centralPreviewDirectory)) {
+      for (const entry of fs.readdirSync(centralPreviewDirectory).filter(item => item.endsWith('.json'))) {
+        try {
+          const record = JSON.parse(fs.readFileSync(path.join(centralPreviewDirectory, entry), 'utf8'));
+          if (record.worktree && path.resolve(record.worktree) === path.resolve(worktreePath)) {
+            reasons.push('主 worktree 存在关联预览服务记录');
+            break;
+          }
+        } catch {
+          reasons.push('主 worktree 预览服务记录无法解析');
+          break;
+        }
+      }
+    }
+  }
+  return reasons;
+}
+
 /**
  * 检查分支是否有开放 PR。
  * @returns {boolean|null} true=有开放PR，false=确认无，null=gh不可用
@@ -122,15 +157,17 @@ function isMainWorktree(wt) {
 function scanWorktrees() {
   const worktrees = listWorktrees();
   const result = { prunable: [], dirty: [], active: [], main: null };
+  const mainWorktree = worktrees.find(isMainWorktree) || null;
+  result.main = mainWorktree;
 
   for (const wt of worktrees) {
     if (isMainWorktree(wt)) {
-      result.main = wt;
       continue;
     }
 
     const clean = isWorktreeClean(wt.path);
     const openPR = hasOpenPR(wt.branch);
+    const protectedState = protectedTaskState(wt.path, mainWorktree?.path);
 
     const info = {
       path: wt.path,
@@ -138,6 +175,7 @@ function scanWorktrees() {
       head: wt.head,
       clean,
       openPR,
+      protectedState,
       reason: null
     };
 
@@ -147,6 +185,9 @@ function scanWorktrees() {
     } else if (!clean) {
       info.reason = 'worktree 有未提交改动，可能在途，需人工确认';
       result.dirty.push(info);
+    } else if (protectedState.length) {
+      info.reason = `${protectedState.join('、')}，必须先完成专用收口`;
+      result.active.push(info);
     } else if (openPR === null) {
       info.reason = 'gh 不可用，无法确认 PR 状态，保守保留';
       result.active.push(info);
@@ -254,6 +295,31 @@ function runSelfTest() {
 
   const fakeOther = { path: path.join(path.dirname(repoRoot), 'other-worktree'), branch: 'feature/test' };
   assert(!isMainWorktree(fakeOther), '非主 worktree 不应被识别为主');
+
+  const protectedFixture = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-worktree-state-'));
+  try {
+    const inbox = path.join(protectedFixture, '.tasks/experience-inbox.json');
+    fs.mkdirSync(path.dirname(inbox), { recursive: true });
+    fs.writeFileSync(inbox, JSON.stringify({ candidates: [{ summary: '待处理' }] }));
+    assert(protectedTaskState(protectedFixture).includes('存在未处理经验草稿'), '必须识别未处理经验草稿');
+    fs.writeFileSync(inbox, JSON.stringify({ candidates: [] }));
+    assert(!protectedTaskState(protectedFixture).length, '空经验草稿不应阻塞收口');
+    const preview = path.join(protectedFixture, '.tasks/preview-servers/test.json');
+    fs.mkdirSync(path.dirname(preview), { recursive: true });
+    fs.writeFileSync(preview, '{}');
+    assert(protectedTaskState(protectedFixture).includes('存在受管预览服务记录'), '必须识别受管预览记录');
+    const centralFixture = fs.mkdtempSync(path.join(os.tmpdir(), 'wego-main-state-'));
+    try {
+      const centralPreview = path.join(centralFixture, '.tasks/preview-servers/test.json');
+      fs.mkdirSync(path.dirname(centralPreview), { recursive: true });
+      fs.writeFileSync(centralPreview, JSON.stringify({ worktree: protectedFixture }));
+      assert(protectedTaskState(protectedFixture, centralFixture).includes('主 worktree 存在关联预览服务记录'), '必须识别主 worktree 中关联到任务 worktree 的预览记录');
+    } finally {
+      fs.rmSync(centralFixture, { recursive: true, force: true });
+    }
+  } finally {
+    fs.rmSync(protectedFixture, { recursive: true, force: true });
+  }
 
   // 测试 parseArgs
   const args1 = parseArgs(['--force', '--json']);

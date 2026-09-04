@@ -118,11 +118,19 @@ function listCheckedOutBranches() {
   return branches;
 }
 
+function resolveMainRef() {
+  for (const candidate of ['refs/heads/main', 'refs/remotes/origin/main']) {
+    if (runGit(['rev-parse', '--verify', '--quiet', candidate]).status === 0) return candidate;
+  }
+  return null;
+}
+
 /**
  * 判断分支 tip 是否为 main 的祖先（即已通过普通 merge 合入 main）。
  */
-function isAncestorOfMain(branch) {
-  const r = runGit(['merge-base', '--is-ancestor', branch, 'refs/heads/main']);
+function isAncestorOfMain(branch, mainRef = resolveMainRef()) {
+  if (!mainRef) return false;
+  const r = runGit(['merge-base', '--is-ancestor', branch, mainRef]);
   return r.status === 0;
 }
 
@@ -130,8 +138,9 @@ function isAncestorOfMain(branch) {
  * 判断分支与 main 当前内容是否完全一致（无任何文件差异）。
  * 用于辅助判断 upstream gone 的分支内容是否已进 main（squash merge 场景）。
  */
-function isContentSameAsMain(branch) {
-  const r = runGit(['diff', '--quiet', 'refs/heads/main', branch]);
+function isContentSameAsMain(branch, mainRef = resolveMainRef()) {
+  if (!mainRef) return false;
+  const r = runGit(['diff', '--quiet', mainRef, branch]);
   return r.status === 0;
 }
 
@@ -142,7 +151,9 @@ function scanBranches() {
   const all = listLocalBranches();
   const checkedOut = listCheckedOutBranches();
   const current = currentBranch();
-  const mainSha = runGit(['rev-parse', 'refs/heads/main']).stdout;
+  const mainRef = resolveMainRef();
+  if (!mainRef) throw new Error('无法定位本地 main 或 origin/main');
+  const mainSha = runGit(['rev-parse', mainRef]).stdout;
 
   const result = { merged: [], gone: [], active: [], error: [] };
 
@@ -156,7 +167,7 @@ function scanBranches() {
 
     if (br.upstreamGone) {
       // 上游已删除：squash merge 后 GitHub 自动删远端，或任务被关闭/废弃
-      const same = isContentSameAsMain(br);
+      const same = isContentSameAsMain(br, mainRef);
       const openPR = hasOpenPR(br.name);
       const info = {
         name: br.name,
@@ -172,7 +183,7 @@ function scanBranches() {
       continue;
     }
 
-    if (isAncestorOfMain(br)) {
+    if (isAncestorOfMain(br.name, mainRef)) {
       result.merged.push({ name: br.name, upstream: br.upstream, reason: 'tip 是 main 祖先，已合入 main' });
       continue;
     }
@@ -267,10 +278,12 @@ function runSelfTest() {
 
   // 测试 listLocalBranches 能正常运行（不校验内容，只校验不抛异常）
   const branches = listLocalBranches();
-  assert(Array.isArray(branches) && branches.length >= 1, '分支列表应至少包含 main');
+  assert(Array.isArray(branches), '分支列表必须可读取；detached HEAD 环境允许没有本地分支');
 
-  // 测试 isAncestorOfMain：main 自身是 main 祖先
-  assert(isAncestorOfMain('main'), 'main 应被识别为 main 的祖先');
+  // GitHub Actions 的 pull_request checkout 可能是 detached HEAD，只要求能定位本地或远端 main。
+  const mainRef = resolveMainRef();
+  assert(Boolean(mainRef), '必须能定位本地 main 或 origin/main');
+  assert(isAncestorOfMain(mainRef, mainRef), 'main ref 应被识别为自身祖先');
 
   // 测试 listCheckedOutBranches 能正常运行
   const co = listCheckedOutBranches();
