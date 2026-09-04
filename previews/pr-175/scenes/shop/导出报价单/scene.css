@@ -172,7 +172,7 @@
 
 /* ===== 商品列表（按产品-宫格） ===== */
 .quote-product-grid {
-  padding: var(--spacer-8) var(--spacer-16) 0;
+  padding: var(--spacer-8) var(--spacer-8) 0;
   --layout-grid-column-gap: var(--spacer-8);
   --layout-grid-row-gap: var(--spacer-8);
 }
