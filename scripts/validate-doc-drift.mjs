@@ -14,6 +14,11 @@ const warnings = [];
 // 扫描的文档目录
 const docDirs = [
   'AGENTS.md',
+  'README.md',
+  'scripts/README.md',
+  'docs/微购工作流流程图.html',
+  '.github/workflows/sync-open-prs.yml',
+  '.codex/skills/wego-design/library-consumption.json',
   '.codex/skills/wego-uxsystem-iterate/',
   '.codex/skills/wego-design/',
   '.codex/skills/wego-product/',
@@ -24,7 +29,7 @@ function collectMdFiles(root, dirOrFile, result = []) {
   const full = path.join(root, dirOrFile);
   if (!fs.existsSync(full)) return result;
   const stat = fs.statSync(full);
-  if (stat.isFile() && dirOrFile.endsWith('.md')) {
+  if (stat.isFile() && /\.(?:md|html|json|ya?ml)$/.test(dirOrFile)) {
     result.push(dirOrFile);
   } else if (stat.isDirectory()) {
     for (const entry of fs.readdirSync(full)) {
@@ -168,6 +173,22 @@ function validate() {
       for (const message of extractStateWordIssues(content, vocabulary)) {
         errors.push({ code: 'doc-drift.state-word-unknown', file, message });
       }
+    }
+  }
+
+  const consumptionFile = '.codex/skills/wego-design/library-consumption.json';
+  if (fileContents.has(consumptionFile)) {
+    try {
+      const consumption = JSON.parse(fileContents.get(consumptionFile));
+      if (consumption.appRuntime?.sceneDirectory !== 'wego-app/scenes/{分类}/{中文业务场景}') {
+        errors.push({
+          code: 'doc-drift.scene-directory',
+          file: consumptionFile,
+          message: 'appRuntime.sceneDirectory 必须与分类场景目录结构一致'
+        });
+      }
+    } catch (error) {
+      errors.push({ code: 'doc-drift.json-invalid', file: consumptionFile, message: `JSON 无法解析：${error.message}` });
     }
   }
 

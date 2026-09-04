@@ -59,8 +59,21 @@ function gitNames(args) {
   return (result.stdout || '').split('\n').map(item => item.trim()).filter(Boolean);
 }
 
+function branchDiffNames() {
+  for (const base of ['origin/main', 'main']) {
+    const existsResult = spawnSync('git', ['rev-parse', '--verify', '--quiet', base], { cwd: root, encoding: 'utf8' });
+    if (existsResult.status !== 0) continue;
+    const result = spawnSync('git', ['-c', 'core.quotepath=false', 'diff', '--name-only', `${base}...HEAD`], { cwd: root, encoding: 'utf8' });
+    if (result.status === 0) {
+      return (result.stdout || '').split('\n').map(item => item.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
 function changedFiles() {
   return [...new Set([
+    ...branchDiffNames(),
     ...gitNames(['diff', '--name-only']),
     ...gitNames(['diff', '--cached', '--name-only']),
     ...gitNames(['ls-files', '--others', '--exclude-standard'])
@@ -192,7 +205,25 @@ function checkWorkflowContracts() {
   runNode('scripts/iteration-record.mjs', ['test'], 'workflow.iteration_test');
   runNode('scripts/validate-scene-iteration-binding.mjs', ['test'], 'workflow.iteration_binding_test');
   runNode('scripts/resolve-delivery-unit.mjs', ['test'], 'workflow.delivery_intake_test');
+  runNode('scripts/cleanup-task-artifacts.mjs', ['test', '--json'], 'workflow.cleanup_test');
+  runNode('scripts/prune-worktrees.mjs', ['test'], 'workflow.worktree_prune_test');
+  runNode('scripts/prune-merged-branches.mjs', ['test'], 'workflow.branch_prune_test');
   runNode('scripts/build-routes.mjs', ['--check'], 'workflow.routes_check');
+  const syncWorkflow = '.github/workflows/sync-open-prs.yml';
+  requireFiles([syncWorkflow]);
+  if (exists(syncWorkflow)) {
+    const source = fs.readFileSync(path.join(root, syncWorkflow), 'utf8');
+    const hasRepositoryContext = source.includes('actions/checkout@') || /gh pr list[^\n]*(?:--repo|-R)\s/.test(source);
+    if (!hasRepositoryContext) {
+      add('error', 'workflow.sync_pr_repo_context', '开放 PR 同步必须 checkout 仓库或显式传入 --repo，禁止绿灯空跑', path.join(root, syncWorkflow));
+    }
+    if (!/set\s+-[^\n]*e[^\n]*pipefail/.test(source)) {
+      add('error', 'workflow.sync_pr_fail_closed', '开放 PR 同步必须启用失败传播与 pipefail', path.join(root, syncWorkflow));
+    }
+    if (!/--method\s+PUT/.test(source) || !/update-branch/.test(source) || !/expected_head_sha/.test(source)) {
+      add('error', 'workflow.sync_pr_update_contract', '开放 PR 同步必须使用 PUT update-branch 并携带 expected_head_sha 防止竞态', path.join(root, syncWorkflow));
+    }
+  }
 }
 
 const systemRuntimePrefixes = [
@@ -382,8 +413,11 @@ function validateScenes(scenes) {
   for (const scene of targets) {
     const rel = resolveSceneRelPath(scene);
     if (!rel) continue;
-    const directory = path.join(appRoot, rel);
-    if (!fs.existsSync(directory)) continue;
+    const directory = path.join(appRoot, 'scenes', rel);
+    if (!fs.existsSync(directory)) {
+      add('error', 'scene.directory_missing', `场景 ${scene} 的解析目录不存在：${rel}`, directory);
+      continue;
+    }
     const missing = ['scene.js', 'scene.css'].filter(file => !fs.existsSync(path.join(directory, file)));
     if (missing.length) {
       add('error', 'scene.file_missing', `场景 ${scene} 缺少 ${missing.join('、')}`, directory);
@@ -411,7 +445,7 @@ function iterationFilesForScenes(scenes) {
   for (const scene of scenes) {
     const rel = resolveSceneRelPath(scene);
     if (!rel) continue;
-    const iterationsRoot = path.join(appRoot, rel, '_iterations');
+    const iterationsRoot = path.join(appRoot, 'scenes', rel, '_iterations');
     if (!fs.existsSync(iterationsRoot)) continue;
     const visit = directory => {
       for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -536,9 +570,21 @@ function runFullScope() {
   checkLibrarySync();
   checkWorkflowContracts();
   checkAppHost(true);
-  validateScenes(sceneDirectories());
+  const allScenes = sceneDirectories();
+  validateScenes(allScenes);
+  if (allScenes.length && report.metrics.validatedScenes !== allScenes.length) {
+    add('error', 'scene.coverage_incomplete', `完整验证应覆盖 ${allScenes.length} 个场景，实际覆盖 ${report.metrics.validatedScenes} 个`);
+  }
   runNode('scripts/validate-scene-iteration-binding.mjs', ['--all', '--json'], 'scene.iteration_unbound');
+  const changedScenes = changed.map(sceneFromChangedPath).filter(Boolean);
+  if (changedScenes.length) {
+    runNode('scripts/validate-scene-iteration-binding.mjs', [...new Set(changedScenes), '--json'], 'scene.changed_iteration_unbound');
+  }
+  const expectedIterations = allScenes.flatMap(scene => iterationFilesForScenes([scene])).length;
   checkIterations({ all: true });
+  if (expectedIterations && report.metrics.validatedIterations !== expectedIterations) {
+    add('error', 'iteration.coverage_incomplete', `完整验证应覆盖 ${expectedIterations} 个迭代，实际覆盖 ${report.metrics.validatedIterations} 个`);
+  }
 }
 
 function main() {
