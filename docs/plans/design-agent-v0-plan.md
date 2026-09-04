@@ -285,6 +285,7 @@ V0 开发期间出现以下情况必须停止扩展并回到本计划审查：
 - [x] V0 范围收缩完成
 - [x] 第一条 Benchmark 已存在：`docs/benchmark/001-快捷发布产品.md`
 - [x] Phase 0 启动
-- [ ] V0 评价规则落盘
+- [x] V0 评价规则落盘
+- [x] Phase 0 基线与边界固化完成
 - [ ] 创建独立 `design-agent` 仓库
 - [ ] Phase 1：Runtime Shell
