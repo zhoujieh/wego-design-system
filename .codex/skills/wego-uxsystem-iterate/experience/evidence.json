@@ -1,4 +1,6 @@
 {
+  "schemaVersion": 3,
+  "qualityGateSince": "ev-042",
   "events": [
     {
       "id": "ev-001",
@@ -585,24 +587,37 @@
     },
     {
       "id": "ev-042",
-      "date": "2026-09-03",
-      "summary": "走查工具间距标注按 Figma 式呈现：gap（元素到父容器 content box 四边间距）用洋红间距线+数字直显，padding 用蓝色数值标签，margin 用绿色数值标签，均直接画在页面上；去掉元素信息气泡 .bubble、色块 hover 弹值的 tooltip 及 padding/margin 大面积色块填充；贴边（间距 0）不绘制只显示有值间距",
+      "date": "2026-09-04",
+      "summary": "经验信号必须先通过因果与复用质量门再进入主题路由，需求复述不得沉淀",
       "source": "user-correction",
-      "scene": "wego-scene-walkthrough-test-间距标注Figma式",
+      "scene": "experience-quality-gate",
       "tags": [
-        "走查工具",
-        "间距标注",
-        "Figma式",
-        "gap洋红",
-        "padding蓝",
-        "margin绿",
-        "wego-walkthrough"
-      ]
+        "经验质量",
+        "信号分流",
+        "因果规则",
+        "语义守门",
+        "wego-uxsystem-iterate"
+      ],
+      "kind": "experience",
+      "observation": "连续验收反馈把控件显示、尺寸和提示文案等需求结果直接写成经验，并在已有场景技能中逐条追加，L2 次数随同一交付循环虚增。",
+      "mechanism": "流程先按主题命中已有场景技能并自动迭代，实际绕过了可复用判断；校验脚本又只检查格式、引用和容量，无法拦截没有失败机制的需求复述。",
+      "rule": "用户纠正只生成 L0 信号；先分流需求和普通缺陷，再同时通过因果明确、跨任务可迁移、可改变动作、修复已验证、非冗余五项质量门，最后才允许进入 L1/L2/L3/L4。",
+      "scope": [
+        "经验候选收口",
+        "已有场景技能迭代",
+        "L1/L2/L3/L4 路由"
+      ],
+      "verification": [
+        "qualityGateSince 起的新事件缺少任一结构化质量字段时 refine-experience --check 失败",
+        "纯需求反馈只更新需求、契约或测试，不写 evidence 且不增加 L2 次数",
+        "L2 的 ×N 只随同根因在独立任务复发而增加"
+      ],
+      "novelty": "旧规则虽提到可复用、可行动、非冗余，但主题归属章节允许命中已有技能后直接迭代，且没有可验证的结构化质量字段。"
     },
     {
       "id": "ev-043",
       "date": "2026-09-04",
-      "summary": "走查工具 text-content 字段变更刷新后不持久化：_replayInlineChanges 用 style.setProperty('text-content') 无效，恢复文案必须用 el.textContent 直接赋值",
+      "summary": "非 CSS 字段不能沿用 CSS 回放通道，持久化恢复必须按字段语义分派",
       "source": "rework",
       "scene": "wego-scene-walkthrough-test-文本字段持久化",
       "tags": [
@@ -610,12 +625,25 @@
         "text-content",
         "持久化",
         "_replayInlineChanges"
-      ]
+      ],
+      "kind": "experience",
+      "observation": "文本修改在当前会话可见，但刷新后恢复失败；记录仍存在且没有页面报错。",
+      "mechanism": "统一回放逻辑把 text-content 当成 CSS 属性传给 style.setProperty，浏览器静默忽略。",
+      "rule": "持久化模型包含文本、属性或类名等非 CSS 字段时，回放、撤销和重做必须按字段语义分派到 textContent、属性或 classList，不能共用 CSS setProperty。",
+      "scope": [
+        "DOM 非 CSS 状态的持久化回放",
+        "撤销/重做与刷新恢复"
+      ],
+      "verification": [
+        "修改文本后刷新仍保持",
+        "撤销和重做分别恢复旧值与新值"
+      ],
+      "novelty": "原规则只覆盖 CSS 样式记录，没有定义非 CSS 字段的恢复通道。"
     },
     {
       "id": "ev-044",
       "date": "2026-09-04",
-      "summary": "走查顺序移动换位后，原坐标位置已被兄弟元素占据，后续改文案/断言继续用旧坐标会命中错误元素，必须重新 getBoundingClientRect 取目标坐标",
+      "summary": "布局顺序变化后旧坐标不再代表原元素，后续交互必须重新定位目标",
       "source": "rework",
       "scene": "wego-scene-walkthrough-test-顺序移动",
       "tags": [
@@ -623,38 +651,25 @@
         "顺序移动",
         "坐标",
         "重取"
-      ]
+      ],
+      "kind": "experience",
+      "observation": "元素换位后继续使用换位前坐标，自动化步骤命中了占据该位置的兄弟元素。",
+      "mechanism": "坐标描述的是视口位置而不是元素身份；顺序变化后位置与目标的对应关系失效。",
+      "rule": "任何会改变布局顺序或几何位置的操作完成后，后续步骤必须重新获取元素引用或 getBoundingClientRect，不得复用旧坐标。",
+      "scope": [
+        "拖拽或顺序调整后的自动化操作",
+        "依赖坐标的交互验证"
+      ],
+      "verification": [
+        "换位后重新取坐标能命中原目标",
+        "复用旧坐标的反例会命中兄弟元素"
+      ],
+      "novelty": "现有测试流程只要求首次定位，没有覆盖布局变更后的目标重定位。"
     },
     {
       "id": "ev-045",
       "date": "2026-09-04",
-      "summary": "走查工具无背景元素 fillHex 字段为空，HSL 改色对其不生效属历史既定行为（非回归），测试不得判失败",
-      "source": "user-correction",
-      "scene": "wego-scene-walkthrough-test-颜色",
-      "tags": [
-        "走查工具",
-        "fillHex",
-        "既定行为",
-        "非回归"
-      ]
-    },
-    {
-      "id": "ev-046",
-      "date": "2026-09-04",
-      "summary": "走查顺序移动同档换位时撤销不记录：moveFlexItem 引用块级变量 g 抛 ReferenceError，修复为作用域内局部变量",
-      "source": "rework",
-      "scene": "wego-scene-walkthrough-test-顺序移动",
-      "tags": [
-        "走查工具",
-        "moveFlexItem",
-        "作用域",
-        "ReferenceError"
-      ]
-    },
-    {
-      "id": "ev-047",
-      "date": "2026-09-04",
-      "summary": "走查冒烟原未覆盖「面板移动按钮+同档换位+顺延」路径，致 moveFlexItem 作用域 bug 与一次移动=多撤销单元长期漏测；须补该路径回归断言（已由用户补 ④d）",
+      "summary": "关键分支未进入冒烟路径时，真实缺陷会在主回归全绿的情况下长期漏检",
       "source": "rework",
       "scene": "wego-scene-walkthrough-test-冒烟覆盖",
       "tags": [
@@ -662,37 +677,25 @@
         "冒烟",
         "覆盖盲区",
         "移动按钮"
-      ]
+      ],
+      "kind": "experience",
+      "observation": "移动按钮的同档换位分支长期未被冒烟执行，作用域错误和撤销粒度问题直到专项操作才暴露。",
+      "mechanism": "主回归只覆盖了功能名称，没有覆盖决定实现路径的关键分支条件。",
+      "rule": "冒烟矩阵必须按会改变代码路径的条件选取代表用例，至少覆盖正常路径、关键分支和一次失败反例，不能用功能点数量代替路径覆盖。",
+      "scope": [
+        "交互功能的冒烟回归设计",
+        "存在多分支实现的核心操作"
+      ],
+      "verification": [
+        "同档换位分支可稳定进入并完成撤销",
+        "故意破坏该分支时冒烟必须失败"
+      ],
+      "novelty": "已有冒烟仅覆盖顺序移动结果，没有覆盖同档顺延这一独立实现路径。"
     },
     {
-      "id": "ev-048",
+      "id": "ev-046",
       "date": "2026-09-04",
-      "summary": "走查工具已移除导入导出 JSON 功能；复制 Prompt 追加『修复后动作』自动化测试指令",
-      "source": "user-preference",
-      "scene": "wego-scene-walkthrough-test-功能移除",
-      "tags": [
-        "走查工具",
-        "导入导出",
-        "功能移除"
-      ]
-    },
-    {
-      "id": "ev-049",
-      "date": "2026-09-04",
-      "summary": "走查样式面板填充分区已移除「渐变填充」开关/渐变面板/多渐变叠加层，渐变唯一入口收敛到颜色选择器，测试 ② 渐变须经颜色选择器",
-      "source": "user-preference",
-      "scene": "wego-scene-walkthrough-test-渐变入口",
-      "tags": [
-        "走查工具",
-        "渐变",
-        "入口收敛",
-        "颜色选择器"
-      ]
-    },
-    {
-      "id": "ev-050",
-      "date": "2026-09-04",
-      "summary": "走查顺序移动一次移动=多个撤销单元：moveKey 把目标/兄弟/顺延+跨卡同步绑成一次撤销/重做，撤销断言须按 moveKey 粒度",
+      "summary": "一次用户动作产生多条底层记录时，撤销与持久化必须使用同一事务标识成组处理",
       "source": "rework",
       "scene": "wego-scene-walkthrough-test-顺序移动",
       "tags": [
@@ -700,38 +703,25 @@
         "顺序移动",
         "moveKey",
         "撤销单元"
-      ]
+      ],
+      "kind": "experience",
+      "observation": "一次顺序移动同时修改目标、兄弟、顺延元素和共享实例，撤销时却需要多次操作且可能留下部分状态。",
+      "mechanism": "撤销栈按底层记录而不是按用户意图建模，导致一个交互被拆成多个不完整事务。",
+      "rule": "一个用户动作可能产生多条记录时，写入时必须附加共同事务键，撤销、重做、删除和刷新回放均按事务组处理。",
+      "scope": [
+        "批量同步与复合交互记录",
+        "撤销/重做/删除/持久化"
+      ],
+      "verification": [
+        "一次撤销恢复全部关联元素",
+        "一次重做与刷新回放恢复完整事务"
+      ],
+      "novelty": "现有共享记录有 sharedKey，但没有覆盖同一动作跨不同记录类型的统一事务边界。"
     },
     {
-      "id": "ev-051",
+      "id": "ev-047",
       "date": "2026-09-04",
-      "summary": "走查技能⑤元信息文档曾过时：宽高气泡实际在 highlight .label、margin 绿色块 rect.mar-bg、无 tooltip；已按当前实现对齐 dom-map 与断言",
-      "source": "user-correction",
-      "scene": "wego-scene-walkthrough-test-文档对齐",
-      "tags": [
-        "走查工具",
-        "⑤元信息",
-        "文档过时",
-        "已对齐"
-      ]
-    },
-    {
-      "id": "ev-052",
-      "date": "2026-09-04",
-      "summary": "走查颜色选择器渐变撤销断言假设错误：切渐变模式与改色标各产一条变更记录，1 次撤销回不到 none，须撤销 2 步；②渐变回归脚本已同步（撤销2步/重做2步）",
-      "source": "rework",
-      "scene": "wego-scene-walkthrough-test-渐变撤销",
-      "tags": [
-        "走查工具",
-        "渐变",
-        "撤销粒度",
-        "断言"
-      ]
-    },
-    {
-      "id": "ev-053",
-      "date": "2026-09-04",
-      "summary": "走查样式面板程序恢复滚动位置会异步派发 scroll 事件，同步标志抑制无效（Chromium 中赋值触发的事件 isTrusted 也是 true）；须用时间窗（_suppressScrollUntil）或临时移除监听器",
+      "summary": "程序恢复滚动会异步触发可信 scroll 事件，抑制逻辑必须覆盖事件派发窗口",
       "source": "rework",
       "scene": "wego-scene-walkthrough-test-滚动恢复",
       "tags": [
@@ -739,25 +729,25 @@
         "滚动恢复",
         "scroll异步",
         "时间窗"
-      ]
+      ],
+      "kind": "experience",
+      "observation": "面板重建后恢复 scrollTop，随后异步 scroll 监听把恢复动作误判为用户滚动并关闭浮层。",
+      "mechanism": "设置 scrollTop 与 scroll 事件派发不在同一同步调用栈，且合成事件的 isTrusted 不能可靠区分来源。",
+      "rule": "程序化恢复滚动且监听器会触发副作用时，使用覆盖异步派发的时间窗或临时移除监听器，不能依赖同步布尔标志或 isTrusted。",
+      "scope": [
+        "程序化滚动恢复",
+        "scroll 监听带关闭或提交副作用的浮层"
+      ],
+      "verification": [
+        "恢复滚动后浮层保持打开",
+        "时间窗结束后的真实用户滚动仍触发原副作用"
+      ],
+      "novelty": "现有滚动恢复只防同步重入，没有处理浏览器异步派发事件。"
     },
     {
-      "id": "ev-054",
+      "id": "ev-048",
       "date": "2026-09-04",
-      "summary": "【高频坑·反复发生】走查回归必须用当前交付单元分支上的技能脚本（.codex/skills 随分支迭代不同步），禁止直接跑主仓库 main 的脚本；main 旧版含已移除的拖拽换位断言/.pad-r，会误报 ④⑤ FAIL（用户多次指正）",
-      "source": "user-correction",
-      "scene": "wego-scene-walkthrough-test-回归脚本来源",
-      "tags": [
-        "走查工具",
-        "回归脚本",
-        "分支来源",
-        "高频坑"
-      ]
-    },
-    {
-      "id": "ev-055",
-      "date": "2026-09-04",
-      "summary": "走查工具替换 iconfont 属类名变更：定位选择器必须排除可变 icon-* 类，修改记录保存原/新图标类，刷新回放需覆盖场景异步二次渲染后再次应用",
+      "summary": "会被运行时修改的类名不能作为持久化定位锚点，记录必须使用不随修改变化的身份",
       "source": "rework",
       "scene": "wego-scene-walkthrough-test-iconfont替换",
       "tags": [
@@ -765,12 +755,25 @@
         "iconfont",
         "稳定选择器",
         "刷新回放"
-      ]
+      ],
+      "kind": "experience",
+      "observation": "替换 iconfont 类后，原选择器立即失效，导致再次编辑、刷新回放和删除记录无法定位元素。",
+      "mechanism": "持久化选择器包含了本次操作会移除的 icon-* 类，定位身份与被修改状态耦合。",
+      "rule": "记录类名替换时，选择器必须排除可变类并使用稳定父结构、data 属性或身份路径；历史选择器查询应提供移除可变类的兼容回退。",
+      "scope": [
+        "类名替换的持久化记录",
+        "刷新回放与记录删除"
+      ],
+      "verification": [
+        "替换后选择器仍命中同一元素",
+        "刷新、撤销、重做和删除均可恢复"
+      ],
+      "novelty": "既有稳定选择器只排除了状态类，没有覆盖被编辑的资源类。"
     },
     {
-      "id": "ev-056",
+      "id": "ev-049",
       "date": "2026-09-04",
-      "summary": "用户验收指出 iconfont 替换未同步共享元素；修复为同组件结构且原图标一致才同步，图标无自身组件类时按最近重复父组件的相对子节点路径匹配，并把同步记录、撤销重做、刷新回放与整组删除绑定为一个共享组",
+      "summary": "共享变更必须由组件语义限定作用域，并把同步实例绑定为一个事务",
       "source": "user-correction",
       "scene": "wego-scene-walkthrough-test-iconfont共享同步",
       "tags": [
@@ -779,49 +782,73 @@
         "共享元素",
         "父组件匹配",
         "整组撤销"
-      ]
+      ],
+      "kind": "experience",
+      "observation": "按图标类替换只改当前实例会漏同步；若按同名图标全局同步又会误改无关组件。",
+      "mechanism": "资源类描述视觉值而不描述组件角色，无法单独决定共享范围。",
+      "rule": "共享资源变更应同时匹配组件结构与原值；目标缺少自身组件类时按最近重复父组件的相对路径匹配，并将全部实例作为一个撤销与持久化事务。",
+      "scope": [
+        "重复组件中的资源或类名变更",
+        "共享实例同步与历史记录"
+      ],
+      "verification": [
+        "同组件同原值实例全部同步",
+        "无关组件同名资源保持不变",
+        "一次撤销、重做和刷新覆盖整组"
+      ],
+      "novelty": "既有共享样式同步依赖 CSS 属性和目标组件类，没有覆盖嵌套资源类的作用域识别。"
     },
     {
-      "id": "ev-057",
+      "id": "ev-050",
       "date": "2026-09-04",
-      "summary": "用户确认走查工具栏在非移动端固定为屏幕水平居中靠下、不可拖动并始终避开底部导航，移动端保留原定位逻辑；展开与收起统一使用叉图标，各工具入口增加上方 Tooltip 提示文案",
-      "source": "user-preference",
-      "scene": "wego-scene-walkthrough-test-工具栏定位与提示",
-      "tags": [
-        "走查工具",
-        "工具栏",
-        "桌面固定定位",
-        "底部导航避让",
-        "Tooltip"
-      ]
-    },
-    {
-      "id": "ev-058",
-      "date": "2026-09-04",
-      "summary": "用户验收纠正走查工具栏：收起态有配置时必须继续用数字替换默认图标；桌面居中若对宿主使用 transform 会改变 fixed 子面板的包含块，导致配置列表不可见、日志错位，须改为显式 left 居中并让数据模拟/更多按各自入口锚定",
+      "summary": "包含 fixed 子面板的宿主使用 transform 居中会改变定位参照，应改用显式坐标或脱离变换层",
       "source": "user-correction",
       "scene": "wego-scene-walkthrough-test-工具栏浮层定位",
       "tags": [
         "走查工具",
         "工具栏",
-        "配置数字",
         "fixed包含块",
         "浮层定位"
-      ]
+      ],
+      "kind": "experience",
+      "observation": "工具宿主用 translateX 居中后，配置列表离开视口，日志和更多面板相对入口错位。",
+      "mechanism": "非 none transform 会为 fixed 后代建立新的包含块，使其坐标不再相对视口。",
+      "rule": "宿主包含 fixed 浮层时不得用 transform 居中；应显式计算 left，或把 fixed 浮层挂到未变换的顶层容器。",
+      "scope": [
+        "包含 fixed 后代的浮动工具宿主",
+        "视口级弹层与锚点定位"
+      ],
+      "verification": [
+        "常规和矮视口分别打开全部浮层并检查视口边界",
+        "调整宿主位置后 fixed 面板仍锚定正确入口"
+      ],
+      "novelty": "现有工具栏定位规则只约束视觉位置，没有约束 transform 对 fixed 后代坐标系的影响。"
     },
     {
-      "id": "ev-059",
+      "id": "ev-051",
       "date": "2026-09-04",
-      "summary": "用户移动端验收指出 iconfont 面板被样式面板 flex 压缩到约两行，须固定为约 42dvh、至少四行并禁止收缩；同时确认工具栏收起态有配置显示数字、无配置显示原走查箭头，只有展开态收起入口使用叉图标",
+      "summary": "同一受限高度 flex 面板内的主次滚动区必须显式分配收缩权，避免关键选择区被挤压",
       "source": "user-correction",
       "scene": "wego-scene-walkthrough-test-iconfont移动端尺寸",
       "tags": [
         "走查工具",
         "iconfont",
         "移动端",
-        "flex压缩",
-        "收起态图标"
-      ]
+        "flex压缩"
+      ],
+      "kind": "experience",
+      "observation": "移动端 Safari 中图标选择区被长样式区挤压到约两行，虽然自身设置了 max-height 仍无法保证可用高度。",
+      "mechanism": "flex 子项默认 flex-shrink:1；max-height 只限制上限，不能阻止其在兄弟内容压力下继续缩小。",
+      "rule": "受限高度面板内有多个滚动区时，关键选择区使用 flex:0 0 加视口相对高度，次要内容区使用 min-height:0 与独立 overflow 滚动。",
+      "scope": [
+        "移动端受限高度复合面板",
+        "并列主次滚动区域"
+      ],
+      "verification": [
+        "不同移动端高度下关键区至少保持四行",
+        "次要区仍可独立滚动且整体不溢出视口"
+      ],
+      "novelty": "现有面板只为内容区设置 min-height:0，没有为关键选择区声明不可收缩的空间预算。"
     }
   ]
 }

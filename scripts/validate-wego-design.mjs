@@ -94,6 +94,10 @@ function parse(result, name) {
 const coreArgs = args.filter(arg => arg !== '--json');
 const coreReport = parse(run('scripts/validate-wego-design-core.mjs', coreArgs), 'core');
 const experienceReport = parse(run('scripts/refine-experience.mjs', ['--check', '--json']), 'experience');
+const runExperienceQualitySelfTest = ['system', 'full'].includes(requestedScope);
+const experienceQualitySelfTestReport = runExperienceQualitySelfTest
+  ? parse(run('scripts/refine-experience.mjs', ['--self-test-quality']), 'experience-quality-self-test')
+  : { errors: [], warnings: [], info: [], metrics: { skipped: true } };
 const runParity = ['system', 'full'].includes(requestedScope)
   || (requestedScope === 'changed' && changedFiles().some(affectsComponentParity));
 const parityReport = runParity
@@ -105,14 +109,15 @@ const docDriftReport = runDocDrift
   : { errors: [], warnings: [], info: [], metrics: { skipped: true } };
 
 const report = {
-  ok: experienceReport.errors.length + parityReport.errors.length + coreReport.errors.length + docDriftReport.errors.length === 0,
+  ok: experienceReport.errors.length + experienceQualitySelfTestReport.errors.length + parityReport.errors.length + coreReport.errors.length + docDriftReport.errors.length === 0,
   scope: requestedScope,
-  errors: [...experienceReport.errors, ...parityReport.errors, ...coreReport.errors, ...docDriftReport.errors],
-  warnings: [...experienceReport.warnings, ...parityReport.warnings, ...coreReport.warnings, ...docDriftReport.warnings],
-  info: [...experienceReport.info, ...parityReport.info, ...coreReport.info, ...docDriftReport.info],
+  errors: [...experienceReport.errors, ...experienceQualitySelfTestReport.errors, ...parityReport.errors, ...coreReport.errors, ...docDriftReport.errors],
+  warnings: [...experienceReport.warnings, ...experienceQualitySelfTestReport.warnings, ...parityReport.warnings, ...coreReport.warnings, ...docDriftReport.warnings],
+  info: [...experienceReport.info, ...experienceQualitySelfTestReport.info, ...parityReport.info, ...coreReport.info, ...docDriftReport.info],
   metrics: {
     ...coreReport.metrics,
     experience: experienceReport.metrics,
+    experienceQualitySelfTest: experienceQualitySelfTestReport.metrics,
     componentParity: parityReport.metrics,
     docDrift: docDriftReport.metrics
   }
