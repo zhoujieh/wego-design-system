@@ -5,7 +5,7 @@
  *   NODE_PATH=/path/to/node_modules node wt-iconfont.cjs
  *   NODE_PATH=/path/to/node_modules node wt-iconfont.cjs --url=https://example.com/wego-app/index.html
  */
-const { chromium } = require('playwright');
+const { chromium, devices } = require('playwright');
 
 const args = Object.fromEntries(process.argv.slice(2).map(arg => {
   const i = arg.indexOf('=');
@@ -26,10 +26,9 @@ function getIconClass(className) {
 
 (async () => {
   const browser = await chromium.launch();
-  const context = await browser.newContext({
-    viewport: { width: Number(args.width) || 1280, height: Number(args.height) || 960 },
-    cacheDisabled: true,
-  });
+  const context = await browser.newContext(args.mobile
+    ? { ...devices['iPhone 13'], cacheDisabled: true }
+    : { viewport: { width: Number(args.width) || 1280, height: Number(args.height) || 960 }, cacheDisabled: true });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message.slice(0, 200)));
@@ -85,17 +84,25 @@ function getIconClass(className) {
       const picker = root.querySelector('[data-iconfont-panel]');
       const options = Array.from(root.querySelectorAll('[data-iconfont-class]'));
       const onlyGlyphs = options.every(btn => btn.children.length === 1 && btn.firstElementChild.tagName === 'SPAN');
+      const optionHeight = options[0] ? options[0].getBoundingClientRect().height : 0;
+      const styles = getComputedStyle(picker);
       picker.scrollTop = picker.scrollHeight;
       return {
         open: !picker.hidden,
         count: options.length,
         scrollable: picker.scrollHeight > picker.clientHeight && picker.scrollTop > 0,
         onlyGlyphs,
+        height: picker.getBoundingClientRect().height,
+        visibleRows: optionHeight ? picker.clientHeight / (optionHeight + 6) : 0,
+        flexShrink: styles.flexShrink,
       };
     });
     check('图标面板展开并只显示图标', panelInfo.open && panelInfo.onlyGlyphs, JSON.stringify(panelInfo));
     check('图标面板包含完整图标目录', panelInfo.count >= 400, `count=${panelInfo.count}`);
     check('图标面板支持滚动查看', panelInfo.scrollable, `count=${panelInfo.count}`);
+    if (args.mobile) {
+      check('移动端图标面板保持至少四行且不被压缩', panelInfo.visibleRows >= 4 && panelInfo.flexShrink === '0', JSON.stringify(panelInfo));
+    }
     if (args.screenshot) await page.screenshot({ path: args.screenshot });
 
     await page.evaluate(() => {

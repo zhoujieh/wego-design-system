@@ -808,6 +808,20 @@
         "fixed包含块",
         "浮层定位"
       ]
+    },
+    {
+      "id": "ev-059",
+      "date": "2026-09-04",
+      "summary": "用户移动端验收指出 iconfont 面板被样式面板 flex 压缩到约两行，须固定为约 42dvh、至少四行并禁止收缩；同时确认工具栏收起态有配置显示数字、无配置显示原走查箭头，只有展开态收起入口使用叉图标",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-iconfont移动端尺寸",
+      "tags": [
+        "走查工具",
+        "iconfont",
+        "移动端",
+        "flex压缩",
+        "收起态图标"
+      ]
     }
   ]
 }

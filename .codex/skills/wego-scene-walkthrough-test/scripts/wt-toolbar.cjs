@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 走查工具工具栏回归：桌面固定居中靠下并避让底部导航、不可拖动、统一叉图标、入口 Tooltip；移动端保持原定位逻辑。
+ * 走查工具工具栏回归：桌面固定居中靠下并避让底部导航、不可拖动、收起态数字/默认箭头、入口 Tooltip；移动端保持原定位逻辑。
  */
 const { chromium, devices } = require('playwright');
 
@@ -123,12 +123,12 @@ async function inspectPanels(page) {
       const labels = Array.from(root.querySelectorAll('[data-toolbar-main] [data-tooltip]')).map(btn => btn.dataset.tooltip);
       return {
         rect: { left: hostRect.left, top: hostRect.top, right: hostRect.right, bottom: hostRect.bottom, width: hostRect.width, height: hostRect.height },
-        sameIcon: fabIcon === collapseIcon,
+        collapsedUsesArrow: fabIcon !== collapseIcon,
         labels,
       };
     });
     check('桌面展开态保持水平居中', Math.abs(expanded.rect.left + expanded.rect.width / 2 - 640) <= 1, JSON.stringify(expanded.rect));
-    check('展开收起统一叉图标', expanded.sameIcon, 'same-svg');
+    check('收起默认箭头、展开态收起入口叉图标', expanded.collapsedUsesArrow, 'different-svg');
     check('工具入口 Tooltip 文案齐全', JSON.stringify(expanded.labels) === JSON.stringify(['收起工具栏', '走查模式', '批注模式', '数据模拟', '修改记录', '调试日志', '更多工具']), expanded.labels.join('、'));
 
     const tooltipChecks = await page.evaluate(() => {

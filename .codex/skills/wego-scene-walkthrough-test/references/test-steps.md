@@ -58,7 +58,7 @@
 
 ## ⑦ iconfont 图标替换
 1. 选中含 `wego-iconfont-s` 与已注册 `icon-*` 类的元素 → 样式面板正常打开，标题栏右侧出现 `[data-action="iconfont"]`；普通元素不出现入口。
-2. 点击入口 → `[data-iconfont-panel]` 展开；图标项只渲染字形，不显示名称文本；目录数量与已加载 `iconfont.css` 一致，面板可纵向滚动。
+2. 点击入口 → `[data-iconfont-panel]` 展开；图标项只渲染字形，不显示名称文本；目录数量与已加载 `iconfont.css` 一致，面板可纵向滚动；移动端图标区固定约 42dvh、至少可见四行且 `flex-shrink:0`，样式区保留独立滚动。
 3. 重复点击 `.iconfont-option.is-current` → 不产生 `icon-class` 修改记录；点击其它图标 → 仅替换图标类，`wego-iconfont-s` 与业务结构类保留。
 4. 同一组件结构且原图标一致的可见实例须全部同步；图标自身无重复组件类时，按最近重复父组件的相对子节点路径匹配；不得把不同组件中碰巧同名的图标一起修改。
 5. 修改记录写入 `property: icon-class`、原图标类与新图标类；定位选择器不得含可变的 `icon-*` 类；共享记录须合并显示“共享 N 个元素”。
@@ -68,14 +68,14 @@
 ## ⑧ 工具栏定位与 Tooltip
 1. 桌面 1280×960：收起态和展开态中心与视口水平中心一致；即使 localStorage 有旧拖动坐标也忽略，`[data-toolbar]` 为 `.is-fixed`，拖动后位置不变。
 2. 可见 `.bottom-nav` 贴视口底部时，工具栏底边与导航顶边至少间隔 16px；1082×490 矮视口重复验证居中与避让。
-3. 收起态有配置内容时显示数字并替换叉图标；无配置内容时显示叉图标；展开态收起入口同样使用叉图标。
+3. 收起态有配置内容时显示数字；无配置内容时显示走查模式箭头；展开态收起入口使用叉图标。
 4. 展开入口 Tooltip 为“展开工具栏”；展开态依次为“收起工具栏 / 走查模式 / 批注模式 / 数据模拟 / 修改记录 / 调试日志 / 更多工具”，均显示在入口上方且无重复原生 title。
 5. 点击“修改记录”后配置列表须在视口内且位于工具栏上方；日志面板同样完整可见；数据模拟/更多面板须锚定各自入口，矮视口重复验证。
 6. 移动端保留 `wego.wgf-position` 历史坐标与现有拖动逻辑，不添加 `.is-fixed`，不显示桌面 hover Tooltip。
 7. 运行 `scripts/wt-toolbar.cjs`，本地与在线均须全量通过且无 `pageerror` / `console.error`。
 
 ## 回归基线脚本
-完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）、`scripts/wt-iconfont.cjs`（⑦）、`scripts/wt-toolbar.cjs`（⑧）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟，再跑对应专项。
+完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）、`scripts/wt-iconfont.cjs`（⑦，移动端加 `--mobile`）、`scripts/wt-toolbar.cjs`（⑧）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟，再跑对应专项。
 
 ## 评测闭环（技能自评）
 - 回归评测集：`scripts/wt-smoke.cjs` + `scripts/wt-iconfont.cjs` + `scripts/wt-toolbar.cjs` 是技能回归评测集，每次技能迭代后必须重跑（本地 + 在线）。
