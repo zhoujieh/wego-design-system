@@ -93,8 +93,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             <span class="bottom-action-bar__selection-value"><span data-role="quote-count-label">0/100</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span>
           </button>
           <span class="quote-batch-divider" aria-hidden="true"></span>
-          <button type="button" class="bottom-action-bar__action quote-view-selected-btn" data-dom-id="quote-view-selected">
-            <span class="bottom-action-bar__action-label">查看已选</span>
+          <button type="button" class="link quote-view-selected-btn" data-component-slug="link" data-dom-id="quote-view-selected">
+            查看已选
           </button>
           <div class="popmenu popmenu--select quote-count-menu" data-component-slug="popmenu" data-role="quote-count-menu" role="listbox" data-state="closed" hidden>
             <div class="popmenu__list">
@@ -363,14 +363,14 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         return '<section class="quote-image-group" data-group-id="' + escapeHtml(p.product_id) + '">'
           + '<div class="quote-image-group__head">'
           + '<button type="button" class="quote-image-group__select" data-quote-toggle-group data-id="' + escapeHtml(p.product_id) + '" aria-label="全选本组">' + checkboxHtml(all, ' data-role="quote-check"') + '</button>'
-          + '<div class="quote-image-group__summary">' + escapeHtml(p.item_no) + ' · 已选 ' + groupSel + '/' + images.length + '</div>'
           + '<div class="quote-image-group__title">' + escapeHtml(p.title) + '</div>'
+          + '<div class="quote-image-group__summary">' + escapeHtml(p.item_no) + ' · 已选 ' + groupSel + '/' + images.length + '</div>'
           + '</div>'
           + '<div class="quote-image-group__grid">'
           + images.map(function (img, idx) {
               return '<div class="quote-image-cell" data-quote-toggle data-mode="image" data-id="' + escapeHtml(p.product_id) + '" data-idx="' + idx + '">'
                 + '<div class="wg-image wg-image--rounded-sm quote-image-cell__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title + '图' + (idx + 1)) + '" loading="lazy"></div>'
-                + '<div class="quote-image-cell__select">' + checkboxHtml(isSelected('image', p, idx), ' data-role="quote-check"') + '</div>'
+                + '<div class="quote-image-cell__select dark">' + checkboxHtml(isSelected('image', p, idx), ' data-role="quote-check"') + '</div>'
                 + '</div>';
             }).join('')
           + '</div></section>';
