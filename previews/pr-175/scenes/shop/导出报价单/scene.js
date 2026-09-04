@@ -250,7 +250,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function productGridCardHtml(p) {
         var img = productImages(p)[0];
         return '<div class="card card--surface card--vertical quote-product-grid-card" data-component-slug="card" data-quote-toggle data-mode="product" data-id="' + escapeHtml(p.product_id) + '">'
-          + '<div class="quote-product-grid-card__select">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
+          + '<div class="quote-product-grid-card__select dark">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
           + '<div class="wg-image wg-image--rounded-sm quote-product-grid-card__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
           + '<div class="quote-product-grid-card__info"><h3 class="quote-product-grid-card__title">' + escapeHtml(p.title) + '</h3>'
           + (p.specification ? '<div class="quote-product-grid-card__spec">' + escapeHtml(p.specification) + '</div>' : '')

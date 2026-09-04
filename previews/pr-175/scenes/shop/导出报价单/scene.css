@@ -186,14 +186,6 @@
   right: var(--spacer-8);
   z-index: var(--z-raised);
 }
-.quote-product-grid-card__select .checkbox {
-  --checkbox-surface: var(--bg-inverse-surface-l1);
-  --checkbox-border: var(--border-inverse);
-}
-.quote-product-grid-card__select .checkbox--checked .checkbox__inner {
-  background: var(--bg-toast);
-  border-color: var(--border-toast);
-}
 .quote-product-grid-card__img {
   width: 100%;
   aspect-ratio: 1;
@@ -205,8 +197,7 @@
   object-fit: cover;
 }
 .quote-product-grid-card__info {
-  padding: var(--spacer-8) var(--spacer-8) var(--spacer-12);
-  padding-bottom: var(--spacer-8);
+  padding: var(--spacer-8);
   display: flex;
   flex-direction: column;
   gap: var(--spacer-4);
@@ -224,7 +215,6 @@
   color: var(--text-default);
 }
 .quote-product-grid-card__spec {
-  min-height: calc(var(--body-sm-line-height) + var(--body-sm-line-height));
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   color: var(--text-tertiary);
@@ -234,7 +224,12 @@
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
+}
+.quote-product-row__spec {
   -webkit-line-clamp: 2;
+}
+.quote-product-grid-card__spec {
+  -webkit-line-clamp: 1;
 }
 
 /* ===== 通用 tag ===== */
