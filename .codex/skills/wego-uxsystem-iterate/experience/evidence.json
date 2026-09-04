@@ -557,6 +557,34 @@
     },
     {
       "id": "ev-040",
+      "date": "2026-09-04",
+      "summary": "开放 PR 同步在修复仓库上下文与 pipefail 后真实执行并返回 404；复核确认仓库 allow_update_branch 初始关闭，开启后仍失败的最终根因是 update-branch REST 接口误用 POST，官方接口要求 PUT。用 PUT + API version + expected_head_sha 实测成功更新 PR #175，并将仓库开关与请求契约纳入规则和守卫。",
+      "source": "ci-failure",
+      "scene": "workflow-integrity-open-pr-sync",
+      "tags": [
+        "GitHub Actions",
+        "update-branch",
+        "HTTP PUT",
+        "allow_update_branch",
+        "wego-github-delivery"
+      ]
+    },
+    {
+      "id": "ev-041",
+      "date": "2026-09-04",
+      "summary": "PUT update-branch 修复后，实际同步已成功更新 PR #175/#172 并识别 PR #160 冲突；继续复验发现已是最新的 PR 返回 422 'There are no new commits on the base branch'，应视为成功无操作而非失败。仓库同时缺少规则依赖的 needs-sync 标签，已创建标签并补齐无操作分支识别。",
+      "source": "ci-failure",
+      "scene": "workflow-integrity-open-pr-sync",
+      "tags": [
+        "GitHub Actions",
+        "update-branch",
+        "幂等",
+        "needs-sync",
+        "wego-github-delivery"
+      ]
+    },
+    {
+      "id": "ev-042",
       "date": "2026-09-03",
       "summary": "走查工具间距标注按 Figma 式呈现：gap（元素到父容器 content box 四边间距）用洋红间距线+数字直显，padding 用蓝色数值标签，margin 用绿色数值标签，均直接画在页面上；去掉元素信息气泡 .bubble、色块 hover 弹值的 tooltip 及 padding/margin 大面积色块填充；贴边（间距 0）不绘制只显示有值间距",
       "source": "user-correction",
@@ -572,7 +600,7 @@
       ]
     },
     {
-      "id": "ev-041",
+      "id": "ev-043",
       "date": "2026-09-04",
       "summary": "走查工具 text-content 字段变更刷新后不持久化：_replayInlineChanges 用 style.setProperty('text-content') 无效，恢复文案必须用 el.textContent 直接赋值",
       "source": "rework",
@@ -585,7 +613,7 @@
       ]
     },
     {
-      "id": "ev-042",
+      "id": "ev-044",
       "date": "2026-09-04",
       "summary": "走查顺序移动换位后，原坐标位置已被兄弟元素占据，后续改文案/断言继续用旧坐标会命中错误元素，必须重新 getBoundingClientRect 取目标坐标",
       "source": "rework",
@@ -598,7 +626,7 @@
       ]
     },
     {
-      "id": "ev-043",
+      "id": "ev-045",
       "date": "2026-09-04",
       "summary": "走查工具无背景元素 fillHex 字段为空，HSL 改色对其不生效属历史既定行为（非回归），测试不得判失败",
       "source": "user-correction",
@@ -611,7 +639,7 @@
       ]
     },
     {
-      "id": "ev-044",
+      "id": "ev-046",
       "date": "2026-09-04",
       "summary": "走查顺序移动同档换位时撤销不记录：moveFlexItem 引用块级变量 g 抛 ReferenceError，修复为作用域内局部变量",
       "source": "rework",
@@ -624,7 +652,7 @@
       ]
     },
     {
-      "id": "ev-045",
+      "id": "ev-047",
       "date": "2026-09-04",
       "summary": "走查冒烟原未覆盖「面板移动按钮+同档换位+顺延」路径，致 moveFlexItem 作用域 bug 与一次移动=多撤销单元长期漏测；须补该路径回归断言（已由用户补 ④d）",
       "source": "rework",
@@ -637,7 +665,7 @@
       ]
     },
     {
-      "id": "ev-046",
+      "id": "ev-048",
       "date": "2026-09-04",
       "summary": "走查工具已移除导入导出 JSON 功能；复制 Prompt 追加『修复后动作』自动化测试指令",
       "source": "user-preference",
@@ -649,7 +677,7 @@
       ]
     },
     {
-      "id": "ev-047",
+      "id": "ev-049",
       "date": "2026-09-04",
       "summary": "走查样式面板填充分区已移除「渐变填充」开关/渐变面板/多渐变叠加层，渐变唯一入口收敛到颜色选择器，测试 ② 渐变须经颜色选择器",
       "source": "user-preference",
@@ -662,7 +690,7 @@
       ]
     },
     {
-      "id": "ev-048",
+      "id": "ev-050",
       "date": "2026-09-04",
       "summary": "走查顺序移动一次移动=多个撤销单元：moveKey 把目标/兄弟/顺延+跨卡同步绑成一次撤销/重做，撤销断言须按 moveKey 粒度",
       "source": "rework",
@@ -675,7 +703,7 @@
       ]
     },
     {
-      "id": "ev-049",
+      "id": "ev-051",
       "date": "2026-09-04",
       "summary": "走查技能⑤元信息文档曾过时：宽高气泡实际在 highlight .label、margin 绿色块 rect.mar-bg、无 tooltip；已按当前实现对齐 dom-map 与断言",
       "source": "user-correction",
@@ -688,7 +716,7 @@
       ]
     },
     {
-      "id": "ev-050",
+      "id": "ev-052",
       "date": "2026-09-04",
       "summary": "走查颜色选择器渐变撤销断言假设错误：切渐变模式与改色标各产一条变更记录，1 次撤销回不到 none，须撤销 2 步；②渐变回归脚本已同步（撤销2步/重做2步）",
       "source": "rework",
@@ -701,7 +729,7 @@
       ]
     },
     {
-      "id": "ev-051",
+      "id": "ev-053",
       "date": "2026-09-04",
       "summary": "走查样式面板程序恢复滚动位置会异步派发 scroll 事件，同步标志抑制无效（Chromium 中赋值触发的事件 isTrusted 也是 true）；须用时间窗（_suppressScrollUntil）或临时移除监听器",
       "source": "rework",
@@ -714,7 +742,7 @@
       ]
     },
     {
-      "id": "ev-052",
+      "id": "ev-054",
       "date": "2026-09-04",
       "summary": "【高频坑·反复发生】走查回归必须用当前交付单元分支上的技能脚本（.codex/skills 随分支迭代不同步），禁止直接跑主仓库 main 的脚本；main 旧版含已移除的拖拽换位断言/.pad-r，会误报 ④⑤ FAIL（用户多次指正）",
       "source": "user-correction",
@@ -727,7 +755,7 @@
       ]
     },
     {
-      "id": "ev-053",
+      "id": "ev-055",
       "date": "2026-09-04",
       "summary": "走查工具替换 iconfont 属类名变更：定位选择器必须排除可变 icon-* 类，修改记录保存原/新图标类，刷新回放需覆盖场景异步二次渲染后再次应用",
       "source": "rework",
@@ -740,7 +768,7 @@
       ]
     },
     {
-      "id": "ev-054",
+      "id": "ev-056",
       "date": "2026-09-04",
       "summary": "用户验收指出 iconfont 替换未同步共享元素；修复为同组件结构且原图标一致才同步，图标无自身组件类时按最近重复父组件的相对子节点路径匹配，并把同步记录、撤销重做、刷新回放与整组删除绑定为一个共享组",
       "source": "user-correction",

@@ -220,6 +220,9 @@ function checkWorkflowContracts() {
     if (!/set\s+-[^\n]*e[^\n]*pipefail/.test(source)) {
       add('error', 'workflow.sync_pr_fail_closed', '开放 PR 同步必须启用失败传播与 pipefail', path.join(root, syncWorkflow));
     }
+    if (!/--method\s+PUT/.test(source) || !/update-branch/.test(source) || !/expected_head_sha/.test(source)) {
+      add('error', 'workflow.sync_pr_update_contract', '开放 PR 同步必须使用 PUT update-branch 并携带 expected_head_sha 防止竞态', path.join(root, syncWorkflow));
+    }
   }
 }
 

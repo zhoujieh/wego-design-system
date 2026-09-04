@@ -21,4 +21,4 @@
 §
 [走查] App 场景走查流程见 wego-scene-app-test。[ev-026, ev-029, ev-030, ev-032] ×8，最近 2026-09-03
 §
-[走查] 走查工具交互验收见 wego-scene-walkthrough-test。[ev-017, ev-020, ev-024, ev-040, ev-044, ev-048, ev-050, ev-051, ev-052, ev-053, ev-054] ×24，最近 2026-09-04
+[走查] 走查工具交互验收见 wego-scene-walkthrough-test。[ev-017, ev-020, ev-024, ev-042, ev-046, ev-050, ev-052, ev-053, ev-054, ev-055, ev-056] ×24，最近 2026-09-04
