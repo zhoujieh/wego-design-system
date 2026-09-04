@@ -15,11 +15,11 @@ description: 创建或变更业务迭代；以需求规格说明为唯一需求�
 
 ## 输出与交接
 
-需求阶段唯一产出是需求规格说明（文件名为 `{iteration_id}-{title}-{YYYYMMDD}.md`），按[简报模板](./references/brief-template.md)填写。写好后通过 `submit-brief` 自动解析并校验，进入 `in-development` 状态。
+需求阶段唯一产出是需求规格说明（文件名为 `{iteration_id}-{title}-{YYYYMMDD}.md`），按[简报模板](./references/brief-template.md)填写。写好后通过 `submit-brief` 自动解析并校验（薄档守门），进入 `in-development` 状态。
 
-**简报开放开发**：`in-development` 期间可随时修改需求规格说明，修改后重新 `submit-brief` 即可更新快照，无需 invalidate/confirm。
+**原型循环**：立项确认（开工前的需求沟通）+ 已提交简要简报即原型授权，可交给 `wego-design` 开始实现。`in-development` 期间可随时修改需求规格说明，修改后重新 `submit-brief` 即可更新快照与验收账本（差量迁移），无需 invalidate/confirm；每轮用户反馈必须写回 spec.md 对应字段，不能只留在聊天记录。
 
-**验收统一收口**：用户说"验收完成"时，由 `wego-design` 输出 5 维度一致性校验清单（范围/入口/关键路径/状态/数据契约），用户逐项确认后执行 `confirm-brief --user-confirmed-brief <iteration_id>`，进入 `prototyping`；随后由 `wego-design` 执行 `submit-prototype --user-confirmed-prototype <iteration_id>` 一步完成确认与冻结，进入 `frozen`。
+**终局确认（与验收合一）**：用户明确表达"验收完成""验收通过""确认合格""可以合并"时进入收口：AI 先把 spec.md 补全至终版（状态、数据契约、路径闭环，只能补细节不能减内容）并重新 `submit-brief`，再逐项核对填写验收账本 `acceptance.json`，然后向用户展示终版补全 diff + 账本清单；用户过目确认后执行 `confirm-brief --user-confirmed-brief <iteration_id>`（脚本终局守门：全量校验 + 充分性 + 账本全绿），进入 `prototyping`；随后执行 `submit-prototype --user-confirmed-prototype <iteration_id>` 一步完成确认与冻结，进入 `frozen`。
 
 反馈改变已确认业务事实时，在原迭代中失效、更新需求规格说明、重新提交并确认，不静默修改范围。
 
@@ -47,7 +47,7 @@ description: 创建或变更业务迭代；以需求规格说明为唯一需求�
 - 创建、查看或更新业务迭代前，必须先完成 `wego-github-delivery` 的交付单元核对（具体执行见 `wego-github-delivery/references/task-intake.md` 启动清单）。命中现有交付单元时，先接手对应分支、worktree 和 PR；已确认范围内的验收反馈不得新建简报，按原迭代的失效与重新提交规则处理。
 
 <!-- rule-id: confirm-brief-must-wait-affirmation -->
-- `confirm-brief` 只能在用户明确表达"验收完成"且 5 维度一致性校验清单逐项确认后执行，必须带当前迭代 ID 作为明确授权参数。
+- `confirm-brief` 是终局确认，只能在用户明确表达"验收完成"、AI 补全终版 spec.md 并重新提交、账本核对填写完毕、用户过目补全 diff 与账本并确认后执行，必须带当前迭代 ID 作为明确授权参数；脚本终局守门（全量结构 + 充分性 + open_questions 清空 + 账本锚点一致且全部 implemented）不过即拒绝。
 
 <!-- rule-id: experience-signal-to-inbox -->
 - 经验信号自检：会话中出现用户纠正、用户表达偏好、返工、踩坑（CI 失败/守卫拦截/验收打回）时，向当前交付单元 `.tasks/experience-inbox.json` 追加一条草稿（字段与分流规则见 `wego-uxsystem-iterate/references/workflow-iteration.md`），不直接改经验权威源，无信号不动作、不打断需求流程。
