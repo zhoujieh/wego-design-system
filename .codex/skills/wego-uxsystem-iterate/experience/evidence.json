@@ -515,6 +515,161 @@
         "margin绿",
         "wego-walkthrough"
       ]
+    },
+    {
+      "id": "ev-037",
+      "date": "2026-09-04",
+      "summary": "走查工具 text-content 字段变更刷新后不持久化：_replayInlineChanges 用 style.setProperty('text-content') 无效，恢复文案必须用 el.textContent 直接赋值",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-文本字段持久化",
+      "tags": [
+        "走查工具",
+        "text-content",
+        "持久化",
+        "_replayInlineChanges"
+      ]
+    },
+    {
+      "id": "ev-038",
+      "date": "2026-09-04",
+      "summary": "走查顺序移动换位后，原坐标位置已被兄弟元素占据，后续改文案/断言继续用旧坐标会命中错误元素，必须重新 getBoundingClientRect 取目标坐标",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-顺序移动",
+      "tags": [
+        "走查工具",
+        "顺序移动",
+        "坐标",
+        "重取"
+      ]
+    },
+    {
+      "id": "ev-039",
+      "date": "2026-09-04",
+      "summary": "走查工具无背景元素 fillHex 字段为空，HSL 改色对其不生效属历史既定行为（非回归），测试不得判失败",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-颜色",
+      "tags": [
+        "走查工具",
+        "fillHex",
+        "既定行为",
+        "非回归"
+      ]
+    },
+    {
+      "id": "ev-040",
+      "date": "2026-09-04",
+      "summary": "走查顺序移动同档换位时撤销不记录：moveFlexItem 引用块级变量 g 抛 ReferenceError，修复为作用域内局部变量",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-顺序移动",
+      "tags": [
+        "走查工具",
+        "moveFlexItem",
+        "作用域",
+        "ReferenceError"
+      ]
+    },
+    {
+      "id": "ev-041",
+      "date": "2026-09-04",
+      "summary": "走查冒烟原未覆盖「面板移动按钮+同档换位+顺延」路径，致 moveFlexItem 作用域 bug 与一次移动=多撤销单元长期漏测；须补该路径回归断言（已由用户补 ④d）",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-冒烟覆盖",
+      "tags": [
+        "走查工具",
+        "冒烟",
+        "覆盖盲区",
+        "移动按钮"
+      ]
+    },
+    {
+      "id": "ev-042",
+      "date": "2026-09-04",
+      "summary": "走查工具已移除导入导出 JSON 功能；复制 Prompt 追加『修复后动作』自动化测试指令",
+      "source": "user-preference",
+      "scene": "wego-scene-walkthrough-test-功能移除",
+      "tags": [
+        "走查工具",
+        "导入导出",
+        "功能移除"
+      ]
+    },
+    {
+      "id": "ev-043",
+      "date": "2026-09-04",
+      "summary": "走查样式面板填充分区已移除「渐变填充」开关/渐变面板/多渐变叠加层，渐变唯一入口收敛到颜色选择器，测试 ② 渐变须经颜色选择器",
+      "source": "user-preference",
+      "scene": "wego-scene-walkthrough-test-渐变入口",
+      "tags": [
+        "走查工具",
+        "渐变",
+        "入口收敛",
+        "颜色选择器"
+      ]
+    },
+    {
+      "id": "ev-044",
+      "date": "2026-09-04",
+      "summary": "走查顺序移动一次移动=多个撤销单元：moveKey 把目标/兄弟/顺延+跨卡同步绑成一次撤销/重做，撤销断言须按 moveKey 粒度",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-顺序移动",
+      "tags": [
+        "走查工具",
+        "顺序移动",
+        "moveKey",
+        "撤销单元"
+      ]
+    },
+    {
+      "id": "ev-045",
+      "date": "2026-09-04",
+      "summary": "走查技能⑤元信息文档曾过时：宽高气泡实际在 highlight .label、margin 绿色块 rect.mar-bg、无 tooltip；已按当前实现对齐 dom-map 与断言",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-文档对齐",
+      "tags": [
+        "走查工具",
+        "⑤元信息",
+        "文档过时",
+        "已对齐"
+      ]
+    },
+    {
+      "id": "ev-046",
+      "date": "2026-09-04",
+      "summary": "走查颜色选择器渐变撤销断言假设错误：切渐变模式与改色标各产一条变更记录，1 次撤销回不到 none，须撤销 2 步；②渐变回归脚本已同步（撤销2步/重做2步）",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-渐变撤销",
+      "tags": [
+        "走查工具",
+        "渐变",
+        "撤销粒度",
+        "断言"
+      ]
+    },
+    {
+      "id": "ev-047",
+      "date": "2026-09-04",
+      "summary": "走查样式面板程序恢复滚动位置会异步派发 scroll 事件，同步标志抑制无效（Chromium 中赋值触发的事件 isTrusted 也是 true）；须用时间窗（_suppressScrollUntil）或临时移除监听器",
+      "source": "rework",
+      "scene": "wego-scene-walkthrough-test-滚动恢复",
+      "tags": [
+        "走查工具",
+        "滚动恢复",
+        "scroll异步",
+        "时间窗"
+      ]
+    },
+    {
+      "id": "ev-048",
+      "date": "2026-09-04",
+      "summary": "【高频坑·反复发生】走查回归必须用当前交付单元分支上的技能脚本（.codex/skills 随分支迭代不同步），禁止直接跑主仓库 main 的脚本；main 旧版含已移除的拖拽换位断言/.pad-r，会误报 ④⑤ FAIL（用户多次指正）",
+      "source": "user-correction",
+      "scene": "wego-scene-walkthrough-test-回归脚本来源",
+      "tags": [
+        "走查工具",
+        "回归脚本",
+        "分支来源",
+        "高频坑"
+      ]
     }
   ]
 }
