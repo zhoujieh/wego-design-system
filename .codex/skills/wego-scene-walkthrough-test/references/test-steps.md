@@ -22,7 +22,7 @@
 2. 点 `.gradient-stopbar` 空白加色标（上限 5 个、至少保留 2 个）；`.stop-dot` 可拖动位置、`[data-stop-delete]` 删除。
 3. 角度：−45° 按钮 / `.gradient-angle-slider` / +45° 调节渐变方向。
 4. 改激活色标颜色 → 断言元素 `backgroundImage` 为 `linear-gradient(...)` 且页面同步。
-5. 撤销 2 步回 none、重做恢复。
+5. 撤销 2 步回 none、重做恢复——注意：切到渐变模式会先应用默认白→黑渐变（1 条变更记录），改色标再 1 条，共 2 条；走查撤销为逐条记录模型，一次用户操作可能含多条内部变更，须撤销 2 步才回 none（回归脚本须按此粒度断言，勿只撤 1 步判回 none）。
 6. 边界：填充/文本支持渐变；描边（strokeHex）/投影（shadowHex）无渐变切换按钮（原生限制，属正常）。
 7. 反例：撤销渐变后 `backgroundImage` 应回 none；防抖落盘 300ms 后读 localStorage 核对，防旧值残留假象。
 

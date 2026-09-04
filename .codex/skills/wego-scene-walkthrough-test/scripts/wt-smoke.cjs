@@ -180,6 +180,42 @@ function check(name, ok, detail = '') {
     const k2 = await page.evaluate(() => getComputedStyle(document.querySelector('.album-feed__publisher')).order);
     check('④c 键盘方向键顺序移动（flex 换位）', k1.selected === 'publisher' && k2 !== k1.order, `选中:${k1.selected} order:${k1.order}→${k2}`);
 
+    // ④d 面板移动按钮「同档换位 + 撤销整体还原」：覆盖 moveFlexItem 顺延分支与 moveKey 一次撤销绑定
+    //     （曾漏测该路径致 moveFlexItem 块级 g 作用域 bug 与「一次移动=多撤销单元」长期未被抓出）
+    const avc = await page.evaluate(() => {
+      const el = document.querySelector('.album-feed__avatar');
+      const r = el.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    });
+    await page.mouse.click(avc.x, avc.y);
+    await page.waitForTimeout(500);
+    const allAvOrder = () => page.evaluate(() => Array.from(document.querySelectorAll('.album-feed__avatar')).map(a => getComputedStyle(a).order));
+    const avBefore = await page.evaluate(() => {
+      const panel = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel');
+      const el = document.querySelector('.album-feed__avatar');
+      return { selected: panel && panel._targetEl === el ? 'avatar' : 'other', order: getComputedStyle(el).order };
+    });
+    const allBefore = await allAvOrder();
+    await page.evaluate(() => {
+      const pr = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel').shadowRoot;
+      pr.querySelector('[data-move="right"]').click();
+    });
+    await page.waitForTimeout(600); // 等跨卡共享同步
+    const avAfter = await page.evaluate(() => getComputedStyle(document.querySelector('.album-feed__avatar')).order);
+    const undoAvail = await page.evaluate(() => {
+      const pr = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel').shadowRoot;
+      return !pr.querySelector('[data-action="undo"]').classList.contains('is-disabled');
+    });
+    check('④d 面板移动按钮同档换位（flex 顺延）', avBefore.selected === 'avatar' && avAfter !== avBefore.order, `选中:${avBefore.selected} order:${avBefore.order}→${avAfter}`);
+    check('④d 移动后撤销栈已记录（undo 可点）', undoAvail, `undoEnabled=${undoAvail}`);
+    await page.evaluate(() => {
+      const pr = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel').shadowRoot;
+      pr.querySelector('[data-action="undo"]').click();
+    });
+    await page.waitForTimeout(500);
+    const allUndone = await allAvOrder();
+    check('④d 一次撤销整体还原（moveKey 跨卡同步）', JSON.stringify(allUndone) === JSON.stringify(allBefore), `${JSON.stringify(allBefore)} → ${JSON.stringify(allUndone)}`);
+
     // localStorage 落盘核对（真实执行证据：操作已写入本地存储，防"看起来对"假象）
     const ls = await page.evaluate(() => {
       const keys = Object.keys(localStorage).filter(k => /wego|walkthrough|changes/i.test(k));
