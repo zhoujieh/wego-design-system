@@ -23,10 +23,13 @@ jobs:
           set -euo pipefail
           gh pr list --repo "$GITHUB_REPOSITORY" --state open --json number --jq '.[].number' | while read -r number; do
             echo "=== 同步 PR #$number ==="
+            head_sha=$(gh pr view "$number" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
             if result=$(gh api \
-                --method POST \
+                --method PUT \
                 -H "Accept: application/vnd.github+json" \
-                "/repos/${GITHUB_REPOSITORY}/pulls/${number}/update-branch" 2>&1); then
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "/repos/${GITHUB_REPOSITORY}/pulls/${number}/update-branch" \
+                -f expected_head_sha="$head_sha" 2>&1); then
               echo "PR #$number 已完成同步检查: $result"
               gh pr edit "$number" --repo "$GITHUB_REPOSITORY" --remove-label needs-sync >/dev/null 2>&1 || true
             elif echo "$result" | grep -Eqi 'merge[_ -]?conflict|merge conflict'; then

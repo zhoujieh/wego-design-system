@@ -555,6 +555,20 @@
         "自测可移植性",
         "wego-github-delivery"
       ]
+    },
+    {
+      "id": "ev-040",
+      "date": "2026-09-04",
+      "summary": "开放 PR 同步在修复仓库上下文与 pipefail 后真实执行并返回 404；复核确认仓库 allow_update_branch 初始关闭，开启后仍失败的最终根因是 update-branch REST 接口误用 POST，官方接口要求 PUT。用 PUT + API version + expected_head_sha 实测成功更新 PR #175，并将仓库开关与请求契约纳入规则和守卫。",
+      "source": "ci-failure",
+      "scene": "workflow-integrity-open-pr-sync",
+      "tags": [
+        "GitHub Actions",
+        "update-branch",
+        "HTTP PUT",
+        "allow_update_branch",
+        "wego-github-delivery"
+      ]
     }
   ]
 }
