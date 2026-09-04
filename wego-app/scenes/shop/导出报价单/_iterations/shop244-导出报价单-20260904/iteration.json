@@ -141,7 +141,7 @@
     "open_questions": []
   },
   "brief_submission": {
-    "at": "2026-09-04T08:22:16.224Z",
+    "at": "2026-09-04T08:43:50.334Z",
     "scope_revision": 1,
     "scope_sha256": "8d40eee8d8cffde29bc93e62211126a68d52990e780df0c01c2295ce2371a3c5"
   },
@@ -177,6 +177,10 @@
     {
       "action": "submit-brief",
       "at": "2026-09-04T08:22:16.226Z"
+    },
+    {
+      "action": "submit-brief",
+      "at": "2026-09-04T08:43:50.336Z"
     }
   ],
   "freeze": null
