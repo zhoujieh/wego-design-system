@@ -243,10 +243,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       }
       function productGridCardHtml(p) {
         var img = productImages(p)[0];
-        return '<div class="card card--surface quote-product-grid-card" data-component-slug="card" data-quote-toggle data-mode="product" data-id="' + escapeHtml(p.product_id) + '">'
+        return '<div class="card card--surface card--vertical quote-product-grid-card" data-component-slug="card" data-quote-toggle data-mode="product" data-id="' + escapeHtml(p.product_id) + '">'
           + '<div class="quote-product-grid-card__select">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
           + '<div class="wg-image wg-image--rounded-sm quote-product-grid-card__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
-          + '<div class="quote-product-grid-card__info"><h3 class="quote-product-grid-card__title"><span class="quote-row__no">' + escapeHtml(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + escapeHtml(p.title) + '</span></h3>'
+          + '<div class="quote-product-grid-card__info"><h3 class="quote-product-grid-card__title">' + escapeHtml(p.title) + '</h3>'
           + (p.specification ? '<div class="quote-product-grid-card__spec">' + escapeHtml(p.specification) + '</div>' : '')
           + '<div class="quote-product-grid-card__price">' + metricHtml(p.price, '14') + '</div></div>'
           + '</div>';
@@ -283,11 +283,12 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (state.selectMode === 'image') {
           html = '<div class="quote-image-groups">' + pageItems.map(imageGroupHtml).join('') + '</div>';
         } else if (state.view === 'grid') {
-          html = '<div class="layout-grid quote-product-grid" data-component-slug="layout-grid" data-columns="2" data-align="stretch">' + pageItems.map(productGridCardHtml).join('') + '</div>';
+          html = '<div class="layout-grid quote-product-grid" data-component-slug="layout-grid" data-columns="3" data-align="stretch">' + pageItems.map(productGridCardHtml).join('') + '</div>';
         } else {
           html = '<div class="layout-flow quote-product-list" data-component-slug="layout-flow" data-direction="vertical" data-align="stretch">' + pageItems.map(productRowHtml).join('') + '</div>';
         }
         listEl.innerHTML = html;
+        updateProductGridColumns();
         activateImages(listEl);
         emptyEl.hidden = list.length !== 0;
         emptyEl.innerHTML = list.length === 0
@@ -296,6 +297,12 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               : '<div class="card card--filled quote-empty__card" data-component-slug="card"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i><strong>暂无商品</strong><span>商品库暂无可选商品</span></div>')
           : '';
         updateBar();
+      }
+
+      function updateProductGridColumns() {
+        var grid = root.querySelector('.quote-product-grid');
+        if (!grid) return;
+        grid.setAttribute('data-columns', grid.getBoundingClientRect().width >= 520 ? '4' : '3');
       }
 
       function updateBar() {
@@ -417,9 +424,13 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         state.page = 1;
         var icon = root.querySelector('[data-role="quote-view-icon"]');
         var label = root.querySelector('[data-role="quote-view-label"]');
-        icon.className = 'search-toolbar__action-icon wego-iconfont-s ' + (view === 'grid' ? 'icon-datu' : 'icon-liebiao');
-        label.textContent = view === 'grid' ? '网格' : '列表';
+        icon.className = 'search-toolbar__action-icon wego-iconfont-s ' + (view === 'grid' ? 'icon-sanlie' : 'icon-liebiao');
+        label.textContent = view === 'grid' ? '卡片' : '列表';
         renderList();
+      }
+
+      function onViewportResize() {
+        updateProductGridColumns();
       }
 
       function applySearch(query) {
@@ -553,6 +564,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       scrollEl.addEventListener('click', onListClick);
       scrollEl.addEventListener('scroll', onScroll);
       document.addEventListener('click', onDocumentClick);
+      window.addEventListener('resize', onViewportResize);
 
       ctx.bindScrollLayout({
         scrollRoot: '.quote-scroll',
@@ -565,6 +577,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         scrollEl.removeEventListener('click', onListClick);
         scrollEl.removeEventListener('scroll', onScroll);
         document.removeEventListener('click', onDocumentClick);
+        window.removeEventListener('resize', onViewportResize);
       });
     }
   });
