@@ -48,13 +48,13 @@
 5. 反例：顺序移动 ArrowDown 会让同容器兄弟**换位**，改文案前须重取目标元素坐标（原坐标此时命中兄弟）；text-content 若走 `el.style.setProperty` 恢复会静默失败，刷新后文本丢失（曾出现，已修复）。
 
 ## ⑤ 悬停/选中元信息
-1. 悬停元素（不选中）→ 四边 `line.guide` 红虚线延长线 + `.bubble`（类名 + 宽×高）+ `text.num` 间距数字。
-2. 有 padding 元素 → `rect.pad-r` 青色块；悬停显示 `padding: t r b l` 数值。
-3. 有 margin 元素 → `rect.mar-r` 橙色块；悬停显示 `margin: t r b l`。
-4. 选中元素后 inspector 同样显示元信息。
+1. 悬停元素（不选中）→ highlight `.label` 显示 `${宽}×${高}` 气泡；inspector `line.guide`×4 红虚线延长线 + `text.num` 间距数字。
+2. 有 padding 元素 → inspector `rect.pad-bg` 蓝色块（fill rgba(76,141,255,0.18)），数值（`text.pnum`）绘制在块内。
+3. 有 margin 元素 → inspector `rect.mar-bg` 绿色块（fill rgba(0,181,120,0.16)），数值（`text.mnum`）在块内；gap 为 `rect.gap-bg` 洋红块。
+4. 选中元素后 highlight `.label` 显示 `${类名} ${tag} · ${宽}×${高}`；inspector 同样显示元信息。
 5. 断言 8px 网格辅助线已移除（页面无网格线覆盖层）。
-6. 场景无 margin 元素时，可用测试注入 `style.marginTop` 验证橙色块逻辑。
-7. 反例：无 padding/margin 的元素不显示色块属正常，勿判失败；悬停前先确保无选中态（无选中时 inspector 才走 hover 分支）。
+6. 场景无 margin 元素时，可用测试注入 `style.marginTop` 验证 `rect.mar-bg` 逻辑。
+7. 反例：气泡在 highlight `.label`，不在 inspector；无 padding/margin 的元素不显示色块属正常，勿判失败；悬停前先确保无选中态（无选中时 inspector 才走 hover 分支）。
 
 ## 回归基线脚本
 完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-keymove`（④ 键盘顺序移动；原拖拽脚本 `wt-test-reorder5`/`wt-card-drag-dispatch` 已随拖拽移除）、`wt-test-hover4`（⑤）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟。

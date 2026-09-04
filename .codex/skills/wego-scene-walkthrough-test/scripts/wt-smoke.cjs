@@ -64,6 +64,12 @@ function check(name, ok, detail = '') {
     check('⑤ 悬停四边延长线', insp && insp.display === 'block' && insp.guides === 4, insp ? `guides=${insp.guides}` : '无 inspector');
     check('⑤ 容器 padding 蓝底 + gap 洋红底', insp && insp.padbg >= 1 && insp.gapbg >= 1 && insp.pnum.length >= 1, `padbg=${insp ? insp.padbg : 0} gapbg=${insp ? insp.gapbg : 0} pnum=${insp ? insp.pnum.length : 0}`);
     check('⑤ 元素信息气泡已去除', insp && insp.noBubble, `noBubble=${insp ? insp.noBubble : 0}`);
+    // 宽×高气泡在 highlight `.label`（hover 模式 `${宽}×${高}`）
+    const hlLabel = await page.evaluate(() => {
+      const hl = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-highlight');
+      return hl?.shadowRoot?.querySelector('.label')?.textContent || '';
+    });
+    check('⑤ highlight 宽×高气泡', hlLabel.includes('×'), hlLabel);
 
     // 选中 head（点击中心 + 连点，head 中心命中 publisher 上移到 head）
     const p = await page.evaluate(() => {

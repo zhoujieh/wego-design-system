@@ -21,16 +21,27 @@
 | 实色/渐变切换 | `.seg-btn`（文本"实色"/"渐变"） |
 | 渐变编辑器 | `.gradient-editor`：`.gradient-angle-row`（−45° 按钮 / `.gradient-angle-slider` / +45°）、`.gradient-stopbar`、`.stop-dot`（激活色标）、`.gradient-toolbar`、`[data-stop-delete]` |
 
-## 元信息（wego-wt-inspector）
+## 元信息（wego-wt-highlight / wego-wt-inspector 两个组件）
+
+> 悬停/选中的色块、延长线、间距数字都在 **wego-wt-inspector** shadowRoot 内；宽×高气泡在 **wego-wt-highlight** shadowRoot 内。断言前先分别 dump 两个组件，勿混用。
+
+### wego-wt-highlight（宽×高气泡 + 选中框）
+
+| 目标 | 选择器 |
+| --- | --- |
+| 气泡 label | shadowRoot → `.label`：hover 模式为 `${宽}×${高}`；选中模式为 `${类名} ${tag} · ${宽}×${高}` |
+
+### wego-wt-inspector（延长线 / 色块 / 间距数字）
 
 | 目标 | 选择器 |
 | --- | --- |
 | 四边延长线（红虚线） | shadowRoot → `line.guide`（stroke rgba(255,77,79,.45)，dasharray 4 5） |
-| 间距数字 | `text.num` / `line.sp` |
-| 气泡（类名 + 宽×高） | `.bubble` / `.bubble-text` |
-| padding 色块（青） | `rect.pad-r`（rgba(64,158,255,.16)，pointer-events:auto） |
-| margin 色块（橙） | `rect.mar-r`（rgba(255,170,0,.16)） |
-| hover 数值 tooltip | `.tooltip`（文本形如 `padding: 12px 16px 12px 16px`） |
+| 间距数字 | `text.num`（padding 为 `text.pnum`、margin 为 `text.mnum`，直接绘制在色块内） |
+| padding 色块（蓝） | `rect.pad-bg`（fill rgba(76,141,255,0.18)） |
+| margin 色块（绿） | `rect.mar-bg`（fill rgba(0,181,120,0.16)） |
+| gap 色块（洋红） | `rect.gap-bg`（fill rgba(255,0,255,0.16)） |
+
+> 数值直接绘制在色块内，inspector 无独立气泡/tooltip 节点（气泡在 highlight `.label`）。
 
 ## 选中与连点选择
 

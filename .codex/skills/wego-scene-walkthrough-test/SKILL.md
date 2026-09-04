@@ -21,7 +21,7 @@ description: 走查工具自动化测试与回归。改动 wego-app/js/walkthrou
 - ② 渐变：实色/渐变切换；色标加（上限 5/最少 2）/删/拖位；±45° 与滑块调角度；填充/文本支持、描边/投影不支持（原生限制）。
 - ③ 数值拖动：拖动调值；Shift ×5、Alt 微调；点击全选直接输入；撤销/重做后元素与面板 input 同步。
 - ④ 顺序移动：选中 flex 容器内元素，面板移动按钮或键盘方向键换位（moveFlexItem + orderBaselines + 共享同步 + 净零往返）；撤销/重做；刷新顺序保持。元素拖拽换位已移除（旧 reorder 数据仍兼容读取）。
-- ⑤ 元信息：悬停四边红虚线 + 间距标注按 Figma 式直显——gap 洋红线+数字（元素到父容器 content box 四边，贴边 0 不绘制）、padding 蓝色数值标签、margin 绿色数值标签；无气泡/tooltip/色块填充；8px 网格已移除。[ev-036]
+- ⑤ 元信息：悬停四边红虚线（inspector `line.guide`）+ 宽×高气泡（highlight `.label`，hover `${宽}×${高}`、选中 `${类名} ${tag} · ${宽}×${高}`）+ 间距标注——gap 洋红色块+数字（`rect.gap-bg`，元素到父容器 content box 四边，贴边 0 不绘制）、padding 蓝色色块+数值（`rect.pad-bg`，rgba(76,141,255,0.18)）、margin 绿色色块+数值（`rect.mar-bg`，rgba(0,181,120,0.16)）；8px 网格已移除。[ev-036]
 - 全程无页面报错（监听 pageerror / console.error）。
 - 置信度：先排除环境假象（缓存/浏览器合成事件/输入合并），再判真实 bug；低置信度保持待确认，高置信度才修复；首败保留、单一假设复现。
 
