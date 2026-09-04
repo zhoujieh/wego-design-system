@@ -36,10 +36,15 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         </div>
         <div class="navbar__right navbar__right--icon">
           <button type="button" class="navbar__action" data-dom-id="quote-records-entry" aria-label="报价记录">
-            <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shangxiajiantou16" aria-hidden="true"></i></span>
+            <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shijian" aria-hidden="true"></i></span>
             <span class="navbar__action-label">报价记录</span>
           </button>
-          <span class="quote-guide-bubble" data-role="quote-guide-bubble" hidden>你的报价单都在这</span>
+          <div class="popover popover--normal quote-guide-popover" data-component-slug="popover" data-role="quote-guide-bubble" role="tooltip" data-variant="normal" data-placement="bottom" data-align="end" data-state="closed" hidden>
+            <div class="popover__arrow"></div>
+            <div class="popover__body">
+              <span class="popover__text">你的报价单都在这</span>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
@@ -59,10 +64,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             <span class="search-toolbar__action-icon wego-iconfont-s icon-liebiao" data-role="quote-view-icon" aria-hidden="true"></span>
             <span data-role="quote-view-label">列表</span>
           </button>
-          <button class="search-toolbar__action quote-filter-btn" data-dom-id="quote-filter-btn" type="button">
+          <button class="search-toolbar__action quote-filter-btn" data-dom-id="quote-filter-btn" type="button" aria-pressed="false">
             <span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>
             筛选
-            <span class="badge badge--number quote-filter-badge" data-component-slug="badge" data-role="quote-filter-badge" hidden><span class="badge__text" data-role="quote-filter-count">0</span></span>
           </button>
         </div>
       </div>
@@ -235,9 +239,11 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           + '<div class="quote-product-row__select">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
           + '<div class="wg-image wg-image--rounded-sm quote-product-row__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
           + '<div class="quote-product-row__info">'
+          + '<div class="quote-product-row__copy">'
           + '<h3 class="quote-product-row__title"><span class="quote-row__no">' + escapeHtml(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + escapeHtml(p.title) + '</span></h3>'
           + (p.specification ? '<div class="quote-product-row__spec">' + escapeHtml(p.specification) + '</div>' : '')
-          + '<div class="quote-product-row__price">' + metricHtml(p.price, '14') + '</div>'
+          + '</div>'
+          + '<div class="quote-product-row__price">' + metricHtml(p.price, '16') + '</div>'
           + '</div>'
           + '</div>';
       }
@@ -248,7 +254,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           + '<div class="wg-image wg-image--rounded-sm quote-product-grid-card__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
           + '<div class="quote-product-grid-card__info"><h3 class="quote-product-grid-card__title">' + escapeHtml(p.title) + '</h3>'
           + (p.specification ? '<div class="quote-product-grid-card__spec">' + escapeHtml(p.specification) + '</div>' : '')
-          + '<div class="quote-product-grid-card__price">' + metricHtml(p.price, '14') + '</div></div>'
+          + '<div class="quote-product-grid-card__price">' + metricHtml(p.price, '16') + '</div></div>'
           + '</div>';
       }
       function imageGroupHtml(p) {
@@ -447,8 +453,13 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var seen = safeReadJSON(STORAGE_KEYS.guide, false);
         if (!seen && guideBubble) {
           guideBubble.hidden = false;
+          guideBubble.setAttribute('data-state', 'open');
           safeWriteJSON(STORAGE_KEYS.guide, true);
-          window.setTimeout(function () { if (!destroyed) guideBubble.hidden = true; }, 4000);
+          window.setTimeout(function () {
+            if (destroyed) return;
+            guideBubble.setAttribute('data-state', 'closed');
+            guideBubble.hidden = true;
+          }, 4000);
         }
       }
 
@@ -520,7 +531,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       syncModeMenuSelection();
       renderList();
       showGuideBubble();
-      if (guideBubble) guideBubble.addEventListener('click', function () { guideBubble.hidden = true; });
+      if (guideBubble) guideBubble.addEventListener('click', function () {
+        guideBubble.setAttribute('data-state', 'closed');
+        guideBubble.hidden = true;
+      });
 
       /* 交互 data-dom-id 显式绑定 */
       root.querySelector('[data-dom-id="quote-back"]').addEventListener('click', function () { ctx.navigateBack(); });
@@ -531,11 +545,11 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       });
       root.querySelector('[data-dom-id="quote-view-toggle"]').addEventListener('click', function () { switchView(state.view === 'grid' ? 'list' : 'grid'); });
       root.querySelector('[data-dom-id="quote-filter-btn"]').addEventListener('click', function () {
-        var badge = root.querySelector('[data-role="quote-filter-badge"]');
+        var btn = root.querySelector('[data-dom-id="quote-filter-btn"]');
         var strip = root.querySelector('[data-role="quote-filter-strip"]');
-        badge.hidden = false;
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-pressed', 'true');
         strip.hidden = false;
-        root.querySelector('[data-role="quote-filter-count"]').textContent = '1';
         ctx.toast('筛选面板将在后续阶段接入');
       });
       selectAllBtn.addEventListener('click', function () { toggleAllInList(); });
