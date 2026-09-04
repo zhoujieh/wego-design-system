@@ -95,7 +95,7 @@
 
 /* ===== 商品列表（按产品-列表行） ===== */
 .quote-product-list {
-  padding: var(--spacer-8) var(--spacer-16) 0;
+  padding: var(--spacer-8) var(--spacer-16);
   --layout-flow-gap: var(--spacer-8);
   justify-content: flex-start;
 }
@@ -114,8 +114,8 @@
 }
 .quote-product-row__img {
   flex: 0 0 auto;
-  width: var(--size-64);
-  height: var(--size-64);
+  width: clamp(calc(var(--size-64) + var(--spacer-16)), 21.333vw, var(--size-96));
+  aspect-ratio: 1;
   overflow: hidden;
 }
 .quote-product-row__info {
@@ -137,7 +137,7 @@
 }
 .quote-row__no {
   flex: 0 0 auto;
-  color: var(--text-brand);
+  color: var(--text-secondary);
   font-weight: var(--font-weight-semibold);
 }
 .quote-row__divider {
@@ -146,9 +146,11 @@
 }
 .quote-row__name {
   min-width: 0;
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .quote-product-row__spec {
   font-size: var(--body-xs-font-size);
@@ -163,6 +165,8 @@
 /* ===== 商品列表（按产品-宫格） ===== */
 .quote-product-grid {
   padding: var(--spacer-8) var(--spacer-16) 0;
+  --layout-grid-column-gap: var(--spacer-8);
+  --layout-grid-row-gap: var(--spacer-8);
 }
 .quote-product-grid-card {
   position: relative;
@@ -171,8 +175,8 @@
 .quote-product-grid-card__select {
   position: absolute;
   top: var(--spacer-8);
-  left: var(--spacer-8);
-  z-index: 2;
+  right: var(--spacer-8);
+  z-index: var(--z-raised);
 }
 .quote-product-grid-card__img {
   width: 100%;
@@ -192,9 +196,10 @@
 }
 .quote-product-grid-card__title {
   margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: var(--spacer-4);
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   font-weight: var(--font-weight-medium);
@@ -204,6 +209,13 @@
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
   color: var(--text-tertiary);
+}
+.quote-product-row__spec,
+.quote-product-grid-card__spec {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 /* ===== 通用 tag ===== */
