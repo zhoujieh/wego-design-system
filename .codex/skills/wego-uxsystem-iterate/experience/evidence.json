@@ -541,6 +541,20 @@
         "pipefail",
         "wego-github-delivery"
       ]
+    },
+    {
+      "id": "ev-039",
+      "date": "2026-09-04",
+      "summary": "工作流 PR 首轮 CI 暴露分支清理自测只适配开发机：pull_request checkout 为 detached HEAD 时没有本地 main，测试错误失败；复核同时发现扫描时把整个分支对象传给祖先判断，导致普通 merged 分支无法被识别。修复为统一解析本地 main 或 origin/main、使用真实分支名并覆盖 detached HEAD 回归。",
+      "source": "ci-failure",
+      "scene": "workflow-integrity-branch-prune",
+      "tags": [
+        "GitHub Actions",
+        "detached HEAD",
+        "分支清理",
+        "自测可移植性",
+        "wego-github-delivery"
+      ]
     }
   ]
 }
