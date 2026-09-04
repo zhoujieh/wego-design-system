@@ -4316,7 +4316,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _structureFingerprint(data, targetEl, target) {
       const d = data || {};
       const keys = Object.keys(d)
-        .filter(k => !['fillLayers', 'strokeLayers', 'shadowLayers'].includes(k))
+        .filter(k => !['strokeLayers', 'shadowLayers'].includes(k))
         .sort();
       return JSON.stringify({
         tag: targetEl ? targetEl.tagName : '',
@@ -4405,13 +4405,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       root.querySelectorAll('input.opacity-input[data-field]').forEach(node => {
         node.disabled = this._isTokenField(node.dataset.field.replace(/Opacity$/, 'Hex'));
       });
-      // 渐变开关与渐变点 swatch
-      const gradToggle = root.querySelector('[data-grad-toggle]');
-      if (gradToggle) gradToggle.classList.toggle('active', !!d.gradientEnabled);
-      [['gradientStart', 'start', '#ffffff'], ['gradientEnd', 'end', '#000000']].forEach(([field, tag, fallback]) => {
-        const sw = root.querySelector(`[data-grad-color="${tag}"] .swatch`);
-        if (sw) sw.style.background = d[field] || fallback;
-      });
       // 追加层 swatch
       root.querySelectorAll('[data-layer-color]').forEach(btn => {
         const [layerType, id, sub] = btn.dataset.layerColor.split(':');
@@ -4428,11 +4421,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _buildData(el, target) {
       const fresh = getElementStyleData(el, target);
       if (this._targetEl === el && this._target === target && this._data) {
-        fresh.fillLayers = this._data.fillLayers || [];
         fresh.strokeLayers = this._data.strokeLayers || [];
         fresh.shadowLayers = this._data.shadowLayers || [];
       } else {
-        fresh.fillLayers = [];
         fresh.strokeLayers = [];
         fresh.shadowLayers = [];
       }
@@ -4558,23 +4549,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       }
       const mv = moveFlexItem(el, dir);
       if (!mv) { this._updateMoveControls(); return; }
+      // 一次顺序移动 = 一个撤销单元：同一 moveKey 的变更（目标/兄弟/顺延 + 跨卡共享同步）整体撤销/重做，
+      // 避免「一次移动需多次 Ctrl+Z」；仅第一条记录压撤销栈，其余 noUndo 由该条统一还原
+      const moveKey = 'move::' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      this._recordMoveChange(mv.el, mv, false, moveKey);
+      if (mv.nbNew !== mv.nbOrder) this._recordMoveChange(mv.neighbor, mv, true, moveKey, true);
       // 记录目标元素（位置：第X位 → 第Y位；真实 order 值见 orderValue）
-      this._recordMoveChange(mv.el, mv, false);
-      // 若与兄弟交换了 order（已显式不同），兄弟也记录
-      if (mv.nbNew !== mv.nbOrder) this._recordMoveChange(mv.neighbor, mv, true);
       // 同档换位时被顺延的同档元素（order 值被改写），一并记录 + 共享同步，
       // 保证施工单还原与其它卡片同款元素联动与实际显示一致
       if (mv.shifted && mv.shifted.length) {
         mv.shifted.forEach(sh => {
-          this._recordMoveChange(sh.el, { idxOld: sh.idx, elOrder: sh.oldOrder, elNew: sh.newOrder }, false);
-          this._scheduleSharedSync({ property: 'order', oldValue: String(sh.oldOrder), newValue: String(sh.newOrder) }, sh.el);
+          this._recordMoveChange(sh.el, { idxOld: sh.idx, elOrder: sh.oldOrder, elNew: sh.newOrder }, false, moveKey, true);
+          this._scheduleSharedSync({ property: 'order', oldValue: String(sh.oldOrder), newValue: String(sh.newOrder) }, sh.el, moveKey);
         });
       }
       // 共享同步：目标元素与兄弟元素分别以各自元素为基准，同类元素（如其它卡片的同款按钮）一起换位。
       // 必须分别传入各自 targetEl（order 属性相同），否则防抖合并会把其中一个的同步覆盖掉
-      this._scheduleSharedSync({ property: 'order', oldValue: String(mv.elOrder), newValue: String(mv.elNew) }, mv.el);
+      this._scheduleSharedSync({ property: 'order', oldValue: String(mv.elOrder), newValue: String(mv.elNew) }, mv.el, moveKey);
       if (mv.nbNew !== mv.nbOrder) {
-        this._scheduleSharedSync({ property: 'order', oldValue: String(mv.nbOrder), newValue: String(mv.nbNew) }, mv.neighbor);
+        this._scheduleSharedSync({ property: 'order', oldValue: String(mv.nbOrder), newValue: String(mv.nbNew) }, mv.neighbor, moveKey);
       }
       // 净零往返：容器显示顺序回到首次移动前的基线（如"右移→左移"快速改回）→ 无净变更，
       // 整体还原本次容器内的顺序移动（本地目标/兄弟记录 + 已落地的共享同步 + 残留 DOM），
@@ -4627,7 +4620,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     /** 记录一次顺序移动变更（property='order'；oldValue/newValue 存真实 order 值供同步匹配与还原，
      *  displayOld/displayNew 存友好位次供配置列表展示） */
-    _recordMoveChange(el, mv, isNeighbor) {
+    _recordMoveChange(el, mv, isNeighbor, moveKey, noUndo) {
       const elNewPos = flexPositionOf(mv.el);
       const elOldPos = mv.idxOld + 1;
       const oldPos = isNeighbor ? elNewPos : elOldPos;
@@ -4651,6 +4644,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         el,
         shared: false,
         sharedKey: '',
+        moveKey: moveKey || '',
+        noUndo: !!noUndo,
       });
     }
 
@@ -5334,44 +5329,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             color: var(--text-brand, #00b96b);
             box-shadow: 0 1px 2px rgba(0,0,0,0.08);
           }
-          /* 渐变填充 */
-          .gradient-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            height: 28px;
-            padding: 0 10px;
-            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
-            border-radius: 7px;
-            background: rgba(255,255,255,0.04);
-            color: var(--text-secondary, rgba(255,255,255,0.6));
-            font-size: 11px;
-            cursor: pointer;
-          }
-          .gradient-toggle.active {
-            border-color: var(--text-brand, #00b96b);
-            color: var(--text-brand, #00b96b);
-            background: rgba(0,185,107,0.08);
-          }
-          .gradient-swatch {
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ffffff 0%, #000000 100%);
-            border: 1px solid rgba(255,255,255,0.2);
-          }
-          .gradient-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 6px;
-            padding: 8px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-          }
-          .gradient-panel .btn-group button {
-            font-size: 11px;
-          }
           .color-button.small { width: 26px; height: 26px; }
           .angle-btn {
             height: 26px;
@@ -5677,61 +5634,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 ${fillIsToken ? fillTokenName : ICONS.token}
               </button>
             </div>
-            <div class="field-row">
-              <button class="gradient-toggle ${d.gradientEnabled ? 'active' : ''}" type="button" data-grad-toggle title="渐变填充（线性/径向，双色标）">
-                <span class="gradient-swatch"></span>
-                渐变填充
-              </button>
-            </div>
-            ${d.gradientEnabled ? `
-            <div class="gradient-panel">
-              <div class="btn-group">
-                <button class="mode-btn ${d.gradientType === 'linear' ? 'active' : ''}" type="button" data-field="gradientType" data-value="linear">线性</button>
-                <button class="mode-btn ${d.gradientType === 'radial' ? 'active' : ''}" type="button" data-field="gradientType" data-value="radial">径向</button>
-              </div>
-              <div class="field-row two-col">
-                <div class="field">
-                  <button class="color-button small" type="button" data-grad-color="start" title="起点颜色">
-                    <span class="swatch" style="background:${d.gradientStart || '#ffffff'}"></span>
-                  </button>
-                  <input class="text-input" type="text" value="${d.gradientStart || ''}" data-field="gradientStart" />
-                </div>
-                <div class="field">
-                  <button class="color-button small" type="button" data-grad-color="end" title="终点颜色">
-                    <span class="swatch" style="background:${d.gradientEnd || '#000000'}"></span>
-                  </button>
-                  <input class="text-input" type="text" value="${d.gradientEnd || ''}" data-field="gradientEnd" />
-                </div>
-              </div>
-              <div class="field-row">
-                <span class="field-icon">∠</span>
-                <input class="text-input" type="text" value="${d.gradientAngle ?? 180}" data-field="gradientAngle" inputmode="numeric" placeholder="角度" />
-                <button class="angle-btn" type="button" data-grad-angle="-45" title="角度减 45°">−45°</button>
-                <button class="angle-btn" type="button" data-grad-angle="45" title="角度加 45°">+45°</button>
-                <button class="angle-btn" type="button" data-grad-flip title="调转渐变位置">⇄</button>
-              </div>
-            </div>
-            ` : ''}
-            ${(d.fillLayers || []).length ? `
-            <div class="layer-list">
-              ${(d.fillLayers || []).map(l => `
-                <div class="layer-row layer-fill" data-layer="fill">
-                  <div class="btn-group layer-type">
-                    <button type="button" data-layer-field="fill:${l.id}:type" data-value="linear" class="${l.type === 'linear' ? 'active' : ''}">线性</button>
-                    <button type="button" data-layer-field="fill:${l.id}:type" data-value="radial" class="${l.type === 'radial' ? 'active' : ''}">径向</button>
-                  </div>
-                  <div class="layer-fields">
-                    <button class="color-button small" type="button" data-layer-color="fill:${l.id}:start" title="起点颜色"><span class="swatch" style="background:${l.start || '#ffffff'}"></span></button>
-                    <input class="text-input layer-cc" type="text" value="${l.start || ''}" data-layer-field="fill:${l.id}:start" />
-                    <button class="color-button small" type="button" data-layer-color="fill:${l.id}:end" title="终点颜色"><span class="swatch" style="background:${l.end || '#000000'}"></span></button>
-                    <input class="text-input layer-cc" type="text" value="${l.end || ''}" data-layer-field="fill:${l.id}:end" />
-                    <input class="text-input layer-angle" type="text" value="${l.angle ?? 180}" data-layer-field="fill:${l.id}:angle" inputmode="numeric" title="角度" />
-                  </div>
-                  <button class="layer-remove" type="button" data-layer-remove="fill:${l.id}" title="删除该层">×</button>
-                </div>`).join('')}
-            </div>
-            ` : ''}
-            <button class="add-layer" type="button" data-layer-add="fill">＋ 添加渐变填充层</button>
           </div>
 
           <!-- 描边 -->
@@ -5934,43 +5836,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('input.text-input[data-field]').forEach(input => {
         this._bindNumberDrag(input, input.dataset.field);
       });
-      // 渐变填充：开关（toggle）
-      const gradToggle = this._shadow.querySelector('[data-grad-toggle]');
-      if (gradToggle) {
-        gradToggle.addEventListener('click', () => {
-          this._onFieldChange('gradientEnabled', this._data.gradientEnabled ? 'false' : 'true');
-        });
-      }
-      // 渐变填充：起止色 → 复用颜色选择器
-      this._shadow.querySelectorAll('[data-grad-color]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const key = btn.dataset.gradColor === 'end' ? 'gradientEnd' : 'gradientStart';
-          const hex = this._data[key] || (key === 'gradientEnd' ? '#000000' : '#ffffff');
-          bus.emit('open-color-picker', {
-            trigger: btn,
-            hex,
-            opacity: 100,
-            callback: (newHex) => {
-              this._onFieldChange(key, newHex);
-            },
-          });
-        });
-      });
-      // 渐变填充：角度 ±45 / 调转位置
-      this._shadow.querySelectorAll('[data-grad-angle]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const delta = parseInt(btn.dataset.gradAngle, 10) || 0;
-          const cur = parseFloat(this._data.gradientAngle) || 180;
-          this._onFieldChange('gradientAngle', String(((cur + delta) % 360 + 360) % 360));
-        });
-      });
-      const gradFlip = this._shadow.querySelector('[data-grad-flip]');
-      if (gradFlip) {
-        gradFlip.addEventListener('click', () => {
-          this._onFieldChange('gradientFlip', this._data.gradientFlip ? 'false' : 'true');
-        });
-      }
       // 多层效果：添加 / 删除 / 编辑追加层
       this._shadow.querySelectorAll('[data-layer-add]').forEach(btn => {
         btn.addEventListener('click', () => this._onLayerAdd(btn.dataset.layerAdd));
@@ -6180,19 +6045,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
     }
 
-    /** 多层效果：添加一层（填充→渐变层；描边→位置/宽/色；投影→x/y/blur/spread/色） */
+    /** 多层效果：添加一层（描边→位置/宽/色；投影→x/y/blur/spread/色） */
     _onLayerAdd(kind) {
       if (!this._targetEl || !this._data || this._target) return;
       const layers = this._data[kind + 'Layers'] || [];
       const id = 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      if (kind === 'fill') layers.push({ id, type: 'linear', start: '#ffffff', end: '#000000', angle: 180 });
-      else if (kind === 'stroke') layers.push({ id, width: '1', position: 'outside', hex: '#000000', opacity: 100 });
+      if (kind === 'stroke') layers.push({ id, width: '1', position: 'outside', hex: '#000000', opacity: 100 });
       else layers.push({ id, x: 0, y: 2, blur: 4, spread: 0, hex: '#000000', opacity: 40, inset: false });
       this._data[kind + 'Layers'] = layers;
       this._commitLayer(kind);
       this._render();
       this._bindEvents();
-      bus.emit('toast', { message: kind === 'fill' ? '已添加渐变填充层' : (kind === 'stroke' ? '已添加描边层' : '已添加投影层') });
+      bus.emit('toast', { message: kind === 'stroke' ? '已添加描边层' : '已添加投影层' });
     }
 
     /** 多层效果：删除一层 */
@@ -6216,30 +6080,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._updateActiveStates();
       const sw = this._shadow.querySelector(`[data-layer-color="${kind}:${id}:${sub}"] .swatch`);
       if (sw) sw.style.background = value || '';
-      // 渐变层类型切换按钮 active 态
-      this._shadow.querySelectorAll(`[data-layer-field^="fill:${id}:type"]`).forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.value === layer.type);
-      });
     }
 
-    /** 多层效果：把当前全部层合并写入元素并记录一条变更（填充→background-image；描边/投影→box-shadow） */
+    /** 多层效果：把当前全部层合并写入元素并记录一条变更（描边/投影→box-shadow） */
     _commitLayer(kind) {
       const el = this._targetEl;
       if (!el || this._target) return;
       const csNow = getComputedStyle(el);
-      let result = null;
-      if (kind === 'fill') {
-        const oldValue = csNow.backgroundImage;
-        const out = this._mergedBackgroundImage();
-        el.style.backgroundImage = out === 'none' ? '' : out;
-        result = { property: 'background-image', oldValue, newValue: out };
-      } else {
-        const oldValue = csNow.boxShadow;
-        const out = this._combineBoxShadow();
-        el.style.boxShadow = out === 'none' ? '' : out;
-        result = { property: 'box-shadow', oldValue, newValue: out };
-      }
-      if (!result) return;
+      const oldValue = csNow.boxShadow;
+      const out = this._combineBoxShadow();
+      el.style.boxShadow = out === 'none' ? '' : out;
+      const result = { property: 'box-shadow', oldValue, newValue: out };
       bus.emit('style-change', {
         selector: this._selector,
         elementTag: el.tagName.toLowerCase(),
@@ -6407,7 +6258,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
      *  同一元素同一属性的多次输入只保留最后一次；不同属性/不同元素在停顿后各自执行一次同步。
      *  targetEl 可选：默认当前选中元素；顺序移动等一次改动多个元素（目标+兄弟）时分别传入各自元素，
      *  避免同属性被合并覆盖导致其中一个元素的同类同步丢失。 */
-    _scheduleSharedSync(result, targetEl) {
+    _scheduleSharedSync(result, targetEl, groupKey) {
       const el = targetEl || this._targetEl;
       if (!el || !result || !result.property) return;
       if (!this._sharedSyncPending) this._sharedSyncPending = [];
@@ -6416,9 +6267,9 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         // 同一元素同一属性在防抖窗口内连续触发（change+blur/步进等）：保留最早 oldValue（编辑起点），
         // 只更新最终 newValue，避免 oldValue 被第二次读成"改后值"导致找不到共享同类、同步失效
         const existing = this._sharedSyncPending[idx];
-        this._sharedSyncPending[idx] = { targetEl: el, result: { ...existing.result, newValue: result.newValue } };
+        this._sharedSyncPending[idx] = { targetEl: el, result: { ...existing.result, newValue: result.newValue }, groupKey: existing.groupKey || groupKey };
       } else {
-        this._sharedSyncPending.push({ targetEl: el, result });
+        this._sharedSyncPending.push({ targetEl: el, result, groupKey });
       }
       if (this._sharedSyncTimer) clearTimeout(this._sharedSyncTimer);
       this._sharedSyncTimer = setTimeout(() => {
@@ -6428,13 +6279,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (!pending) return;
         pending.forEach(p => {
           if (!p.targetEl || !p.targetEl.isConnected) return;
-          this._applySharedSync(p.result, p.targetEl);
+          this._applySharedSync(p.result, p.targetEl, p.groupKey);
         });
       }, 160);
     }
 
     /** 执行共享样式同步：按最终值扫描命中元素并批量应用 + 记录（含目标元素补标共享） */
-    _applySharedSync(result, targetEl) {
+    _applySharedSync(result, targetEl, groupKey) {
       // 无效果兜底守卫：共享同步结果已是无效果值（old===new 归一化相等）时跳过，
       // 拦截防抖合并产生的 no-op（用户快速改回原值时，_scheduleSharedSync 合并成 old===new，
       // 会绕过 _onFieldChange 入口守卫，把无效果值写到已是同值的共享元素上产生脏施工单）。
@@ -6467,6 +6318,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           el,
           shared: true,
           sharedKey,
+          moveKey: groupKey || '',
           noUndo: true,
         });
       });
@@ -6489,6 +6341,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           el: targetEl,
           shared: true,
           sharedKey,
+          moveKey: groupKey || '',
           noUndo: true,
         });
       }
@@ -6554,20 +6407,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       return opacity > 0 ? hexOpacityToRgba(hex, opacity) : 'transparent';
     }
 
-    /** 合并基础渐变 + 追加渐变层 → background-image 值（多背景逗号分隔） */
+    /** 合并基础渐变 → background-image 值（多背景逗号分隔） */
     _mergedBackgroundImage() {
       const images = [];
       const base = buildGradient(this._data);
       if (base) images.push(base);
-      (this._data.fillLayers || []).forEach(l => {
-        const s = l.start || '#ffffff';
-        const e = l.end || '#000000';
-        const flip = l.flip === true || l.flip === 'true';
-        const a = flip ? e : s;
-        const b = flip ? s : e;
-        if (l.type === 'radial') images.push(`radial-gradient(circle, ${a} 0%, ${b} 100%)`);
-        else images.push(`linear-gradient(${(parseFloat(l.angle) || 180)}deg, ${a} 0%, ${b} 100%)`);
-      });
       return images.length ? images.join(', ') : 'none';
     }
 
@@ -7321,17 +7165,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._shadow.querySelectorAll('[data-field="shadowInset"]').forEach(btn => {
         const isActive = (btn.dataset.value === 'true') === (d.shadowInset === true || d.shadowInset === 'true');
         btn.classList.toggle('active', isActive);
-      });
-      // 渐变填充：开关 + 类型按钮 + 起止色 swatch 回显
-      const gradToggle = this._shadow.querySelector('[data-grad-toggle]');
-      if (gradToggle) gradToggle.classList.toggle('active', d.gradientEnabled === true || d.gradientEnabled === 'true');
-      this._shadow.querySelectorAll('[data-field="gradientType"]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.value === d.gradientType);
-      });
-      this._shadow.querySelectorAll('[data-grad-color]').forEach(btn => {
-        const key = btn.dataset.gradColor === 'end' ? 'gradientEnd' : 'gradientStart';
-        const swatch = btn.querySelector('.swatch');
-        if (swatch) swatch.style.background = d[key] || (key === 'gradientEnd' ? '#000000' : '#ffffff');
       });
       // 颜色色块更新
       this._shadow.querySelectorAll('[data-color-trigger]').forEach(btn => {
@@ -9856,6 +9689,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           property: change.property,
           prevValue: existing ? existing.newValue : null,
           nextValue: change.newValue,
+          moveKey: change.moveKey || '',
         });
         if (state.undoStack.length > 100) state.undoStack.shift();
         state.redoStack = []; // 新修改打断重做链
@@ -9868,6 +9702,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.elementClasses = change.elementClasses || existing.elementClasses || [];
         existing.shared = !!change.shared;
         existing.sharedKey = change.sharedKey || '';
+        existing.moveKey = change.moveKey || existing.moveKey || '';
         existing.orderValue = change.orderValue || existing.orderValue || '';
         existing.displayOld = change.displayOld || existing.displayOld || '';
         existing.displayNew = change.displayNew || existing.displayNew || '';
@@ -9893,6 +9728,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           initPos: Number(change.initPos) || 0,
           shared: !!change.shared,
           sharedKey: change.sharedKey || '',
+          moveKey: change.moveKey || '',
           sourceDeclared: srcInfo.declared,
           sourceValue: srcInfo.sourceValue,
           timestamp: Date.now(),
@@ -10043,6 +9879,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this._refreshStylePanelData(item.selector, item.target || '');
         this._showToast('已撤销（元素顺序还原）');
         return true;
+      }
+      // 顺序移动（面板 [data-move]/方向键）：一次移动的目标/兄弟/顺延 + 跨卡共享同步共用同一 moveKey，
+      // 撤销时按 moveKey 整体还原，避免「一次移动需多次 Ctrl+Z」
+      if (item.moveKey) {
+        const mgroup = state.changes.filter(c => c.moveKey === item.moveKey);
+        if (mgroup.length) {
+          mgroup.forEach(c => this._revertChange(c));
+          state.changes = state.changes.filter(c => c.moveKey !== item.moveKey);
+          item.groupRecords = mgroup.map(c => ({ ...c }));
+          state.redoStack.push(item);
+          this._syncAfterRecordsChanged();
+          this._updateUndoRedoUI();
+          this._refreshStylePanelData(item.selector, item.target || '');
+          this._showToast('已撤销（元素顺序还原）');
+          return true;
+        }
       }
       const existing = state.changes.find(c =>
         c.selector === item.selector && (c.target || '') === item.target && c.property === item.property);
