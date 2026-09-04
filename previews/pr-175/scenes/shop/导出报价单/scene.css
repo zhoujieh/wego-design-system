@@ -191,10 +191,15 @@
   font-weight: var(--font-weight-semibold);
 }
 .quote-row__divider {
+  margin-inline: var(--spacer-4);
   color: var(--border-neutral-l2);
 }
 .quote-row__name {
   min-width: 0;
+}
+.quote-search-highlight {
+  color: var(--text-brand);
+  background: transparent;
 }
 .quote-product-row__spec {
   font-size: var(--body-md-font-size);
@@ -303,6 +308,7 @@
   align-items: center;
   gap: var(--spacer-8);
   padding: var(--spacer-8);
+  padding-right: var(--spacer-16);
   border-block-end: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 .quote-image-group__select {
@@ -323,11 +329,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.quote-image-group__title-no {
-  margin-inline-start: var(--spacer-4);
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-regular);
 }
 .quote-image-group__summary {
   flex: 0 0 auto;
@@ -388,8 +389,9 @@
   font-size: var(--size-32);
   color: var(--icon-tertiary);
 }
-.quote-empty__action {
-  margin-block-start: var(--spacer-4);
+.quote-empty__result .result {
+  --result-gap: 0;
+  padding: var(--spacer-32);
 }
 
 

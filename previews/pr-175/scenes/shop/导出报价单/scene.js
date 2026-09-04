@@ -226,6 +226,15 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           return true;
         });
       }
+      function highlightSearchMatch(value) {
+        var text = String(value == null ? '' : value);
+        var query = state.query.trim();
+        var index = text.toLowerCase().indexOf(query.toLowerCase());
+        if (!query || index < 0) return escapeHtml(text);
+        return escapeHtml(text.slice(0, index))
+          + '<mark class="quote-search-highlight">' + escapeHtml(text.slice(index, index + query.length)) + '</mark>'
+          + escapeHtml(text.slice(index + query.length));
+      }
 
       function selectionKey(mode, p, idx) {
         return mode === 'image' ? p.product_id + ':' + idx : p.product_id;
@@ -337,7 +346,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           + '<div class="wg-image wg-image--rounded-sm quote-product-row__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
           + '<div class="cell__content quote-product-row__info">'
           + '<div class="cell__title-row quote-product-row__copy">'
-          + '<span class="cell__title quote-product-row__title"><span class="quote-row__no">' + escapeHtml(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + escapeHtml(p.title) + '</span></span>'
+          + '<span class="cell__title quote-product-row__title"><span class="quote-row__no">' + highlightSearchMatch(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + highlightSearchMatch(p.title) + '</span></span>'
           + '</div>'
           + (p.specification ? '<div class="cell__subtitle quote-product-row__spec">' + escapeHtml(p.specification) + '</div>' : '')
           + '<div class="quote-product-row__price">' + metricHtml(p.price, '16') + '</div>'
@@ -350,7 +359,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         return '<div class="card card--surface card--vertical quote-product-grid-card" data-component-slug="card" data-quote-toggle data-mode="product" data-id="' + escapeHtml(p.product_id) + '">'
           + '<div class="quote-product-grid-card__select dark">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
           + '<div class="wg-image wg-image--rounded-sm quote-product-grid-card__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
-          + '<div class="quote-product-grid-card__info"><h3 class="quote-product-grid-card__title">' + escapeHtml(p.title) + '</h3>'
+          + '<div class="quote-product-grid-card__info"><h3 class="quote-product-grid-card__title"><span class="quote-row__no">' + highlightSearchMatch(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + highlightSearchMatch(p.title) + '</span></h3>'
           + (p.specification ? '<div class="quote-product-grid-card__spec">' + escapeHtml(p.specification) + '</div>' : '')
           + '<div class="quote-product-grid-card__price">' + metricHtml(p.price, '16') + '</div></div>'
           + '</div>';
@@ -363,7 +372,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         return '<section class="quote-image-group" data-group-id="' + escapeHtml(p.product_id) + '">'
           + '<div class="quote-image-group__head">'
           + '<button type="button" class="quote-image-group__select" data-quote-toggle-group data-id="' + escapeHtml(p.product_id) + '" aria-label="全选本组">' + checkboxHtml(all, ' data-role="quote-check"') + '</button>'
-          + '<div class="quote-image-group__title">' + escapeHtml(p.title) + '<span class="quote-image-group__title-no">' + escapeHtml(p.item_no) + '</span></div>'
+          + '<div class="quote-image-group__title"><span class="quote-row__no">' + highlightSearchMatch(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + highlightSearchMatch(p.title) + '</span></div>'
           + '<div class="quote-image-group__summary">已选 ' + groupSel + '/' + images.length + '</div>'
           + '</div>'
           + '<div class="quote-image-group__grid">'
@@ -398,7 +407,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         emptyEl.hidden = list.length !== 0;
         emptyEl.innerHTML = list.length === 0
           ? (noResult
-              ? '<div class="card card--filled quote-empty__card" data-component-slug="card"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i><strong>暂无相关结果</strong><span>换个关键词试试</span><button type="button" class="btn btn--ghost btn--sm quote-empty__action" data-action="clear-search">清空搜索</button></div>'
+              ? '<div class="quote-empty__result"><div class="result" data-component-slug="result" role="group" aria-label="无搜索结果"><div class="result__title">未搜索到相关商品</div></div></div>'
               : '<div class="card card--filled quote-empty__card" data-component-slug="card"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i><strong>暂无商品</strong><span>商品库暂无可选商品</span></div>')
           : '';
         updateBar();
@@ -577,12 +586,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
 
       function onListClick(e) {
         var target = e.target;
-        var clearSearch = target.closest('[data-action="clear-search"]');
-        if (clearSearch) {
-          searchInput.value = '';
-          applySearch('');
-          return;
-        }
         var toggle = target.closest('[data-quote-toggle]');
         if (toggle) {
           var mode = toggle.getAttribute('data-mode');
