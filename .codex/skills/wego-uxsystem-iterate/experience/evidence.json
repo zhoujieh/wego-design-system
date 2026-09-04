@@ -613,6 +613,36 @@
         "L2 的 ×N 只随同根因在独立任务复发而增加"
       ],
       "novelty": "旧规则虽提到可复用、可行动、非冗余，但主题归属章节允许命中已有技能后直接迭代，且没有可验证的结构化质量字段。"
+    },
+    {
+      "id": "ev-043",
+      "date": "2026-09-04",
+      "summary": "本地迭代不应每改一个细节就推送或更新 PR，应先累计小问题，到交付节点再集中更新同一个 PR",
+      "source": "user-correction",
+      "scene": "github-delivery-pr-update-cadence",
+      "tags": [
+        "PR节奏",
+        "本地迭代",
+        "交付节点",
+        "在线预览",
+        "wego-github-delivery"
+      ],
+      "kind": "experience",
+      "observation": "用户追溯并纠正规则：现有工作流把完成一轮实现后自动推送、每次推送后返回在线预览写成默认路径，执行上容易演变成每改一次就推送 PR。",
+      "mechanism": "旧口径把本地迭代完成、checkpoint、在线预览和 PR 更新绑定过紧，缺少明确的交付节点定义，导致连续小反馈无法自然留在本地累计。",
+      "rule": "本地迭代默认先累计小问题和 checkpoint；只有首次可验收版本、一组反馈集中处理完成、用户明确要求更新 PR/在线预览，或多人协作需要远端同步时，才推送并创建/更新同一个 PR。",
+      "scope": [
+        "wego-github-delivery",
+        "wego-design",
+        "wego-uxsystem-iterate",
+        "README 用户流程"
+      ],
+      "verification": [
+        "AGENTS.md 增加 local-iteration-batches-pr-updates 硬约束",
+        "wego-github-delivery 和 wego-design 不再写每轮自动推送",
+        "README 和技能路由改为本地累计到交付节点再更新 PR"
+      ],
+      "novelty": "既有规则只要求同一需求复用同一个 PR，并要求不得为每个细节制造提交；没有把不得每个细节推送 PR、交付节点边界和在线预览返回时机统一成正式规则。"
     }
   ]
 }
