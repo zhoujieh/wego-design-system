@@ -48,18 +48,23 @@ function check(name, ok, detail = '') {
     await page.mouse.move(hp.x, hp.y);
     await page.waitForTimeout(600);
     const insp = await page.evaluate(() => {
-      const ins = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-inspector');
+      const wt = document.querySelector('wego-walkthrough').shadowRoot;
+      const ins = wt.querySelector('wego-wt-inspector');
+      const hl = wt.querySelector('wego-wt-highlight');
       if (!ins) return null;
       const isr = ins.shadowRoot;
+      // 气泡（tag·宽×高）在 wego-wt-highlight 组件的 .label（悬停/选中态显示），非 inspector 内
+      const label = hl && !hl.hasAttribute('hidden') && hl.shadowRoot.querySelector('.label')?.textContent || '';
+      // padding/margin 色块实际类名：.pad-bg / .gap-bg（文档旧选择器 .pad-r/.mar-r 已过时）
       return {
         guides: isr.querySelectorAll('line.guide').length,
-        bubble: isr.querySelector('.bubble-text')?.textContent || '',
-        pads: isr.querySelectorAll('rect.pad-r').length,
+        bubble: label,
+        pads: isr.querySelectorAll('rect.pad-bg').length,
         display: getComputedStyle(ins).display
       };
     });
-    check('⑤ 悬停四边延长线+气泡', insp && insp.display === 'block' && insp.guides === 4 && insp.bubble.includes('×'), insp ? insp.bubble : '无 inspector');
-    check('⑤ padding 青色块', insp && insp.pads >= 1, `pads=${insp ? insp.pads : 0}`);
+    check('⑤ 悬停四边延长线+气泡', insp && insp.display === 'block' && insp.guides === 4 && /\d+×\d+/.test(insp.bubble), insp ? insp.bubble : '无 inspector');
+    check('⑤ padding 色块', insp && insp.pads >= 1, `pads=${insp ? insp.pads : 0}`);
 
     // 选中 head（点击中心 + 连点，head 中心命中 publisher 上移到 head）
     const p = await page.evaluate(() => {
@@ -122,32 +127,35 @@ function check(name, ok, detail = '') {
     });
     check('③ 数值字段点击全选', num && num.len > 0 && num.selStart === 0 && num.selEnd === num.len, num ? `len=${num.len}` : '字段未找到');
 
-    // ④ 拖拽换位（head 层：head 中心起点，越过 media 中心；单次 move 到位——CDP 多段会被输入合并只留第一段）
-    const dragInfo = await page.evaluate(() => {
-      const head = document.querySelector('.album-feed__head').getBoundingClientRect();
-      const media = document.querySelector('.album-feed__media').getBoundingClientRect();
-      window.__drag = { sx: head.x + head.width / 2, sy: head.y + head.height / 2, ty: media.y + media.height / 2 + 20 };
-      const card0 = document.querySelector('.album-feed__list').children[0];
-      return {
-        headClass: card0.querySelector('.album-feed__head') ? 'head存在' : 'head缺失',
-        publisher: card0.querySelector('.album-feed__publisher')?.textContent.trim().slice(0, 4)
-      };
+    // ④ 顺序移动（面板移动按钮，替代已移除的"鼠标拖拽换位"）：
+    //    选中 list 内 card（父容器 list 为 flex column，下移按钮可用）→ 点下移 → order 0→1 → 撤销恢复
+    const pc = await page.evaluate(() => {
+      const el = document.querySelector('.album-feed__card');
+      const r = el.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
     });
-    const d = await page.evaluate(() => window.__drag);
-    await page.mouse.move(d.sx, d.sy);
-    await page.mouse.down();
-    await page.waitForTimeout(300);
-    await page.mouse.move(d.sx, d.ty, { steps: 20 });
-    await page.waitForTimeout(400);
-    await page.mouse.up();
-    await page.waitForTimeout(900);
-    const orderAfter = await page.evaluate(() => {
-      const list = document.querySelector('.album-feed__list');
-      const card0 = list.children[0];
-      return Array.from(card0.children).map(c => c.className.split(' ')[0]).slice(0, 3);
+    await page.mouse.click(pc.x, pc.y);
+    await page.waitForTimeout(450);
+    for (let i = 0; i < 4; i++) { await page.mouse.click(pc.x, pc.y); await page.waitForTimeout(300); }
+    const selCard = await page.evaluate(() => {
+      const panel = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel');
+      return panel && panel._targetEl ? (panel._targetEl.className || panel._targetEl.tagName) : 'none';
     });
-    const changed = orderAfter[0] !== 'album-feed__head';
-    check('④ 拖拽换位（head↔media）', changed, `card0 子序:${orderAfter.join(',')}`);
+    check('④ 选中 flex 子项 card', selCard === 'album-feed__card', selCard);
+    const o0 = await page.evaluate(() => getComputedStyle(document.querySelector('.album-feed__list > .album-feed__card')).order);
+    await page.evaluate(() => {
+      const sp = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel').shadowRoot;
+      sp.querySelector('[data-move="down"]').click();
+    });
+    await page.waitForTimeout(600);
+    const o1 = await page.evaluate(() => getComputedStyle(document.querySelector('.album-feed__list > .album-feed__card')).order);
+    check('④ 下移按钮换位（order 0→1）', o0 === '0' && o1 === '1', `order ${o0}→${o1}`);
+    await page.evaluate(() => {
+      document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel').shadowRoot.querySelector('[data-action="undo"]').click();
+    });
+    await page.waitForTimeout(500);
+    const o2 = await page.evaluate(() => getComputedStyle(document.querySelector('.album-feed__list > .album-feed__card')).order);
+    check('④ 撤销恢复顺序', o2 === o0, `order 回到 ${o2}`);
 
     // localStorage 落盘核对（真实执行证据：操作已写入本地存储，防"看起来对"假象）
     const ls = await page.evaluate(() => {

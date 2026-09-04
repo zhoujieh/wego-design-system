@@ -33,22 +33,22 @@
 4. 撤销（回 36）→ 重做（回 88）→ 撤销输入，元素与面板 input 全程同步（防 blur 写回旧值）。
 5. 反例：撤销后面板 input 会因 `_render` 重建写回旧值，断言须等重建完成；非法输入应被回退或忽略（边界）。
 
-## ④ 元素拖拽换位
-1. 选中元素后直接拖动（无需长按）→ 位移限制在父容器内（clamp）。
-2. 拖动中心越过兄弟中心 → 换位 + FLIP 过渡动画（250ms）。
-3. 撤销 → 顺序还原；重做 → 恢复。
-4. 刷新页面 → DOM 顺序保持。
-5. 注意：card 层长距离拖动在 Playwright 合成鼠标下受输入合并限制，验证逻辑用手动 dispatch PointerEvent（见踩坑 ev-017）。
-6. 反例：拖拽未换位先查是否越过兄弟中心（clamp 限制），再查是否被样式面板/inspector 色块拦截（ev-023/ev-024）；先排除环境假象再判真实 bug。
+## ④ 元素顺序移动（面板移动按钮 / 方向键，替代已移除的"鼠标拖拽换位"）
+1. 选中 flex 容器内的元素（父容器须 flex，否则移动按钮置灰属正常）→ 样式面板 `[data-move]` 上/下/左/右按钮 + 方向键。
+2. 点移动按钮 → 元素按 flex 主轴方向前/后移一位，通过 CSS `order` 换位（DOM 顺序不变，读 `getComputedStyle(el).order` 断言，勿读 children 顺序）。
+3. 撤销 → 顺序还原（一次移动 = 一个撤销单元，moveKey 聚合目标/兄弟/顺延）；重做 → 恢复。
+4. 刷新页面 → order 保持。
+5. 注意：父容器 `flex-direction: column` 只有上/下可用，row 只有左/右可用；已在边界或非 flex 子项对应按钮置灰。
+6. 反例：移动未生效先查父容器是否 flex、按钮是否 disabled、目标是否非 flex 子项；再查是否被样式面板/inspector 色块拦截（ev-023/ev-024）；先排除环境假象再判真实 bug。
 
 ## ⑤ 悬停/选中元信息
-1. 悬停元素（不选中）→ 四边 `line.guide` 红虚线延长线 + `.bubble`（类名 + 宽×高）+ `text.num` 间距数字。
-2. 有 padding 元素 → `rect.pad-r` 青色块；悬停显示 `padding: t r b l` 数值。
-3. 有 margin 元素 → `rect.mar-r` 橙色块；悬停显示 `margin: t r b l`。
+1. 悬停元素（不选中）→ 四边 `line.guide` 红虚线延长线 + wego-wt-highlight `.label` 气泡（宽×高，文本形如 `670×64`）+ inspector `text.num`/`text.pnum` 间距数字。
+2. 有 padding 元素 → inspector `rect.pad-bg` 青色块；悬停显示 `padding: t r b l` 数值。
+3. 有 margin/gap 元素 → inspector `rect.gap-bg`/`line.sp` 洋红标注；悬停显示对应数值。
 4. 选中元素后 inspector 同样显示元信息。
 5. 断言 8px 网格辅助线已移除（页面无网格线覆盖层）。
-6. 场景无 margin 元素时，可用测试注入 `style.marginTop` 验证橙色块逻辑。
-7. 反例：无 padding/margin 的元素不显示色块属正常，勿判失败；悬停前先确保无选中态（无选中时 inspector 才走 hover 分支）。
+6. 场景无 margin 元素时，可用测试注入 `style.marginTop` 验证色块逻辑。
+7. 反例：无 padding/margin 的元素不显示色块属正常，勿判失败；悬停前先确保无选中态（无选中时 inspector 才走 hover 分支）；气泡在 wego-wt-highlight 的 `.label`（不在 inspector 内），padding 色块类名是 `.pad-bg` 而非旧文档的 `.pad-r`。
 
 ## 回归基线脚本
 完整闭环回归脚本：`wt-test-hsl2`（①）、`wt-test-grad8`（②）、`wt-test-numdrag6`（③）、`wt-test-reorder5`（④ head 层）/`wt-card-drag-dispatch`（④ card 层）、`wt-test-hover4`（⑤）。优先跑 `scripts/wt-smoke.cjs` 一键冒烟。

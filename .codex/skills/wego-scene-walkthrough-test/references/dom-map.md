@@ -22,19 +22,20 @@
 | 实色/渐变切换 | `.seg-btn`（文本"实色"/"渐变"） |
 | 渐变编辑器 | `.gradient-editor`：`.gradient-angle-row`（−45° 按钮 / `.gradient-angle-slider` / +45°）、`.gradient-stopbar`、`.stop-dot`（激活色标）、`.gradient-toolbar`、`[data-stop-delete]` |
 
-## 元信息（wego-wt-inspector）
+## 元信息（wego-wt-inspector + wego-wt-highlight）
 
 | 目标 | 选择器 |
 | --- | --- |
-| 四边延长线（红虚线） | shadowRoot → `line.guide`（stroke rgba(255,77,79,.45)，dasharray 4 5） |
-| 间距数字 | `text.num` / `line.sp` |
-| 气泡（类名 + 宽×高） | `.bubble` / `.bubble-text` |
-| padding 色块（青） | `rect.pad-r`（rgba(64,158,255,.16)，pointer-events:auto） |
-| margin 色块（橙） | `rect.mar-r`（rgba(255,170,0,.16)） |
+| 四边延长线（红虚线） | inspector shadowRoot → `line.guide`（stroke rgba(255,77,79,.45)，dasharray 4 5） |
+| 间距数字 | inspector shadowRoot → `text.num`（gap 间距）/ `text.pnum`（padding） |
+| 气泡（宽×高，悬停/选中显示） | **wego-wt-highlight** shadowRoot → `.label`（文本形如 `670×64`；旧 `.bubble-text` 已过时） |
+| 选中框/调整柄 | wego-wt-highlight shadowRoot → `.box.box--selected` / `.handles .handle` |
+| padding 色块（青） | inspector shadowRoot → `rect.pad-bg`（旧 `.pad-r` 已过时） |
+| gap 间距色块（洋红线） | inspector shadowRoot → `rect.gap-bg` / `line.sp` |
 | hover 数值 tooltip | `.tooltip`（文本形如 `padding: 12px 16px 12px 16px`） |
 
-## 选中与拖拽
+## 选中与顺序移动
 
 - 选中元素：`panel._targetEl`（样式面板实例属性）可取当前选中元素。
-- 连点选中父级：同位置连点（≤1.2s、±16px）逐级上移（img→item→grid→media→card）。
-- 拖拽换位：选中即拖（120ms + 移动 >8px 双触发）；`_swapSiblings` 用 FLIP 过渡（transition transform 250ms cubic-bezier(0.22,0.9,0.32,1)）。
+- 连点选中父级：同位置连点（≤1.2s、±16px）逐级上移（head→publisher→…→card）。
+- 顺序移动（替代已移除的"鼠标拖拽换位"）：样式面板 shadowRoot → `[data-move]`（up/left/right/down 按钮，父容器须 flex 才启用，`_updateMoveControls` 按主轴置灰）+ 方向键；换位通过 CSS `order` 实现（`_moveSelected`/`moveFlexItem`），DOM 顺序不变，撤销/重做按 moveKey 整体回退。
