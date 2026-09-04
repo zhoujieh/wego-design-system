@@ -325,15 +325,17 @@
 }
 .quote-image-group__summary {
   flex: 0 0 auto;
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  color: var(--text-tertiary);
+  padding-inline-end: var(--spacer-8);
+  border-inline-end: var(--stroke-hairline) solid var(--border-neutral-l2);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-secondary);
 }
 .quote-image-group__grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacer-8);
-  padding: var(--spacer-8);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--spacer-2);
+  padding: var(--spacer-2);
 }
 .quote-image-cell {
   position: relative;

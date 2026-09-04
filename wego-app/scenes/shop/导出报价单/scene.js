@@ -363,8 +363,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         return '<section class="quote-image-group" data-group-id="' + escapeHtml(p.product_id) + '">'
           + '<div class="quote-image-group__head">'
           + '<button type="button" class="quote-image-group__select" data-quote-toggle-group data-id="' + escapeHtml(p.product_id) + '" aria-label="全选本组">' + checkboxHtml(all, ' data-role="quote-check"') + '</button>'
-          + '<div class="quote-image-group__title">' + escapeHtml(p.title) + '</div>'
           + '<div class="quote-image-group__summary">' + escapeHtml(p.item_no) + ' · 已选 ' + groupSel + '/' + images.length + '</div>'
+          + '<div class="quote-image-group__title">' + escapeHtml(p.title) + '</div>'
           + '</div>'
           + '<div class="quote-image-group__grid">'
           + images.map(function (img, idx) {
