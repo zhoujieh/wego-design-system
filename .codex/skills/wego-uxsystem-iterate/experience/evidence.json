@@ -499,6 +499,48 @@
         "容量",
         "wego-uxsystem-iterate"
       ]
+    },
+    {
+      "id": "ev-036",
+      "date": "2026-09-04",
+      "summary": "完整工作流复审发现两处分类目录迁移后的守卫断点：resolve-delivery-unit 仍按无分类旧路径查迭代，错误返回 new；validate-wego-design full 拼接场景路径时漏掉 scenes 层，CI 绿灯但实际覆盖 0 个场景、0 个迭代。修复为递归分类目录与分支实际变更归属匹配，完整验证增加非零覆盖断言，并将回归纳入 system/full。",
+      "source": "guard-block",
+      "scene": "workflow-integrity-guard-coverage",
+      "tags": [
+        "交付单元核对",
+        "分类目录",
+        "验证覆盖",
+        "fail-closed",
+        "wego-github-delivery"
+      ]
+    },
+    {
+      "id": "ev-037",
+      "date": "2026-09-04",
+      "summary": "工作流复审发现 .tasks 已被 gitignore，但通用清理与 worktree 孤儿判断没有保护 experience-inbox 和 preview-servers：未处理经验草稿与受管预览记录可能在 Git 状态仍显示干净时被删除。修复为通用清理永久排除两类状态，worktree 清理同时检查任务 worktree 与主 worktree 的关联记录。",
+      "source": "guard-block",
+      "scene": "workflow-integrity-closeout",
+      "tags": [
+        "经验收口",
+        "预览服务",
+        "worktree清理",
+        "任务状态保护",
+        "wego-github-delivery"
+      ]
+    },
+    {
+      "id": "ev-038",
+      "date": "2026-09-04",
+      "summary": "Sync Open PRs 工作流连续显示 success，但运行日志实际报 fatal: not a git repository；原因是未 checkout 且 gh pr list 未传 repo，管道又未启用 pipefail，错误被吞掉后绿灯空跑。修复为显式仓库参数、set -euo pipefail、冲突打 needs-sync、未知错误直接失败。",
+      "source": "ci-failure",
+      "scene": "workflow-integrity-open-pr-sync",
+      "tags": [
+        "GitHub Actions",
+        "开放PR同步",
+        "绿灯空跑",
+        "pipefail",
+        "wego-github-delivery"
+      ]
     }
   ]
 }

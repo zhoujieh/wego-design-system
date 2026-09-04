@@ -783,6 +783,18 @@ function suggestIterationId(scene) {
   return `${category}${String(num).padStart(3, '0')}`;
 }
 
+function iterationIdConflicts(id, targetFile) {
+  const scenesRoot = path.join(root, 'wego-app/scenes');
+  return files(scenesRoot).filter(file => {
+    if (path.resolve(file) === path.resolve(targetFile)) return false;
+    try {
+      return JSON.parse(fs.readFileSync(file, 'utf8')).identity?.iteration_id === id;
+    } catch {
+      return false;
+    }
+  });
+}
+
 function init() {
   let id = value('--iteration-id');
   const title = value('--title');
@@ -798,6 +810,10 @@ function init() {
   }
   const file = requireFile(scene);
   if (fs.existsSync(file)) fail(`${file} 已存在`);
+  const conflicts = iterationIdConflicts(id, file);
+  if (conflicts.length) {
+    fail(`iteration_id 必须在仓库内唯一：${id} 已被 ${conflicts.map(item => path.relative(root, item)).join('、')} 使用`);
+  }
   const today = new Date().toISOString().slice(0, 10);
   const briefFileName = `${id}-${title}-${today.replace(/-/g, '')}.md`;
   const record = {
@@ -894,7 +910,7 @@ function briefSufficiencyErrors(brief) {
 
   // B. 禁止用静态种子/本地模拟代替真实数据产生入口
   const forbidSeedWords = /种子|内置数据|预置|mock|模拟数据|seed/i;
-  const forbiddenText = [...(brief.assumptions || []), ...(brief.data_contract && typeof brief.data_contract === 'object' ? [String(brief.data_contract)] : [])].join(' ');
+  const forbiddenText = [...(brief.assumptions || []), ...(brief.data_contract && typeof brief.data_contract === 'object' ? [stableJson(brief.data_contract)] : [])].join(' ');
   if (forbidSeedWords.test(forbiddenText)) {
     errors.push('prototype_brief 不得用「内置种子/mock/预置模拟数据」代替数据产生入口；数据必须通过发布/新建流程写入（localStorage 可作为存储位置，但写入通道必须是真实交互流程）');
   }
@@ -1009,6 +1025,9 @@ function acceptanceLedgerErrors(iterationFile, record, { requireAllImplemented =
     if (typeof item.evidence !== 'string') return [`账本条目「${item.label}」evidence 必须为字符串`];
     if (requireAllImplemented && item.status !== 'implemented') {
       return [`验收勾销账本未全绿：「${item.label}」当前为 ${item.status}；全部条目标记 implemented 并附证据后才能继续`];
+    }
+    if (requireAllImplemented && item.status === 'implemented' && !item.evidence.trim()) {
+      return [`验收勾销账本证据为空：「${item.label}」必须填写可复核的实现或交互位置`];
     }
   }
   return [];
@@ -1239,6 +1258,9 @@ function test() {
   const arrayDataContract = clone(sample);
   arrayDataContract.prototype_brief.data_contract = [];
   assert(briefSubmissionErrors(arrayDataContract).some(error => error.includes('非空普通对象')), '终局守门未拦截非普通对象 data_contract');
+  const mockedDataContract = clone(sample);
+  mockedDataContract.prototype_brief.data_contract = { product: { 产生入口: '内置 mock 数据' } };
+  assert(briefSufficiencyErrors(mockedDataContract.prototype_brief).some(error => error.includes('mock')), '充分性守门未检查 data_contract 对象内部的 mock 降级');
   const nullIncluded = clone(sample);
   nullIncluded.prototype_brief.included = [null];
   assert(briefSubmissionErrors(nullIncluded).some(error => error.includes('included[0]')), '业务迭代状态机未拦截 included 中的非字符串');
@@ -1370,6 +1392,11 @@ function test() {
     assert(linkedInit.status !== 0 && (linkedInit.stderr || '').includes('符号链接'), 'init 未拦截符号链接迭代路径');
 
     fs.writeFileSync(iterationFile, `${JSON.stringify(sample, null, 2)}\n`);
+    const duplicateDirectory = path.join(sceneRoot, '_iterations/20260716-test-重复');
+    const duplicateArgument = path.relative(fixtureRoot, path.join(duplicateDirectory, 'iteration.json')).split(path.sep).join('/');
+    const duplicateInit = run(['init', '--file', duplicateArgument, '--iteration-id', 'test', '--title', '重复', '--scene', scene]);
+    assert(duplicateInit.status !== 0 && (duplicateInit.stderr || '').includes('必须在仓库内唯一'), 'init 未拦截重复 iteration_id');
+    assert(!fs.existsSync(path.join(duplicateDirectory, 'iteration.json')), '重复 iteration_id 不得创建迭代');
     // 创建有效的 spec.md 供 submit-brief 解析
     const briefMdPath = path.join(iterationDirectory, 'test-测试-20260715.md');
     fs.writeFileSync(briefMdPath, `# 测试 需求规格说明
@@ -1440,6 +1467,9 @@ function test() {
     fs.writeFileSync(ledgerFile, `${JSON.stringify(driftedLedger, null, 2)}\n`);
     const anchorDriftConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
     assert(anchorDriftConfirmation.status !== 0 && (anchorDriftConfirmation.stderr || '').includes('锚点漂移'), 'confirm-brief 未拦截账本锚点漂移');
+    fs.writeFileSync(ledgerFile, `${JSON.stringify({ ...generatedLedger, items: generatedLedger.items.map(item => ({ ...item, status: 'implemented', evidence: '' })) }, null, 2)}\n`);
+    const emptyEvidenceConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
+    assert(emptyEvidenceConfirmation.status !== 0 && (emptyEvidenceConfirmation.stderr || '').includes('证据为空'), 'confirm-brief 未拦截 implemented 但无证据的账本');
     // 模拟 AI 逐项核对：全部标记 implemented 并附证据
     fs.writeFileSync(ledgerFile, `${JSON.stringify({ ...generatedLedger, items: generatedLedger.items.map(item => ({ ...item, status: 'implemented', evidence: '已实现' })) }, null, 2)}\n`);
     const validBriefConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
