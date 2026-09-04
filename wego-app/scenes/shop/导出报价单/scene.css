@@ -20,17 +20,19 @@
 /* ===== 顶部：模式切换 + 搜索工具条 ===== */
 .quote-select-toolbar {
   background: var(--bg-page);
-  padding: var(--spacer-8) var(--spacer-16) var(--spacer-12);
+  padding: 0 var(--spacer-16);
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-8);
+  gap: 0;
+  justify-content: flex-start;
   border-block-end: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
-.quote-mode-switch {
+
+/* ===== 导航栏中间：模式切换 ===== */
+.quote-nav-mode {
   position: relative;
-  align-self: flex-start;
 }
-.quote-mode-switch__button {
+.quote-nav-mode__button {
   display: inline-flex;
   align-items: center;
   gap: var(--spacer-4);
@@ -44,10 +46,10 @@
   line-height: var(--body-sm-line-height);
   font-weight: var(--font-weight-medium);
 }
-.quote-mode-switch__button:active {
+.quote-nav-mode__button:active {
   background: var(--bg-state-pressed);
 }
-.quote-mode-switch__button.is-open .wego-iconfont-s {
+.quote-nav-mode__button.is-open .wego-iconfont-s {
   transform: rotate(180deg);
 }
 .quote-mode-menu {
@@ -106,7 +108,8 @@
 /* ===== 商品列表（按产品-列表行） ===== */
 .quote-product-list {
   padding: var(--spacer-8) var(--spacer-16) 0;
-  gap: var(--spacer-8);
+  --layout-flow-gap: var(--spacer-8);
+  justify-content: flex-start;
 }
 .quote-product-row {
   display: flex;
@@ -136,25 +139,35 @@
 }
 .quote-product-row__title {
   margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacer-4);
   font-size: var(--body-md-font-size);
   line-height: var(--body-md-line-height);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
+}
+.quote-row__no {
+  flex: 0 0 auto;
+  color: var(--text-brand);
+  font-weight: var(--font-weight-semibold);
+}
+.quote-row__divider {
+  flex: 0 0 auto;
+  color: var(--border-neutral-l2);
+}
+.quote-row__name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.quote-product-row__meta {
+.quote-product-row__spec {
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
   color: var(--text-tertiary);
 }
-.quote-product-row__tags {
-  display: flex;
-  gap: var(--spacer-4);
-}
 .quote-product-row__price {
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
 }
@@ -191,17 +204,18 @@
 }
 .quote-product-grid-card__title {
   margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacer-4);
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   font-weight: var(--font-weight-medium);
   color: var(--text-default);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
-.quote-product-grid-card__tags {
-  display: flex;
-  gap: var(--spacer-4);
+.quote-product-grid-card__spec {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
 }
 
 /* ===== 通用 tag ===== */
@@ -323,27 +337,12 @@
 
 
 /* ===== 底部批量栏 ===== */
-.quote-bottom-bar .quote-bar-text-btn,
-.quote-bottom-bar .quote-bar-count-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacer-4);
-  height: var(--size-36);
-  padding: 0 var(--spacer-8);
-  border: none;
-  border-radius: var(--radius-6);
-  background: transparent;
-  color: var(--text-default);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
-}
-.quote-bottom-bar .quote-bar-text-btn:active,
-.quote-bottom-bar .quote-bar-count-btn:active {
-  background: var(--bg-state-pressed);
-}
 .quote-bottom-bar .quote-bar-count-btn {
   color: var(--text-brand);
   font-weight: var(--font-weight-medium);
+}
+.quote-bottom-bar .quote-bar-count-btn:active {
+  background: var(--bg-state-pressed);
 }
 .quote-bottom-bar .quote-bar-count-btn .wego-iconfont-s {
   font-size: var(--size-16);

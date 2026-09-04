@@ -14,35 +14,35 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             <i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i>
           </button>
         </div>
-        <div class="navbar__center"><span class="navbar__title">选择商品</span></div>
+        <div class="navbar__center">
+          <div class="quote-nav-mode">
+            <button type="button" class="quote-nav-mode__button" data-dom-id="quote-mode-button" aria-haspopup="menu" aria-expanded="false">
+              <span data-role="quote-mode-label">按产品报价</span>
+              <i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i>
+            </button>
+            <div class="popmenu popmenu--select quote-mode-menu" data-component-slug="popmenu" data-role="quote-mode-menu" role="listbox" data-state="closed" hidden>
+              <div class="popmenu__list">
+                <div class="popmenu__item" data-role="quote-mode-option" data-mode="product">
+                  <span class="popmenu__item-text">按产品报价</span>
+                  <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+                </div>
+                <div class="popmenu__item" data-role="quote-mode-option" data-mode="image">
+                  <span class="popmenu__item-text">按图报价</span>
+                  <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="navbar__right navbar__right--icon">
           <button type="button" class="navbar__action" data-dom-id="quote-records-entry" aria-label="报价记录">
-            <span class="navbar__action-icon"><i class="wego-iconfont-s icon-jilu" aria-hidden="true"></i></span>
-            <span class="navbar__action-label">报价记录</span>
+            <span class="navbar__action-icon"><i class="wego-iconfont-s icon-shangxiajiantou16" aria-hidden="true"></i></span>
           </button>
           <span class="quote-guide-bubble" data-role="quote-guide-bubble" hidden>你的报价单都在这</span>
         </div>
       </div>
     </nav>
     <div class="quote-select-toolbar">
-      <div class="quote-mode-switch">
-        <button type="button" class="quote-mode-switch__button" data-dom-id="quote-mode-button" aria-haspopup="menu" aria-expanded="false">
-          <span data-role="quote-mode-label">按产品报价</span>
-          <i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i>
-        </button>
-        <div class="popmenu popmenu--select quote-mode-menu" data-component-slug="popmenu" data-role="quote-mode-menu" role="listbox" data-state="closed" hidden>
-          <div class="popmenu__list">
-            <div class="popmenu__item" data-role="quote-mode-option" data-mode="product">
-              <span class="popmenu__item-text">按产品报价</span>
-              <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
-            </div>
-            <div class="popmenu__item" data-role="quote-mode-option" data-mode="image">
-              <span class="popmenu__item-text">按图报价</span>
-              <i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="search-toolbar quote-search-toolbar">
         <div class="searchbox searchbox--md searchbox--white" data-component-slug="search">
           <span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>
@@ -79,8 +79,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     <div class="bottom-action-bar bottom-action-bar--selection quote-bottom-bar" data-component-slug="bottom-action-bar">
       <div class="bottom-action-bar__inner">
         <div class="bottom-action-bar__leading">
-          <button type="button" class="quote-bar-text-btn" data-dom-id="quote-select-all">全选</button>
-          <button type="button" class="quote-bar-count-btn" data-dom-id="quote-count-dropdown" aria-haspopup="menu" aria-expanded="false">
+          <button type="button" class="bottom-action-bar__action" data-dom-id="quote-select-all">全选</button>
+          <button type="button" class="bottom-action-bar__action quote-bar-count-btn" data-dom-id="quote-count-dropdown" aria-haspopup="menu" aria-expanded="false">
             <span data-role="quote-count-label">已选 0</span>
             <i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i>
           </button>
@@ -90,7 +90,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               <div class="popmenu__item" data-role="quote-batch-option" data-value="clear"><span class="popmenu__item-text">清空已选</span></div>
             </div>
           </div>
-          <button type="button" class="quote-bar-text-btn" data-dom-id="quote-view-selected">查看已选</button>
+          <button type="button" class="bottom-action-bar__action" data-dom-id="quote-view-selected">查看已选</button>
         </div>
         <div class="bottom-action-bar__trailing">
           <button type="button" class="btn btn--strong btn--md" data-component-slug="button" data-dom-id="quote-next" disabled>下一步</button>
@@ -233,11 +233,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           + '<div class="quote-product-row__select">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
           + '<div class="wg-image wg-image--rounded-sm quote-product-row__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
           + '<div class="quote-product-row__info">'
-          + '<h3 class="quote-product-row__title">' + escapeHtml(p.title) + '</h3>'
-          + '<div class="quote-product-row__meta">货号 ' + escapeHtml(p.item_no) + ' · ' + escapeHtml(p.search_code) + '</div>'
-          + '<div class="quote-product-row__tags">' + tagsHtml(p) + '</div>'
-          + '</div>'
+          + '<h3 class="quote-product-row__title"><span class="quote-row__no">' + escapeHtml(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + escapeHtml(p.title) + '</span></h3>'
+          + (p.specification ? '<div class="quote-product-row__spec">' + escapeHtml(p.specification) + '</div>' : '')
           + '<div class="quote-product-row__price">' + metricHtml(p.price, '14') + '</div>'
+          + '</div>'
           + '</div>';
       }
       function productGridCardHtml(p) {
@@ -245,8 +244,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         return '<div class="card card--surface quote-product-grid-card" data-component-slug="card" data-quote-toggle data-mode="product" data-id="' + escapeHtml(p.product_id) + '">'
           + '<div class="quote-product-grid-card__select">' + checkboxHtml(isSelected('product', p, 0), ' data-role="quote-check"') + '</div>'
           + '<div class="wg-image wg-image--rounded-sm quote-product-grid-card__img" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy"></div>'
-          + '<div class="quote-product-grid-card__info"><h3 class="quote-product-grid-card__title">' + escapeHtml(p.title) + '</h3>'
-          + '<div class="quote-product-grid-card__tags">' + tagsHtml(p) + '</div>'
+          + '<div class="quote-product-grid-card__info"><h3 class="quote-product-grid-card__title"><span class="quote-row__no">' + escapeHtml(p.item_no) + '</span><span class="quote-row__divider">|</span><span class="quote-row__name">' + escapeHtml(p.title) + '</span></h3>'
+          + (p.specification ? '<div class="quote-product-grid-card__spec">' + escapeHtml(p.specification) + '</div>' : '')
           + '<div class="quote-product-grid-card__price">' + metricHtml(p.price, '14') + '</div></div>'
           + '</div>';
       }
