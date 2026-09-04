@@ -5191,6 +5191,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             background: rgba(0,185,107,0.16);
             color: #00d982;
           }
+          @media (max-width: 600px) {
+            .iconfont-panel {
+              --iconfont-panel-height: clamp(180px, 42vh, 300px);
+              --iconfont-panel-height: clamp(180px, 42dvh, 300px);
+              flex: 0 0 var(--iconfont-panel-height);
+              height: var(--iconfont-panel-height);
+              min-height: var(--iconfont-panel-height);
+              max-height: var(--iconfont-panel-height);
+            }
+          }
           .section {
             display: flex;
             flex-direction: column;
@@ -8409,7 +8419,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           <div class="toolbar-clip">
             <!-- 收起态：圆形按钮 -->
             <button class="fab-btn" data-fab-btn data-has-indicator="false" data-has-count="false" data-tooltip="展开工具栏" aria-label="展开工具栏">
-              <span class="fab-icon">${ICONS.close}</span>
+              <span class="fab-icon">${ICONS.pointer}</span>
               <span class="fab-count" data-fab-count hidden>0</span>
               <span class="fab-dot"></span>
             </button>
