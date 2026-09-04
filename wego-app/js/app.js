@@ -410,14 +410,29 @@
     };
   }
 
+  // 返回样式就绪 Promise：平铺渲染（renderSceneTo）需要等私有 scene.css 落地后再挂载，
+  // 否则只用到全局组件样式、场景私有 class 会短暂或持续失样。幂等且并发去重。
   function ensureStyle(href) {
-    if (!href || loadedStyles.has(href)) return;
-    var link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    link.dataset.sceneStyle = href;
-    document.head.appendChild(link);
-    loadedStyles.add(href);
+    if (!href) return Promise.resolve();
+    if (loadedStyles.has(href)) return Promise.resolve();
+    var inflight = ensureStyle._inflight;
+    if (inflight && inflight.has(href)) return inflight.get(href);
+    var promise = new Promise(function (resolve) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.dataset.sceneStyle = href;
+      var done = function () {
+        loadedStyles.add(href);
+        if (ensureStyle._inflight) ensureStyle._inflight.delete(href);
+        resolve();
+      };
+      link.onload = done;
+      link.onerror = done; // 样式加载失败也放行，避免平铺渲染被永久挂起
+      document.head.appendChild(link);
+    });
+    (ensureStyle._inflight || (ensureStyle._inflight = new Map())).set(href, promise);
+    return promise;
   }
 
   function ensureScript(routeId, src) {
@@ -2249,8 +2264,9 @@
           }
         };
       };
-      if (scenes.has(routeId)) return Promise.resolve(render());
-      return ensureScript(routeId, config.script).then(render).catch(function (e) {
+      var scriptReady = scenes.has(routeId) ? Promise.resolve() : ensureScript(routeId, config.script);
+      // 平铺渲染同样要确保目标场景私有样式表就绪，否则场景私有 class 失样
+      return Promise.all([scriptReady, ensureStyle(config.style)]).then(render).catch(function (e) {
         console.warn('[wego-app] renderSceneTo load failed:', e);
         return null;
       });

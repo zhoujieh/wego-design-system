@@ -310,10 +310,35 @@
 
 .iter-canvas-page__flow-chain {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  width: max-content;
+  max-width: none;
+  overflow-x: visible;
+}
+
+/* 一段连续的里程碑节点横排成行 */
+.iter-canvas-page__flow-chain-row {
+  display: flex;
   align-items: flex-start;
   gap: var(--spacer-40);
-  flex-wrap: nowrap;
-  overflow-x: visible;
+}
+
+/* 段与 cell 矩阵之间的纵向承接箭头（右箭头旋转 90°） */
+.iter-canvas-page__flow-stepdown {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: calc(var(--spacer-72) * 2 + var(--spacer-48));
+  margin: var(--spacer-8) 0;
+  color: var(--text-tertiary);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+}
+
+.iter-canvas-page__flow-stepdown .wego-iconfont-s {
+  transform: rotate(90deg);
 }
 
 .iter-canvas-page__node {
@@ -583,7 +608,14 @@
   color: var(--text-secondary);
 }
 
-/* ── 局部状态块：整页渲染后 clip 聚焦，信息蓝描边表明这是裁剪局部 ── */
+/* ── 局部状态块：宿主恒为完整设备高度，外层裁剪窗只露出 clip 目标区域 ──
+   （弹窗类场景贴底 + 内部滚动，若直接裁矮宿主会令内部布局重排错位，故裁剪与布局分离） */
+.iter-canvas-page__frame-clip {
+  width: 393px;
+  overflow: hidden;
+  border-radius: var(--radius-12);
+}
+
 .iter-canvas-page__frame-wrap--local .iter-canvas-page__scene-host--clip {
   border-color: var(--status-info-default);
   box-shadow: var(--shadow-sm);
@@ -681,4 +713,83 @@
   font-size: var(--body-xs-font-size);
   line-height: var(--body-xs-line-height);
   color: var(--text-tertiary);
+}
+
+/* ── cell 状态矩阵：复杂页面节点下钻一层，矩阵节点独占一行，内部按分组纵向、组内状态横排换行 ── */
+.iter-canvas-page__node--matrix {
+  width: 1560px;
+  max-width: 1560px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+}
+
+.iter-canvas-page__matrix-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+  padding: 0 var(--spacer-2);
+}
+
+.iter-canvas-page__matrix-title {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__matrix-lead {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+}
+
+.iter-canvas-page__cell-group {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+  padding: var(--spacer-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-10);
+  box-sizing: border-box;
+}
+
+.iter-canvas-page__cell-group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.iter-canvas-page__cell-group-name {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__cell-group-count {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-full);
+  padding: var(--spacer-2) var(--spacer-8);
+}
+
+.iter-canvas-page__cell-group-states {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--spacer-16) var(--spacer-20);
+}
+
+/* host-tab 页面补了底部导航后，把场景内悬浮发布按钮上抬一个导航位，避免被底栏遮挡 */
+.iter-canvas-page__scene-host--tabbed .wego-fab {
+  bottom: calc(var(--size-56) + var(--spacer-16));
 }

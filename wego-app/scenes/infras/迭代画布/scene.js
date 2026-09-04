@@ -39,6 +39,118 @@ const iterationCanvasTemplate = `
 `;
 
 (function () {
+  // ── 画布驱动/投影辅助 ─────────────────────────────────────────────
+  // 真实驱动：fill 文本、click 走运行时、add-tag 走「输入+回车」真实委托；
+  // 显式投影 project：列表数据/多值回显等封在业务场景闭包内、画布无法从外部驱动的，
+  // 用与业务模板同构的 DOM 投影呈现（settle 用于覆盖业务运行时晚渲染，如动态流 600ms 后重渲染）。
+  function protoDB() { return window.WEGO_PROTOTYPE_DB || {}; }
+  function assetImages(n) {
+    var out = [];
+    (protoDB().products || []).forEach(function (p) {
+      if (p && p.image_list && p.image_list[0] && out.indexOf(p.image_list[0]) < 0) out.push(p.image_list[0]);
+    });
+    return out.slice(0, n || 3);
+  }
+  function fieldClip(f, pad) { return { selector: '[data-form-field="' + f + '"]', closest: '.form-body', pad: pad == null ? 8 : pad }; }
+  function tagClip(k, pad) { return { selector: '[data-tag-list="' + k + '"]', closest: '.form-body', pad: pad == null ? 8 : pad }; }
+  function fill(f, v) { return { action: 'fill', selector: '[data-form-field="' + f + '"]', value: v }; }
+  function addTags(k, vs) { return { action: 'add-tag', selector: '[data-tag-input="' + k + '"]', values: vs }; }
+  function clickSel(sel) { return { action: 'click', selector: sel }; }
+  function project(sel, html, settle) { var s = { action: 'project', selector: sel, html: html }; if (settle) s.settle = settle; return s; }
+  function imgItemsHtml(imgs) {
+    return imgs.map(function (s) {
+      return '<div class="publish-product__img-item"><img src="' + s + '" alt="" /><button type="button" class="publish-product__img-remove" aria-label="移除">×</button></div>';
+    }).join('');
+  }
+  // 动态流空态：与 album-product-feed 的 emptyStateTemplate 同构
+  function feedEmptyStep() {
+    var html = '<div class="album-feed__empty"><i class="wego-iconfont-s icon-tupian album-feed__empty-icon" aria-hidden="true"></i>'
+      + '<span class="album-feed__empty-text">还没有商品动态</span>'
+      + '<button type="button" class="btn btn--strong btn--md">去发布</button></div>';
+    return project('[data-feed-list]', html, 720);
+  }
+  // 动态流发布完成：投影一张刚发布商品卡（对齐 feedCardTemplate 结构，突出「从空到有」）
+  function feedPublishedStep() {
+    var u = protoDB().currentUser || {};
+    var imgs = assetImages(1);
+    var thumb = imgs[0] || '';
+    var html = '<article class="album-feed__card">'
+      + '<header class="album-feed__head"><div class="avatar avatar--40 avatar--image album-feed__avatar"><img src="' + (u.publisher_avatar || u.avatar || '') + '" alt="" /></div>'
+      + '<div class="album-feed__meta"><span class="album-feed__publisher">' + (u.publisher_name || u.name || '我') + '</span><span class="album-feed__time">刚刚</span></div></header>'
+      + (thumb ? '<div class="album-feed__media"><div class="wg-image-grid wg-image-grid--single wg-image-grid--square"><img class="album-feed__media-img" src="' + thumb + '" alt="" /></div></div>' : '')
+      + '<button type="button" class="album-feed__product"><span class="album-feed__product-body">'
+      + (thumb ? '<img class="album-feed__product-thumb" src="' + thumb + '" alt="" />' : '')
+      + '<span class="album-feed__product-info"><span class="album-feed__product-name">荷叶边方领短袖上衣</span>'
+      + '<span class="album-feed__product-price"><i class="album-feed__price-symbol">¥</i><span class="album-feed__price-num">139</span></span></span></span></button>'
+      + '<footer class="album-feed__actions"><div class="album-feed__actions-row"><button type="button" class="btn btn--strong btn--md album-feed__primary">我也要卖</button></div></footer>'
+      + '</article>';
+    return project('[data-feed-list]', html, 720);
+  }
+
+  // ── 发布表单 cell 状态矩阵：严格以 publish-product 运行时代码为准，逐 cell 列出真实存在的状态 ──
+  function buildPublishMatrix() {
+    var imgs = assetImages(3);
+    function inputPair(f, label, val) {
+      return [
+        { name: label + ' · 空', clip: fieldClip(f) },
+        { name: label + ' · 已填', clip: fieldClip(f), prepare: [fill(f, val)] }
+      ];
+    }
+    function tagPair(k, label, vs) {
+      return [
+        { name: label + ' · 空', clip: tagClip(k) },
+        { name: label + ' · 已录 ' + vs.length + ' 个（回车添加 / × 删除）', clip: tagClip(k), prepare: [addTags(k, vs)] }
+      ];
+    }
+    var priceRows = [
+      ['f-takePrice', '拿货价', '89'], ['f-salePrice', '售价', '139'], ['f-groupPrice', '拼团价', '129'],
+      ['f-wholesalePrice', '批发价', '99'], ['f-packPrice', '打包价', '119']
+    ];
+    var priceStates = [];
+    priceRows.forEach(function (r) {
+      priceStates.push({ name: r[1] + ' · 已填 · 公开', clip: fieldClip(r[0]), prepare: [fill(r[0], r[2])] });
+      priceStates.push({ name: r[1] + ' · 已填 · 隐藏（点公开切换）', clip: fieldClip(r[0]),
+        prepare: [fill(r[0], r[2]), clickSel('[data-public-toggle="' + r[0] + '"]')] });
+    });
+    return [
+      { title: '商品图片', states: [
+        { name: '商品图片 · 空（仅「添加图片」按钮）', clip: { selector: '[data-image-list]', closest: '.form-group', pad: 8 } },
+        { name: '商品图片 · 已选 ' + imgs.length + ' 张（每张可 × 移除）', clip: { selector: '[data-image-list]', closest: '.form-group', pad: 8 },
+          prepare: [project('[data-image-list]', imgItemsHtml(imgs))] }
+      ] },
+      { title: '商品信息', states: [].concat(
+        inputPair('f-name', '产品名', '荷叶边方领短袖上衣'),
+        inputPair('f-shortName', '商品简称', '荷叶边方领短袖'),
+        [
+          { name: '货号 · 空', clip: fieldClip('f-sku') },
+          { name: '货号 · 点「自动生成」填入', clip: fieldClip('f-sku'), prepare: [clickSel('[data-dom-id="auto-sku"]')] }
+        ]
+      ) },
+      { title: '价格（5 格，每格均可在 公开 / 隐藏 间切换）', states: priceStates },
+      { title: '规格与库存', states: [].concat(
+        tagPair('f-specs', '规格', ['S', 'M', 'L']),
+        tagPair('f-colors', '颜色', ['黑色', '米白', '卡其']),
+        inputPair('f-stock', '库存', '200'),
+        inputPair('f-weight', '重量/kg', '0.35')
+      ) },
+      { title: '标签与来源（多值：回车添加 / × 删除）', states: [].concat(
+        tagPair('f-tags', '标签', ['纯棉', '新款', '短袖']),
+        tagPair('f-source', '来源', ['杭州四季青', '十三行'])
+      ) },
+      { title: '其他', states: [].concat(
+        inputPair('f-freight', '运费模板', '包邮模板'),
+        inputPair('f-remark', '备注', '新款短袖，棉质亲肤'),
+        inputPair('f-subAccount', '子账号', '小助手')
+      ) },
+      { title: '帮卖分销（可点入口；弹窗子流程在下方独立流程链呈现）', states: [
+        { name: '帮卖分销 · 未开启', clip: { selector: '.publish-product__resale', pad: 8 } },
+        { name: '帮卖分销 · 设置后回显「自由定价 · +30」', clip: { selector: '.publish-product__resale', pad: 8 },
+          prepare: [project('[data-resale-value]', '自由定价 · +30')] }
+      ] }
+    ];
+  }
+  var MATRIX_BUILDERS = { publish: buildPublishMatrix };
+
   // ── MVP 样例迭代数据（取自 wego-app/scenes/shop/发布产品/_iterations/20260825-publish-product-发布产品/iteration.json）──
   var SAMPLE_ITERATION = {
     identity: {
@@ -74,40 +186,44 @@ const iterationCanvasTemplate = `
     flows: [
       {
         id: 'publish-product',
-        title: '发布产品',
+        title: '发布产品（主链路：列表从空到有 + 表单逐 cell 状态）',
         priority: 'P1',
-        desc: '动态流「发布」入口 → 空状态 → 填写中 → 填完整 → 发布完成，新产品出现在动态流（按需求规格 empty-form / publish-success）',
+        desc: '动态流空态（发布入口完整可见）→ 空表单 → 填写中（逐 cell 真实状态矩阵）→ 全部字段真实填满 → 发布完成、动态从空到有；末尾列提交动作的规格缺口状态',
         nodes: [
           { label: '动态流', routeId: 'album-product-feed', tab: 'dongtai',
-            states: [{ name: '「发布」入口', sub: 'entry' }] },
+            states: [{ name: '① 空态：列表为空，右下发布入口完整可见', sub: 'empty · 去发布',
+              prepare: [feedEmptyStep()] }] },
           { label: '发布表单', routeId: 'publish-product',
-            states: [{ name: '空状态', sub: 'empty-form' }] },
+            states: [{ name: '② 空表单：所有 cell 处于初始态', sub: 'empty-form' }] },
+          { label: '填写中', routeId: 'publish-product', matrixBuilder: 'publish',
+            matrixTitle: '③ 填写中 · 逐 cell 状态矩阵（以代码为准穷举，均为真实表单局部裁剪）',
+            matrixLead: '上承「② 空表单」：下列每个 cell 在运行时代码里真实存在的状态；下启「④ 填完整」' },
           { label: '发布表单', routeId: 'publish-product',
-            states: [{ name: '填写中', sub: '录入基础字段',
+            states: [{ name: '④ 填完整：图片 + 全部字段 + 多值标签 + 公开/隐藏设置齐全', sub: 'all-filled',
               prepare: [
-                { action: 'fill', selector: 'input[placeholder*="请输入产品名"]', value: '荷叶边方领短袖上衣' },
-                { action: 'fill', selector: 'input[placeholder*="请输入售价"]', value: '139' },
-                { action: 'fill', selector: 'input[placeholder*="请输入货号"]', value: 'HYB-012' }
-              ] }] },
-          { label: '发布表单', routeId: 'publish-product',
-            states: [{ name: '填完整', sub: '全部字段已填写',
-              prepare: [
-                { action: 'fill', selector: 'input[placeholder*="请输入产品名"]', value: '荷叶边方领短袖上衣' },
-                { action: 'fill', selector: 'input[placeholder*="请输入商品简称"]', value: '荷叶边方领短袖' },
-                { action: 'fill', selector: 'input[placeholder*="请输入货号"]', value: 'HYB-012' },
-                { action: 'fill', selector: 'input[placeholder*="请输入拿货价"]', value: '89' },
-                { action: 'fill', selector: 'input[placeholder*="请输入售价"]', value: '139' },
-                { action: 'fill', selector: 'input[placeholder*="请输入拼团价"]', value: '129' },
-                { action: 'fill', selector: 'input[placeholder*="请输入批发价"]', value: '99' },
-                { action: 'fill', selector: 'input[placeholder*="请输入打包价"]', value: '119' },
-                { action: 'fill', selector: 'input[placeholder*="请输入库存"]', value: '200' },
-                { action: 'fill', selector: 'input[placeholder*="请输入商品重量"]', value: '0.35' },
-                { action: 'fill', selector: 'input[placeholder*="请输入运费模板"]', value: '包邮模板' },
-                { action: 'fill', selector: 'input[placeholder*="请输入备注"]', value: '新款短袖，棉质亲肤' },
-                { action: 'fill', selector: 'input[placeholder*="请输入子账号"]', value: '小助手' }
+                fill('f-name', '荷叶边方领短袖上衣'), fill('f-shortName', '荷叶边方领短袖'), fill('f-sku', 'HYB-012'),
+                fill('f-takePrice', '89'), fill('f-salePrice', '139'), fill('f-groupPrice', '129'),
+                fill('f-wholesalePrice', '99'), fill('f-packPrice', '119'),
+                addTags('f-specs', ['S', 'M', 'L']), addTags('f-colors', ['黑色', '米白', '卡其']),
+                fill('f-stock', '200'), fill('f-weight', '0.35'),
+                addTags('f-tags', ['纯棉', '新款', '短袖']), addTags('f-source', ['杭州四季青', '十三行']),
+                fill('f-freight', '包邮模板'), fill('f-remark', '新款短袖，棉质亲肤'), fill('f-subAccount', '小助手'),
+                project('[data-image-list]', imgItemsHtml(assetImages(3))),
+                project('[data-resale-value]', '自由定价 · +30'),
+                clickSel('[data-public-toggle="f-wholesalePrice"]')
               ] }] },
           { label: '动态流', routeId: 'album-product-feed', tab: 'dongtai',
-            states: [{ name: '发布完成', sub: 'publish-success · 新产品出现' }] }
+            states: [{ name: '⑤ 发布完成：列表从空到有，出现新商品', sub: 'publish-success',
+              prepare: [feedPublishedStep()] }] },
+          { label: '发布提交', routeId: 'publish-product',
+            states: [
+              { name: '缺产品名 / 售价 · 阻断', sub: 'field-validation',
+                placeholder: { ref: 'states.field-validation', note: '代码 doPublish：产品名或售价为空时 toast 阻断提交；字段级报错 UI 场景尚未实现' } },
+              { name: '读取失败 · 重试', sub: 'load-failed',
+                placeholder: { ref: 'states.load-failed', note: '表单数据读取失败的提示与「重试/关闭」，发布场景尚未实现' } },
+              { name: '保存失败 · 重试', sub: 'publish-failed',
+                placeholder: { ref: 'states.publish-failed', note: '代码 faultInjection(save) 时 toast「发布失败，请稍后重试」；失败页 UI 尚未实现' } }
+            ] }
         ]
       },
       {
@@ -141,49 +257,6 @@ const iterationCanvasTemplate = `
             states: [{ name: '修改后保存', sub: 'edit' }] },
           { label: '动态流', routeId: 'album-product-feed', tab: 'dongtai',
             states: [{ name: '对应动态同步更新', sub: 'edit' }] }
-        ]
-      },
-      {
-        id: 'multi-value',
-        title: '多值字段录入',
-        priority: '—',
-        desc: '规格 / 颜色 / 标签 / 来源 → 一次录入多个值 → 实时展示已录入项 → 可增删（multi-value-entry）',
-        nodes: [
-          { label: '发布表单', routeId: 'publish-product',
-            states: [{ name: '多值字段录入', sub: 'multi-value-entry' }] },
-          { label: '发布表单', routeId: 'publish-product',
-            states: [{ name: '已录入项实时展示', sub: 'multi-value-entry' }] }
-        ]
-      },
-      {
-        // 预研：局部状态块（整页渲染后 clip 聚焦目标区域）+ 规格占位卡（spec 声明、场景未实现 UI）
-        id: 'field-and-exception',
-        title: '字段级局部状态与异常缺口（局部块 · 占位卡）',
-        priority: '—',
-        desc: '局部块=整页渲染后裁剪聚焦价格区/入口行（保留整页宽度上下文）；占位卡=spec states 已声明（field-validation/load-failed/publish-failed）但发布场景尚无对应 UI，显式标缺口、不伪造',
-        nodes: [
-          { label: '价格区（局部）', routeId: 'publish-product',
-            states: [{ name: '多价格已填写', sub: 'clip · 价格分组',
-              prepare: [
-                { action: 'fill', selector: 'input[placeholder*="请输入拿货价"]', value: '89' },
-                { action: 'fill', selector: 'input[placeholder*="请输入售价"]', value: '139' },
-                { action: 'fill', selector: 'input[placeholder*="请输入拼团价"]', value: '129' },
-                { action: 'fill', selector: 'input[placeholder*="请输入批发价"]', value: '99' },
-                { action: 'fill', selector: 'input[placeholder*="请输入打包价"]', value: '119' }
-              ],
-              clip: { selector: '[data-form-field="f-salePrice"]', closest: '.form-group', pad: 10 } }] },
-          { label: '帮卖入口行（局部）', routeId: 'publish-product',
-            states: [{ name: '帮卖分销入口', sub: 'clip · 单行字段',
-              clip: { selector: '.publish-product__resale', pad: 10 } }] },
-          { label: '发布表单', routeId: 'publish-product',
-            states: [{ name: '必填/格式校验提示', sub: 'field-validation',
-              placeholder: { ref: 'states.field-validation', note: '必填未填或格式非法时的字段级报错与阻断提交，发布场景尚未实现该校验 UI' } }] },
-          { label: '发布表单', routeId: 'publish-product',
-            states: [{ name: '读取失败 · 重试', sub: 'load-failed',
-              placeholder: { ref: 'states.load-failed', note: '表单数据读取失败的失败提示与「重试/关闭」，发布场景尚未实现' } }] },
-          { label: '发布表单', routeId: 'publish-product',
-            states: [{ name: '保存失败 · 重试', sub: 'publish-failed',
-              placeholder: { ref: 'states.publish-failed', note: '提交保存失败提示与重试、数据保持原状，发布场景尚未实现' } }] }
         ]
       }
     ]
@@ -255,56 +328,116 @@ const iterationCanvasTemplate = `
       + '</div>';
   }
 
-  // 每个流程 = 一排"功能节点"，节点内部是多个状态块横排，节点之间连线
+  // 单个状态块：规格占位卡（登记缺口）或真实状态块（整页 / 局部 clip）。返回 {html,block,gap}
+  function stateFrameMarkup(st, key, node) {
+    if (st.placeholder) {
+      return {
+        block: null,
+        gap: { name: st.name, ref: (st.placeholder || {}).ref || '', sub: st.sub || '' },
+        html: ''
+          + '<div class="iter-canvas-page__state iter-canvas-page__state--gap">'
+          +   '<div class="iter-canvas-page__state-label">' + esc(st.name)
+          +     '<span class="iter-canvas-page__frame-tag iter-canvas-page__frame-tag--gap">规格缺口</span>'
+          +   '</div>'
+          +   placeholderMarkup(st)
+          + '</div>'
+      };
+    }
+    var routeId = st.routeId || node.routeId;
+    var isLocal = !!st.clip;
+    var frameName = st.frameName === undefined ? node.label : st.frameName;
+    // 未进入视口前为 pending 骨架，懒加载命中后再渲染真实场景
+    var hostEl = '<div class="iter-canvas-page__scene-host iter-canvas-page__scene-host--pending" data-block-key="' + esc(key) + '" data-route-id="' + esc(routeId) + '"></div>';
+    // 局部块：宿主恒保持完整设备高度（内部弹窗/滚动布局不被裁矮而错位），外层裁剪窗只露目标区域
+    var hostSlot = isLocal ? '<div class="iter-canvas-page__frame-clip">' + hostEl + '</div>' : hostEl;
+    return {
+      gap: null,
+      block: { key: key, routeId: routeId, prepare: st.prepare || [], overlay: node.overlay || null, tab: node.tab || null, clip: st.clip || null },
+      html: ''
+        + '<div class="iter-canvas-page__state">'
+        +   '<div class="iter-canvas-page__state-label">' + esc(st.name)
+        +     (isLocal ? '<span class="iter-canvas-page__frame-tag iter-canvas-page__frame-tag--local">局部</span>' : '')
+        +   '</div>'
+        +   '<div class="iter-canvas-page__frame-wrap' + (isLocal ? ' iter-canvas-page__frame-wrap--local' : '') + '">'
+        +     (frameName ? '<div class="iter-canvas-page__frame-label">'
+        +       '<span class="iter-canvas-page__frame-name">' + esc(frameName) + '</span>'
+        +       (st.sub ? '<span class="iter-canvas-page__frame-sub">' + esc(st.sub) + '</span>' : '')
+        +     '</div>' : '')
+        +     hostSlot
+        +     '<div class="iter-canvas-page__frame-route">' + esc(routeId) + '</div>'
+        +     (isLocal ? '' : '<div class="iter-canvas-page__resize-handle" data-role="resize"><i class="wego-iconfont-s icon-tuodong"></i>拖拽调高度</div>')
+        +   '</div>'
+        + '</div>'
+    };
+  }
+
+  // cell 状态矩阵：复杂页面节点下钻一层，按分组纵向、组内把每个 cell 的真实状态横排（可换行）
+  function matrixMarkup(node, flow, flowIdx, nodeIdx, blocks, gaps) {
+    var groups = (node.matrixBuilder && MATRIX_BUILDERS[node.matrixBuilder]) ? MATRIX_BUILDERS[node.matrixBuilder]() : (node.groups || []);
+    var groupsHtml = groups.map(function (g, gi) {
+      var statesHtml = g.states.map(function (st, si) {
+        var key = 'f' + flowIdx + '-n' + nodeIdx + '-g' + gi + '-s' + si;
+        // 矩阵内状态标签已写明「cell · 状态」，不再重复显示节点帧名
+        var r = stateFrameMarkup(Object.assign({ frameName: '' }, st), key, node);
+        if (r.block) blocks.push(r.block);
+        if (r.gap) gaps.push(Object.assign({ flow: flow.title }, r.gap));
+        return r.html;
+      }).join('');
+      return ''
+        + '<div class="iter-canvas-page__cell-group">'
+        +   '<div class="iter-canvas-page__cell-group-head"><span class="iter-canvas-page__cell-group-name">' + esc(g.title) + '</span>'
+        +     '<span class="iter-canvas-page__cell-group-count">' + g.states.length + ' 态</span></div>'
+        +   '<div class="iter-canvas-page__cell-group-states">' + statesHtml + '</div>'
+        + '</div>';
+    }).join('');
+    return ''
+      + '<div class="iter-canvas-page__node iter-canvas-page__node--matrix">'
+      +   '<div class="iter-canvas-page__matrix-head">'
+      +     '<div class="iter-canvas-page__matrix-title">' + esc(node.matrixTitle || node.label || '状态矩阵') + '</div>'
+      +     (node.matrixLead ? '<div class="iter-canvas-page__matrix-lead">' + esc(node.matrixLead) + '</div>' : '')
+      +   '</div>'
+      +   groupsHtml
+      + '</div>';
+  }
+
+  // 每个流程 = 一排功能节点（普通节点内状态块横排、节点连线；matrix 节点独占一行下钻 cell 状态矩阵）
   // 返回 { html, blocks, gaps }；blocks 供懒加载按 key 找到 routeId/prepare/clip，gaps 汇总占位卡
   function flowMarkup(flow, flowIdx) {
     var blocks = [];
     var gaps = [];
-    var nodeHtml = flow.nodes.map(function (node, nodeIdx) {
+    // 普通里程碑节点按连续段横排成行；matrix 节点纵向独占一行；段与矩阵之间用向下箭头承接
+    var segments = [];
+    var row = [];
+    function flushRow() {
+      if (!row.length) return;
+      segments.push('<div class="iter-canvas-page__flow-chain-row">' + row.join('') + '</div>');
+      row = [];
+    }
+    flow.nodes.forEach(function (node, nodeIdx) {
+      if (node.matrixBuilder || node.groups) {
+        flushRow();
+        segments.push(matrixMarkup(node, flow, flowIdx, nodeIdx, blocks, gaps));
+        return;
+      }
       var states = (node.states && node.states.length) ? node.states : [{ name: node.sub || node.label, routeId: node.routeId }];
       var stateHtml = states.map(function (st, si) {
         var key = 'f' + flowIdx + '-n' + nodeIdx + '-s' + si;
-        // ① 规格占位卡：不渲染真实场景，仅登记缺口
-        if (st.placeholder) {
-          gaps.push({ flow: flow.title, name: st.name, ref: (st.placeholder || {}).ref || '', sub: st.sub || '' });
-          return ''
-            + '<div class="iter-canvas-page__state iter-canvas-page__state--gap">'
-            +   '<div class="iter-canvas-page__state-label">' + esc(st.name)
-            +     '<span class="iter-canvas-page__frame-tag iter-canvas-page__frame-tag--gap">规格缺口</span>'
-            +   '</div>'
-            +   placeholderMarkup(st)
-            + '</div>';
-        }
-        // ② 真实状态块（整页 / 局部 clip）
-        var routeId = st.routeId || node.routeId;
-        var isLocal = !!st.clip;
-        blocks.push({
-          key: key, routeId: routeId, prepare: st.prepare || [],
-          overlay: node.overlay || null, tab: node.tab || null, clip: st.clip || null
-        });
-        return ''
-          + '<div class="iter-canvas-page__state">'
-          +   '<div class="iter-canvas-page__state-label">' + esc(st.name)
-          +     (isLocal ? '<span class="iter-canvas-page__frame-tag iter-canvas-page__frame-tag--local">局部</span>' : '')
-          +   '</div>'
-          +   '<div class="iter-canvas-page__frame-wrap' + (isLocal ? ' iter-canvas-page__frame-wrap--local' : '') + '">'
-          +     '<div class="iter-canvas-page__frame-label">'
-          +       '<span class="iter-canvas-page__frame-name">' + esc(node.label) + '</span>'
-          +       (st.sub ? '<span class="iter-canvas-page__frame-sub">' + esc(st.sub) + '</span>' : '')
-          +     '</div>'
-          // 未进入视口前为 pending 骨架，懒加载命中后再渲染真实场景
-          +     '<div class="iter-canvas-page__scene-host iter-canvas-page__scene-host--pending" data-block-key="' + esc(key) + '" data-route-id="' + esc(routeId) + '"></div>'
-          +     '<div class="iter-canvas-page__frame-route">' + esc(routeId) + '</div>'
-          +     '<div class="iter-canvas-page__resize-handle" data-role="resize"><i class="wego-iconfont-s icon-tuodong"></i>拖拽调高度</div>'
-          +   '</div>'
-          + '</div>';
+        var r = stateFrameMarkup(st, key, node);
+        if (r.block) blocks.push(r.block);
+        if (r.gap) gaps.push(Object.assign({ flow: flow.title }, r.gap));
+        return r.html;
       }).join('');
-      return ''
+      var next = flow.nodes[nodeIdx + 1];
+      var showLink = nodeIdx < flow.nodes.length - 1 && !(next && (next.matrixBuilder || next.groups));
+      row.push(''
         + '<div class="iter-canvas-page__node">'
         +   '<div class="iter-canvas-page__node-states">' + stateHtml + '</div>'
-        +   (nodeIdx < flow.nodes.length - 1 ? '<div class="iter-canvas-page__link" aria-hidden="true"><i class="wego-iconfont-s icon-youjiantou16"></i></div>' : '')
-        + '</div>';
-    }).join('');
+        +   (showLink ? '<div class="iter-canvas-page__link" aria-hidden="true"><i class="wego-iconfont-s icon-youjiantou16"></i></div>' : '')
+        + '</div>');
+    });
+    flushRow();
+    var stepdown = '<div class="iter-canvas-page__flow-stepdown" aria-hidden="true"><i class="wego-iconfont-s icon-youjiantou16"></i></div>';
+    var nodeHtml = segments.join(stepdown);
     return {
       html: ''
         + '<div class="iter-canvas-page__flow" data-flow-id="' + esc(flow.id) + '">'
@@ -348,6 +481,8 @@ const iterationCanvasTemplate = `
         if (step.action === 'fill') { prepareFill(host, step); }
         else if (step.action === 'click') { prepareClick(host, step); }
         else if (step.action === 'scrollTo') { prepareScrollTo(host, step); }
+        else if (step.action === 'add-tag') { prepareAddTag(host, step); }
+        else if (step.action === 'project') { prepareProject(host, step); }
         else { console.warn('[iter-canvas] unknown prepare action:', step.action); }
       } catch (e) {
         console.warn('[iter-canvas] prepare step failed:', step, e);
@@ -382,6 +517,29 @@ const iterationCanvasTemplate = `
     host.scrollTop = top - (step.pos === 'top' ? 0 : Math.max(0, (h / 2) - 40));
   }
 
+  // 多值标签：走业务运行时真实的「输入 + 回车」委托（keydown Enter 触发 push/去重/刷新标签）
+  function prepareAddTag(host, step) {
+    var input = host.querySelector(step.selector);
+    if (!input) return;
+    var setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    (step.values || []).forEach(function (v) {
+      setter.call(input, v);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    });
+  }
+
+  // 同构投影：把业务闭包内、外部无法驱动的区域（列表数据/回显摘要）设为与业务模板同构的 DOM；
+  // settle 毫秒后重放一次，覆盖业务运行时的晚渲染（如动态流 init 600ms 后 renderList）
+  function prepareProject(host, step) {
+    function paint() {
+      var el = host.querySelector(step.selector);
+      if (el) el.innerHTML = step.html;
+    }
+    paint();
+    if (step.settle) setTimeout(paint, step.settle);
+  }
+
   // 局部状态块：整页已渲染的前提下，只做"展示裁剪"——把目标区域平移到画板顶部并收缩高度，
   // 不改动业务场景状态、不产生新状态（clip 是纯视觉投影）。保留整页宽度，左右上下文不丢。
   function applyClip(host, clip) {
@@ -397,12 +555,16 @@ const iterationCanvasTemplate = `
         return;
       }
       var sceneRoot = host.firstElementChild; // renderSceneTo 后场景模板根即 host 直接子节点
-      // 复位外层位移，保证多次重算幂等（不被上一次结果污染）
+      // host 恒保持完整设备高度（内部弹窗贴底/内部滚动布局不随裁剪变化而错位）；
+      // 外层 .frame-clip 裁剪窗负责只露出目标区域。
+      var clipBox = host.parentElement;
+      var hasClipBox = !!(clipBox && clipBox.classList.contains('iter-canvas-page__frame-clip'));
+      // 1) 复位外层位移，保证多次重算幂等
       if (sceneRoot) sceneRoot.style.transform = '';
-      // 目标常位于业务场景的内部滚动容器中（如 .layout-scroll，内容远高于可视区）：
-      // 仅移动外层无法穿过滚动容器自身的裁剪，必须先让目标在每一层内部纵向滚动祖先里
-      // 滚到可视顶。手动只设 scrollTop（不使用 scrollIntoView，避免其 inline 方向引入
-      // 横向偏移、也避免带动外层画布视口），并把横向 scrollLeft 锁零。
+      // 2) 目标常位于业务场景的内部滚动容器中（如 .layout-scroll / .modal__body）：
+      //    仅移动外层无法穿过滚动容器自身的裁剪，必须先让目标在每一层内部纵向滚动祖先里
+      //    滚到可视顶。手动只设 scrollTop（不用 scrollIntoView，避免横向偏移/带动外层视口），
+      //    横向 scrollLeft 锁零。
       var outer = host.closest('.iter-canvas-page__viewport');
       var savedOuterScroll = outer ? outer.scrollTop : 0;
       var scEl = target.parentElement;
@@ -419,13 +581,15 @@ const iterationCanvasTemplate = `
         var rel = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
         scroller.scrollTop = Math.max(0, rel - pad);
       });
+      void host.offsetHeight; // 等滚动定位落定后再测量
       if (outer) outer.scrollTop = savedOuterScroll;
-      // 再把场景根整体上移，使目标对齐到 host 顶部留 pad，并把 host 裁到目标高度
+      // 3) 把场景根整体上移使目标对齐裁剪窗顶部留 pad；裁剪窗（无则回退 host）裁到目标高度
       var hr = host.getBoundingClientRect();
       var tr = target.getBoundingClientRect();
       var delta = tr.top - hr.top;
       if (sceneRoot) sceneRoot.style.transform = 'translateY(' + (-(delta - pad)) + 'px)';
-      host.style.height = Math.round(target.offsetHeight + pad * 2) + 'px';
+      var boxH = Math.round(target.offsetHeight + pad * 2) + 'px';
+      if (hasClipBox) clipBox.style.height = boxH; else host.style.height = boxH;
       host.classList.add('iter-canvas-page__scene-host--clip');
     }
     requestAnimationFrame(function () { requestAnimationFrame(measure); });
@@ -455,7 +619,9 @@ const iterationCanvasTemplate = `
     var map = {};
     blocks.forEach(function (b) { map[b.key] = b; });
     var hosts = Array.prototype.slice.call(root.querySelectorAll('.iter-canvas-page__scene-host'));
-    if (!('IntersectionObserver' in window)) {
+    // ?all=1：一次性全量挂载（验收截图 / 长画布导出用）；无 IntersectionObserver 时同样降级为全量
+    var forceAll = (new URLSearchParams(window.location.search).get('all') === '1');
+    if (forceAll || !('IntersectionObserver' in window)) {
       hosts.forEach(function (h) { mountHost(h, map[h.dataset.blockKey]); }); // 降级：直接全量
       return;
     }
@@ -792,6 +958,8 @@ const iterationCanvasTemplate = `
       getScale: function () { return scale; },
       // 绝对缩放（以视口中心为锚），供预览定位参数 ?scale= 使用
       zoomTo: function (s) { if (s > 0) { zoomCenter(s / scale); } },
+      // 原点视角：不平移、不居中，从画布左上按固定比例铺开（?origin=1，整图核对/导出用）
+      setOrigin: function (s, pad) { scale = s > 0 ? s : 1; tx = pad || 0; ty = pad || 0; apply(); },
       panBy: function (dx, dy) { tx += dx; ty += dy; apply(); }
     };
   }
@@ -825,14 +993,29 @@ const iterationCanvasTemplate = `
       var previewScale = parseFloat(previewQuery.get('scale'));
       var previewFlow = previewQuery.get('flow');
       setTimeout(function () {
-        if (previewScale > 0) {
+        if (previewQuery.get('origin') === '1') {
+          canvas.setOrigin(previewScale > 0 ? previewScale : 1, 12);
+        } else if (previewScale > 0) {
           canvas.zoomTo(previewScale);
         } else {
           canvas.fit();
         }
-        if (previewFlow) {
+        var previewY = parseFloat(previewQuery.get('y'));
+        if (isFinite(previewY)) {
+          viewport.scrollTop = Math.max(0, previewY * canvas.getScale()); // ?y= 为画布世界坐标
+        } else if (previewFlow) {
           var flowEl = viewport.querySelector('[data-flow-id="' + previewFlow + '"]');
           if (flowEl) { viewport.scrollTop = Math.max(0, flowEl.offsetTop - 56); }
+        }
+        // ?anchor=<选择器>：直达任意画布元素（局部块裁剪在数百毫秒内收敛，延迟定位一次）
+        var anchorSel = previewQuery.get('anchor');
+        if (anchorSel) {
+          setTimeout(function () {
+            var a = viewport.querySelector(anchorSel);
+            if (!a) return;
+            var ar = a.getBoundingClientRect(), vr = viewport.getBoundingClientRect();
+            viewport.scrollTop = Math.max(0, viewport.scrollTop + (ar.top - vr.top) - 56);
+          }, 600);
         }
       }, 150);
 
