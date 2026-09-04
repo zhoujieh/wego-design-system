@@ -31,9 +31,11 @@
 2. 巡检结果与当前交付单元冲突时，先确认归属再处理。
 3. 中断兜底：若待接手/待清理 worktree 的 `.tasks/experience-inbox.json` 留有未处理草稿，交 `wego-uxsystem-iterate` 补做经验收口后再继续，不得直接清理 worktree。
 
-## 第 2 步：环境同步与清理（仅完整启动）
+## 第 2 步：环境同步与清理
 
-1. 主 worktree 执行 `git pull --rebase origin main`。
+> `git fetch origin` 在完整与轻量启动中都**不可跳过**：本仓库主线会因工作流短周期 PR 的 CI 自动合并随时前进，不 fetch 就无从得知 `main` 是否有新合并，第 5 步"从最新 `origin/main` 建分支"随之失去依据。
+
+1. 主 worktree 执行 `git fetch origin`；完整启动接着执行 `git pull --rebase origin main`（轻量启动发现 main 有新合并或距上次同步超过合理时间时，同样执行 pull 并完成下方清理）。
 2. 会话前置读取 `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` 核心摘要（轻量启动且本会话已读过则不重复读）；命中场景技能挂载点时再按需读取对应 `wego-scene-*`。
 3. 检查是否有带 `needs-sync` 标签的开放 PR（CI 自动同步 main 时冲突会打此标签），有则先处理冲突。
 4. 检查 `.tasks/preview-servers/` 中的预览服务记录：
@@ -69,15 +71,16 @@ node scripts/resolve-delivery-unit.mjs --scene {场景}
 
 - **matched + 范围未变** → 跳过此步，直接进入 wego-design。
 - **matched + 范围变化** → 进入 wego-product，在原迭代中失效简报、更新需求规格说明、重新提交并确认。
-- **new** → 进入 wego-product，init 迭代 → 写 spec.md → submit-brief → 用户确认后 confirm-brief。
+- **new** → 进入 wego-product，init 迭代 → 写简要 spec.md（薄档：目标/范围/入口/主路径）→ submit-brief（薄档校验 + 生成验收账本）→ 直接进入 wego-design 原型循环。
 
-**两次确认的边界**：
+**三道确认的边界**：
 - 立项确认（第 0 步前的读代码与用户沟通）：判断要不要做、做哪个场景、大致范围。
-- 规格确认（本步）：细化目标、入口、关键路径、状态、数据契约。
+- 循环反馈（原型循环期间，随轮发生）：用户对原型的业务反馈写回 spec.md 对应字段后重新 submit-brief，不构成独立门禁。
+- 终局确认（验收时）：AI 补全终版 spec.md、核对填写账本、展示补全 diff 与账本，用户过目确认后 confirm-brief + submit-prototype 一次收口。
 
 ## 第 5 步：工作环境就绪
 
-- **new**：从最新 `origin/main` 创建 `feature/<owner>-<task>` 分支 + 独立 worktree（`git worktree add ../<owner>-<task> -b <分支>`）。
+- **new**：以第 2 步 fetch 后的最新 `origin/main` 为基创建 `feature/<owner>-<task>` 分支 + 独立 worktree（`git worktree add ../<owner>-<task> -b <分支>`）。
 - **matched**：切换到已有 worktree，确认当前分支与任务分支一致。
 - 确认 worktree 中无未提交的游离改动（归属不清的先交由用户确认保留或还原）。
 
@@ -94,7 +97,7 @@ node scripts/resolve-delivery-unit.mjs --scene {场景}
 | --- | --- | --- |
 | 第 0 步 上下文判断 | ✅ | ✅ |
 | 第 1 步 分支巡检 | ✅ | ✅ |
-| 第 2 步 环境同步与清理 | ✅ | ❌（除非距上次已超过合理时间或 main 有新合并） |
+| 第 2 步 环境同步与清理 | ✅ | 仅 `git fetch origin` 必做；pull 与清理项按需（main 有新合并或距上次超过合理时间时补齐） |
 | 第 3 步 交付单元核对 | ✅ | ✅ |
 | 第 4 步 需求规格确认 | 按需 | 按需 |
 | 第 5 步 工作环境就绪 | ✅ | ✅（切换 worktree） |

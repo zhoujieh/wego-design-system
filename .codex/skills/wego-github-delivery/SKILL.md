@@ -27,11 +27,11 @@ description: 负责微购仓库的分支、PR、本地迭代预览、合并和�
 
 ### 合并阶段（用户验收通过后）
 
-用户明确表达"验收完成""验收通过""确认合格""可以合并"后进入此阶段，由 `wego-design` 先输出 5 维度一致性校验清单，用户逐项确认后，一次性完成固化、验证与合并：
+用户明确表达"验收完成""验收通过""确认合格""可以合并"后进入此阶段，由 `wego-design` 按终局确认流程收口（补全终版 spec.md → 核对填写验收账本 → 展示补全 diff 与账本 → 用户过目确认），一次性完成固化、验证与合并：
 
 1. 由 `wego-design` 连续执行迭代收口：
-   - `confirm-brief --user-confirmed-brief <iteration_id>`（简报确认，进入 prototyping）
-   - `submit-prototype --user-confirmed-prototype <iteration_id>`（场景验证 + 固化指纹 + 确认 + 冻结，一步到 frozen）
+   - `confirm-brief --user-confirmed-brief <iteration_id>`（终局确认，脚本守门全量结构 + 充分性 + 账本全绿，进入 prototyping）
+   - `submit-prototype --user-confirmed-prototype <iteration_id>`（账本复验 + 场景验证 + 固化指纹 + 确认 + 冻结，一步到 frozen）
 2. 运行与范围相称的完整静态验证，确认 PR 内包含全部本次改动且工作区已清零：
    - `node scripts/validate-wego-design.mjs --scope=full --strict`（场景 Token 合规、源/副本同步、原型指纹、完整守门）
    - `node scripts/build-routes.mjs --check`（路由生成一致性）

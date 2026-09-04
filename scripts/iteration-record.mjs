@@ -30,6 +30,7 @@ const prototypeBriefKeys = ['goal', 'included', 'excluded', 'entry_points', 'cri
 const prototypeBriefKeySet = new Set(prototypeBriefKeys);
 const prototypeBriefArrayFields = ['included', 'excluded', 'entry_points', 'critical_paths', 'states', 'assumptions', 'open_questions'];
 const requiredBriefArrayFields = new Set(['included', 'entry_points', 'critical_paths', 'states']);
+const acceptanceStatuses = new Set(['unverified', 'implemented', 'missing', 'mismatch']);
 const iterationKeys = ['schemaVersion', 'identity', 'status', 'scope_revision', 'brief_file', 'prototype_brief', 'brief_submission', 'brief_confirmation', 'prototype_submission', 'prototype_confirmation', 'affected_scenes', 'affected_runtime', 'stage_outputs', 'change_log', 'freeze'];
 const identityKeys = ['iteration_id', 'title', 'date', 'primary_scene', 'related_scenes'];
 const routesRelativePath = 'wego-app/js/routes.js';
@@ -580,7 +581,7 @@ function validate(record, file, repositoryRoot = root, options = {}) {
     if (!Array.isArray(brief.prototype_boundaries)) errors.push(`${file}: prototype_brief.prototype_boundaries 必须为数组`);
     else errors.push(...prototypeBoundaryErrors(brief, `${file}: `, false));
     if (!isPlainObject(brief.data_contract)) errors.push(`${file}: prototype_brief.data_contract 必须为普通对象`);
-    if (briefSubmittedStatuses.has(record.status)) errors.push(...briefSubmissionErrors(record).map(error => `${file}: ${error}`));
+    if (briefSubmittedStatuses.has(record.status)) errors.push(...thinBriefErrors(record).map(error => `${file}: ${error}`));
   }
   errors.push(...affectedSceneErrors(record, file));
   errors.push(...affectedRuntimeErrors(record, file));
@@ -608,7 +609,7 @@ function transition(expected, next, mutate = () => {}) {
   const errors = validate(record, file);
   if (errors.length) fail(errors.join('\n'));
   if (!expected.includes(record.status)) fail(`${file}: 当前状态 ${record.status} 不能执行 ${command}`);
-  mutate(record);
+  mutate(record, file);
   record.status = next;
   const changedErrors = validate(record, file);
   if (changedErrors.length) fail(`${command} 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
@@ -907,6 +908,111 @@ function briefSufficiencyErrors(brief) {
 
   return errors;
 }
+/**
+ * 薄档守门（submit-brief）：原型循环期间随时可提交，仅要求需求骨架成形；
+ * states/data_contract/prototype_boundaries/open_questions 允许为空，充分性留待终局确认（confirm-brief）把关。
+ */
+function thinBriefErrors(record) {
+  const brief = record.prototype_brief;
+  const errors = [];
+  if (!isPlainObject(brief)) return ['prototype_brief 必须为普通对象'];
+  if (typeof brief.goal !== 'string' || !brief.goal.trim()) errors.push('prototype_brief.goal 不能为空');
+  for (const key of ['included', 'entry_points', 'critical_paths']) {
+    errors.push(...stringArrayErrors(brief[key], `prototype_brief.${key}`, true));
+  }
+  for (const key of ['excluded', 'states', 'assumptions', 'open_questions']) {
+    errors.push(...stringArrayErrors(brief[key], `prototype_brief.${key}`, false));
+  }
+  if (!isPlainObject(brief.data_contract)) errors.push('prototype_brief.data_contract 必须是普通对象');
+  errors.push(...prototypeBoundaryErrors(brief, '', false));
+  return [...new Set(errors)];
+}
+
+/**
+ * 终局守门（confirm-brief）：全量结构校验 + 充分性 + open_questions 清空。
+ */
+function finalBriefErrors(record) {
+  return [...new Set([...briefSubmissionErrors(record), ...briefSufficiencyErrors(record.prototype_brief)])];
+}
+
+/**
+ * 验收勾销账本（acceptance.json）：从 prototype_brief 快照生成逐项核对清单，存于迭代目录。
+ * 由 submit-brief 差量维护（锚点未变条目保留核对状态与证据），不写入 iteration.json、不参与 scope hash；
+ * confirm-brief 校验锚点一致且全部 implemented，submit-prototype 复验通过后才允许冻结。
+ */
+function buildAcceptanceItems(brief) {
+  const items = [];
+  const push = (dimension, label, text) => {
+    items.push({
+      dimension,
+      label,
+      anchor: crypto.createHash('sha256').update(String(text).trim()).digest('hex'),
+      status: 'unverified',
+      evidence: ''
+    });
+  };
+  for (const entry of (brief?.entry_points || [])) {
+    if (typeof entry === 'string' && entry.trim()) push('entry_points', entry.trim(), entry);
+  }
+  for (const route of (brief?.critical_paths || [])) {
+    if (typeof route === 'string' && route.trim()) push('critical_paths', route.trim(), route);
+  }
+  for (const state of (brief?.states || [])) {
+    if (typeof state === 'string' && state.trim()) push('states', state.trim(), state);
+  }
+  if (isPlainObject(brief?.data_contract)) {
+    for (const [entity, fields] of Object.entries(brief.data_contract)) {
+      push('data_contract', entity.trim(), `${entity}:${stableJson(fields)}`);
+    }
+  }
+  return items;
+}
+function acceptanceLedgerPath(iterationFile) {
+  return path.join(path.dirname(iterationFile), 'acceptance.json');
+}
+function refreshAcceptanceLedger(iterationFile, record) {
+  const items = buildAcceptanceItems(record.prototype_brief);
+  const ledgerFile = acceptanceLedgerPath(iterationFile);
+  let previousItems = [];
+  if (fs.existsSync(ledgerFile)) {
+    try {
+      const previous = JSON.parse(fs.readFileSync(ledgerFile, 'utf8'));
+      if (isPlainObject(previous) && Array.isArray(previous.items)) previousItems = previous.items;
+    } catch { /* 损坏的账本按无历史处理，整体重建 */ }
+  }
+  const previousByAnchor = new Map(previousItems
+    .filter(item => isPlainObject(item) && typeof item.anchor === 'string' && acceptanceStatuses.has(item.status))
+    .map(item => [item.anchor, item]));
+  const migrated = items.map(item => {
+    const old = previousByAnchor.get(item.anchor);
+    return old ? { ...item, status: old.status, evidence: typeof old.evidence === 'string' ? old.evidence : '' } : item;
+  });
+  const ledger = { schema: 1, scope_revision: record.scope_revision, updated_at: new Date().toISOString(), items: migrated };
+  fs.writeFileSync(ledgerFile, `${JSON.stringify(ledger, null, 2)}\n`);
+  return ledger;
+}
+function acceptanceLedgerErrors(iterationFile, record, { requireAllImplemented = false } = {}) {
+  const ledgerFile = acceptanceLedgerPath(iterationFile);
+  if (!fs.existsSync(ledgerFile)) return ['缺少验收勾销账本 acceptance.json；请先执行 submit-brief 生成'];
+  let ledger;
+  try { ledger = JSON.parse(fs.readFileSync(ledgerFile, 'utf8')); }
+  catch (error) { return [`acceptance.json 无法解析：${error.message}`]; }
+  if (!isPlainObject(ledger) || ledger.schema !== 1) return ['acceptance.json.schema 必须为 1'];
+  if (!Array.isArray(ledger.items)) return ['acceptance.json.items 必须为数组'];
+  const expectedAnchors = buildAcceptanceItems(record.prototype_brief).map(item => item.anchor);
+  const actualAnchors = ledger.items.map(item => isPlainObject(item) ? item.anchor : null);
+  if (stableJson(actualAnchors) !== stableJson(expectedAnchors)) {
+    return ['acceptance.json 条目与当前简报快照不一致（锚点漂移）；请重新执行 submit-brief 刷新账本'];
+  }
+  for (const item of ledger.items) {
+    if (!acceptanceStatuses.has(item.status)) return [`账本条目「${item.label}」status 必须为 unverified/implemented/missing/mismatch`];
+    if (typeof item.evidence !== 'string') return [`账本条目「${item.label}」evidence 必须为字符串`];
+    if (requireAllImplemented && item.status !== 'implemented') {
+      return [`验收勾销账本未全绿：「${item.label}」当前为 ${item.status}；全部条目标记 implemented 并附证据后才能继续`];
+    }
+  }
+  return [];
+}
 function validatePrototypeScenes(record) {
   if (!Array.isArray(record.affected_scenes) || !record.affected_scenes.length) fail('submit-prototype 要求 affected_scenes 为非空数组');
   for (const scene of record.affected_scenes) {
@@ -966,6 +1072,16 @@ function invalidationSourceError(record, stage) {
   if (!invalidateSources[stage]?.has(record.status)) return `当前状态 ${record.status} 不能执行 invalidate --stage=${stage}`;
   return null;
 }
+// blocked 不新增顶层字段：恢复目标由不可变的提交/确认快照推导
+// （blocked 期间无任何命令可修改这些快照，推导结果稳定）
+function resumeTargetOf(record) {
+  if (record.brief_confirmation) return 'prototyping';
+  if (record.brief_submission) return 'in-development';
+  return 'draft';
+}
+const blockSources = new Set(['draft', 'in-development', 'prototyping']);
+const terminateSources = new Set(['draft', 'in-development', 'prototyping', 'blocked']);
+const terminateTargets = new Set(['cancelled', 'superseded']);
 function applyInvalidation(record, stage) {
   record.status = stage === 'brief' ? 'draft' : 'prototyping';
   if (stage === 'brief') {
@@ -1016,6 +1132,9 @@ function acceptAndFreeze() {
   const errors = validate(record, file);
   if (errors.length) fail(errors.join('\n'));
   if (record.status !== 'prototyping') fail(`${file}: 当前状态 ${record.status} 不能执行 submit-prototype`);
+  // 验收勾销账本复验：锚点一致且全部 implemented 才允许冻结
+  const ledgerErrors = acceptanceLedgerErrors(file, record, { requireAllImplemented: true });
+  if (ledgerErrors.length) fail(ledgerErrors.join('\n'));
   // 场景静态验证
   validatePrototypeScenes(record);
   // 固定原型提交指纹
@@ -1097,12 +1216,29 @@ function test() {
 
   sample.prototype_brief = readyBrief();
   assert(!briefSubmissionErrors(sample).length, '业务迭代状态机错误拦截有效 prototype_brief');
+  // 薄档守门：states/data_contract/prototype_boundaries/open_questions 允许为空，骨架字段必须成形
+  assert(!thinBriefErrors(sample).length, '薄档守门错误拦截合规终版简报');
+  const thinBase = clone(sample);
+  thinBase.prototype_brief.states = [];
+  thinBase.prototype_brief.data_contract = {};
+  thinBase.prototype_brief.prototype_boundaries = [];
+  thinBase.prototype_brief.open_questions = ['细节待确认'];
+  thinBase.prototype_brief.assumptions = [];
+  assert(!thinBriefErrors(thinBase).length, '薄档守门未允许 states/data_contract/prototype_boundaries 为空与 open_questions 暂存');
+  for (const key of ['included', 'entry_points', 'critical_paths']) {
+    const missingSkeleton = clone(thinBase);
+    missingSkeleton.prototype_brief[key] = [];
+    assert(thinBriefErrors(missingSkeleton).some(error => error.includes(`${key} 必须是非空数组`)), `薄档守门未拦截空 ${key}`);
+  }
+  const emptyGoal = clone(thinBase);
+  emptyGoal.prototype_brief.goal = '';
+  assert(thinBriefErrors(emptyGoal).some(error => error.includes('goal 不能为空')), '薄档守门未拦截空 goal');
   const emptyDataContract = clone(sample);
   emptyDataContract.prototype_brief.data_contract = {};
-  assert(briefSubmissionErrors(emptyDataContract).some(error => error.includes('非空普通对象')), 'submit-brief 未拦截空 data_contract');
+  assert(briefSubmissionErrors(emptyDataContract).some(error => error.includes('非空普通对象')), '终局守门未拦截空 data_contract');
   const arrayDataContract = clone(sample);
   arrayDataContract.prototype_brief.data_contract = [];
-  assert(briefSubmissionErrors(arrayDataContract).some(error => error.includes('非空普通对象')), 'submit-brief 未拦截非普通对象 data_contract');
+  assert(briefSubmissionErrors(arrayDataContract).some(error => error.includes('非空普通对象')), '终局守门未拦截非普通对象 data_contract');
   const nullIncluded = clone(sample);
   nullIncluded.prototype_brief.included = [null];
   assert(briefSubmissionErrors(nullIncluded).some(error => error.includes('included[0]')), '业务迭代状态机未拦截 included 中的非字符串');
@@ -1292,6 +1428,20 @@ function test() {
     fs.writeFileSync(iterationFile, `${JSON.stringify(submittedRecord, null, 2)}\n`);
     const unapprovedBriefConfirmation = run(['confirm-brief', '--file', iterationArgument]);
     assert(unapprovedBriefConfirmation.status !== 0 && (unapprovedBriefConfirmation.stderr || '').includes('用户明确确认'), 'confirm-brief 未拦截缺少用户明确授权的请求');
+    // 验收勾销账本：submit-brief 自动生成，终局确认前须全部核对 implemented
+    const ledgerFile = path.join(iterationDirectory, 'acceptance.json');
+    assert(fs.existsSync(ledgerFile), 'submit-brief 未生成验收勾销账本 acceptance.json');
+    const generatedLedger = JSON.parse(fs.readFileSync(ledgerFile, 'utf8'));
+    assert(generatedLedger.items.length === 7, `账本条目数应为 7（入口1+路径1+状态4+数据1），实际 ${generatedLedger.items.length}`);
+    assert(generatedLedger.items.every(item => item.status === 'unverified'), '新账本条目初始状态应为 unverified');
+    const incompleteConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
+    assert(incompleteConfirmation.status !== 0 && (incompleteConfirmation.stderr || '').includes('未全绿'), 'confirm-brief 未拦截账本未全绿');
+    const driftedLedger = { ...generatedLedger, items: generatedLedger.items.slice(1) };
+    fs.writeFileSync(ledgerFile, `${JSON.stringify(driftedLedger, null, 2)}\n`);
+    const anchorDriftConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
+    assert(anchorDriftConfirmation.status !== 0 && (anchorDriftConfirmation.stderr || '').includes('锚点漂移'), 'confirm-brief 未拦截账本锚点漂移');
+    // 模拟 AI 逐项核对：全部标记 implemented 并附证据
+    fs.writeFileSync(ledgerFile, `${JSON.stringify({ ...generatedLedger, items: generatedLedger.items.map(item => ({ ...item, status: 'implemented', evidence: '已实现' })) }, null, 2)}\n`);
     const validBriefConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
     assert(validBriefConfirmation.status === 0, `合法 confirm-brief 失败：${(validBriefConfirmation.stderr || validBriefConfirmation.stdout).trim()}`);
     assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', 'confirm-brief 未进入 prototyping');
@@ -1329,6 +1479,41 @@ function test() {
     assert(resubmit.status === 0, `失效后重新 submit-prototype 失败：${(resubmit.stderr || resubmit.stdout).trim()}`);
     const frozen = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
     assert(frozen.status === 'frozen', '失效后重新提交未回到 frozen');
+
+    // block / resume / terminate 状态出口测试
+    assert(resumeTargetOf(prototyping) === 'prototyping' && resumeTargetOf(inDevelopment) === 'in-development' && resumeTargetOf(sample) === 'draft', 'resume 目标推导与提交/确认快照不一致');
+    assert(run(['invalidate', '--file', iterationArgument, '--stage=prototype']).status === 0, '出口测试前置 invalidate 失败');
+    const unapprovedTermination = run(['terminate', '--file', iterationArgument, '--target', 'cancelled']);
+    assert(unapprovedTermination.status !== 0 && (unapprovedTermination.stderr || '').includes('用户明确确认'), 'terminate 未拦截缺少用户明确授权的请求');
+    const invalidTerminationTarget = run(['terminate', '--file', iterationArgument, '--user-confirmed-termination', 'test', '--target', 'paused']);
+    assert(invalidTerminationTarget.status !== 0 && (invalidTerminationTarget.stderr || '').includes('--target'), 'terminate 未拦截非法目标状态');
+    const blockedResult = run(['block', '--file', iterationArgument]);
+    assert(blockedResult.status === 0, `合法 block 失败：${(blockedResult.stderr || blockedResult.stdout).trim()}`);
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'blocked', 'block 未进入 blocked');
+    const blockedSubmission = run(['submit-prototype', '--file', iterationArgument, '--user-confirmed-prototype', 'test']);
+    assert(blockedSubmission.status !== 0 && (blockedSubmission.stderr || '').includes('不能执行'), 'blocked 状态不得执行 submit-prototype');
+    const blockedBriefConfirmation = run(['confirm-brief', '--file', iterationArgument, '--user-confirmed-brief', 'test']);
+    assert(blockedBriefConfirmation.status !== 0, 'blocked 状态不得执行 confirm-brief');
+    const doubleBlock = run(['block', '--file', iterationArgument]);
+    assert(doubleBlock.status !== 0 && (doubleBlock.stderr || '').includes('不能执行'), 'blocked 状态不得重复 block');
+    const resumeResult = run(['resume', '--file', iterationArgument]);
+    assert(resumeResult.status === 0, `合法 resume 失败：${(resumeResult.stderr || resumeResult.stdout).trim()}`);
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'prototyping', 'resume 未回到中断前状态');
+    const resumeFromPrototyping = run(['resume', '--file', iterationArgument]);
+    assert(resumeFromPrototyping.status !== 0, '非 blocked 状态不得执行 resume');
+    run(['block', '--file', iterationArgument]);
+    const wrongTargetTermination = run(['terminate', '--file', iterationArgument, '--user-confirmed-termination', 'other-iteration', '--target', 'cancelled']);
+    assert(wrongTargetTermination.status !== 0 && (wrongTargetTermination.stderr || '').includes('必须等于当前 iteration_id'), 'terminate 未拦截授权与目标迭代不一致');
+    const cancelledTermination = run(['terminate', '--file', iterationArgument, '--user-confirmed-termination', 'test', '--target', 'cancelled']);
+    assert(cancelledTermination.status === 0, `合法 terminate 失败：${(cancelledTermination.stderr || cancelledTermination.stdout).trim()}`);
+    const cancelledRecord = JSON.parse(fs.readFileSync(iterationFile, 'utf8'));
+    assert(cancelledRecord.status === 'cancelled' && cancelledRecord.freeze === null, 'terminate 未进入 cancelled');
+    const resumeFromCancelled = run(['resume', '--file', iterationArgument]);
+    assert(resumeFromCancelled.status !== 0, '终态 cancelled 不得 resume');
+    fs.writeFileSync(iterationFile, `${JSON.stringify(sample, null, 2)}\n`);
+    const supersededTermination = run(['terminate', '--file', iterationArgument, '--user-confirmed-termination', 'test', '--target', 'superseded']);
+    assert(supersededTermination.status === 0, `draft 状态 terminate 失败：${(supersededTermination.stderr || supersededTermination.stdout).trim()}`);
+    assert(JSON.parse(fs.readFileSync(iterationFile, 'utf8')).status === 'superseded', 'terminate 未从 draft 进入 superseded');
 
     const emptyFingerprints = clone(frozen);
     emptyFingerprints.freeze.fingerprints = {};
@@ -1378,6 +1563,71 @@ function test() {
 
     fs.writeFileSync(path.join(sceneRoot, 'scene.css'), '.test { color: red; }\n');
     assert(!validate(frozen, iterationFile, fixtureRoot).length, '旧 frozen 不应因当前文件变化失败');
+    // 薄档提交 + 终局守门 + 账本差量迁移
+    const thinDirectory = path.join(sceneRoot, '_iterations/20260716-thin-薄档');
+    const thinFile = path.join(thinDirectory, 'iteration.json');
+    const thinArgument = path.relative(fixtureRoot, thinFile).split(path.sep).join('/');
+    fs.mkdirSync(thinDirectory, { recursive: true });
+    const thinRecord = clone(sample);
+    thinRecord.identity.iteration_id = 'thin';
+    thinRecord.brief_file = 'thin-薄档-20260716.md';
+    fs.writeFileSync(thinFile, `${JSON.stringify(thinRecord, null, 2)}\n`);
+    const thinSpecPath = path.join(thinDirectory, 'thin-薄档-20260716.md');
+    fs.writeFileSync(thinSpecPath, `# 薄档 需求规格说明
+
+## 目标（goal）
+薄档目标
+
+## 纳入范围（included）
+- 商品列表
+
+## 入口（entry_points）
+- 工作台商品管理
+
+## 关键路径（critical_paths）
+- [P1] 进入列表 → 浏览商品
+
+## 待确认问题（open_questions）
+- 数据字段细节待确认
+`);
+    const thinSubmission = run(['submit-brief', '--file', thinArgument]);
+    assert(thinSubmission.status === 0, `薄档 submit-brief 应通过（states/data_contract 允许为空、open_questions 允许暂存）：${(thinSubmission.stderr || thinSubmission.stdout).trim()}`);
+    const thinLedgerFile = path.join(thinDirectory, 'acceptance.json');
+    assert(fs.existsSync(thinLedgerFile), '薄档 submit-brief 未生成账本');
+    const thinLedger = JSON.parse(fs.readFileSync(thinLedgerFile, 'utf8'));
+    assert(thinLedger.items.length === 2, `薄档账本应为 2 项（入口1+路径1），实际 ${thinLedger.items.length}`);
+    // 薄档即使账本全绿也不能终局确认：结构全量 + 充分性 + open_questions 清空都未满足
+    fs.writeFileSync(thinLedgerFile, `${JSON.stringify({ ...thinLedger, items: thinLedger.items.map(item => ({ ...item, status: 'implemented', evidence: '已实现' })) }, null, 2)}\n`);
+    const thinConfirmation = run(['confirm-brief', '--file', thinArgument, '--user-confirmed-brief', 'thin']);
+    assert(thinConfirmation.status !== 0 && (thinConfirmation.stderr || '').includes('终局确认未通过'), '薄档 confirm-brief 未被终版守门拦截');
+    assert((thinConfirmation.stderr || '').includes('open_questions'), '终版守门未指出 open_questions 未清空');
+    // 差量迁移：未变条目保留核对状态，新增条目重置 unverified
+    fs.writeFileSync(thinSpecPath, `# 薄档 需求规格说明
+
+## 目标（goal）
+薄档目标
+
+## 纳入范围（included）
+- 商品列表
+
+## 入口（entry_points）
+- 工作台商品管理
+
+## 关键路径（critical_paths）
+- [P1] 进入列表 → 浏览商品
+- [P2] 点击商品 → 查看详情
+
+## 待确认问题（open_questions）
+- 数据字段细节待确认
+`);
+    const thinResubmission = run(['submit-brief', '--file', thinArgument]);
+    assert(thinResubmission.status === 0, `薄档重新 submit-brief 失败：${(thinResubmission.stderr || thinResubmission.stdout).trim()}`);
+    const migratedLedger = JSON.parse(fs.readFileSync(thinLedgerFile, 'utf8'));
+    assert(migratedLedger.items.length === 3, `差量迁移后账本应为 3 项，实际 ${migratedLedger.items.length}`);
+    const preserved = migratedLedger.items.find(item => item.label.includes('进入列表'));
+    const added = migratedLedger.items.find(item => item.label.includes('查看详情'));
+    assert(preserved?.status === 'implemented' && preserved.evidence === '已实现', '差量迁移未保留未变条目的核对状态');
+    assert(added?.status === 'unverified', '差量迁移后新增条目应为 unverified');
   } finally {
     fs.rmSync(fixtureRoot, { recursive: true, force: true });
   }
@@ -1414,11 +1664,8 @@ switch (command) {
     // 解析 spec.md
     const parsedBrief = parseBriefMarkdown(briefFile);
     record.prototype_brief = parsedBrief;
-    // 校验
-    const submissionErrors = [
-      ...briefSubmissionErrors(record),
-      ...briefSufficiencyErrors(record.prototype_brief)
-    ];
+    // 薄档守门：原型循环期间随时可提交；终版全量校验与充分性在 confirm-brief 把关
+    const submissionErrors = thinBriefErrors(record);
     if (submissionErrors.length) fail(submissionErrors.join('\n'));
     // 更新 brief_submission 快照
     record.brief_submission = createBriefSubmission(record);
@@ -1426,13 +1673,22 @@ switch (command) {
     record.status = 'in-development';
     const changedErrors = validate(record, file);
     if (changedErrors.length) fail(`submit-brief 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
+    // 生成/差量迁移验收勾销账本（锚点未变条目保留核对状态与证据）
+    const ledger = refreshAcceptanceLedger(file, record);
     save(file, record, 'submit-brief');
-    console.log(`简报已提交，状态：in-development`);
+    console.log(`简报已提交（薄档），状态：in-development`);
     console.log(`范围哈希：${record.brief_submission.scope_sha256}`);
+    console.log(`验收账本：acceptance.json，${ledger.items.length} 项（终局确认前须全部核对为 implemented）`);
     break;
   }
-  case 'confirm-brief': transition(['in-development'], 'prototyping', record => {
+  case 'confirm-brief': transition(['in-development'], 'prototyping', (record, file) => {
     requireUserConfirmation(record, '--user-confirmed-brief', 'confirm-brief');
+    // 终局守门：简报须补全至终版（全量结构+充分性+open_questions 清空），账本锚点一致且全部 implemented
+    const finalErrors = [
+      ...finalBriefErrors(record),
+      ...acceptanceLedgerErrors(file, record, { requireAllImplemented: true })
+    ];
+    if (finalErrors.length) fail(`终局确认未通过（简报须补全至终版、账本须全部核对 implemented）：\n${finalErrors.join('\n')}`);
     record.brief_confirmation = createBriefConfirmation(record);
   }); break;
   case 'submit-prototype': acceptAndFreeze(); break;
@@ -1457,7 +1713,49 @@ switch (command) {
     save(file, record, 'invalidate');
     break;
   }
+  case 'block': {
+    const file = requireFile();
+    const record = load(file);
+    const errors = validate(record, file);
+    if (errors.length) fail(errors.join('\n'));
+    if (!blockSources.has(record.status)) fail(`${file}: 当前状态 ${record.status} 不能执行 block`);
+    record.status = 'blocked';
+    const changedErrors = validate(record, file);
+    if (changedErrors.length) fail(`block 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
+    save(file, record, 'block');
+    console.log(`迭代已暂停，状态：blocked（resume 可恢复到 ${resumeTargetOf(record)}）`);
+    break;
+  }
+  case 'resume': {
+    const file = requireFile();
+    const record = load(file);
+    const errors = validate(record, file);
+    if (errors.length) fail(errors.join('\n'));
+    if (record.status !== 'blocked') fail(`${file}: 当前状态 ${record.status} 不能执行 resume`);
+    record.status = resumeTargetOf(record);
+    const changedErrors = validate(record, file);
+    if (changedErrors.length) fail(`resume 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
+    save(file, record, 'resume');
+    console.log(`迭代已恢复，状态：${record.status}`);
+    break;
+  }
+  case 'terminate': {
+    const target = value('--target');
+    if (!terminateTargets.has(target)) fail('terminate 需要 --target cancelled|superseded 或 --target=cancelled|superseded');
+    const file = requireFile();
+    const record = load(file);
+    requireUserConfirmation(record, '--user-confirmed-termination', 'terminate');
+    const errors = validate(record, file);
+    if (errors.length) fail(errors.join('\n'));
+    if (!terminateSources.has(record.status)) fail(`${file}: 当前状态 ${record.status} 不能执行 terminate`);
+    record.status = target;
+    const changedErrors = validate(record, file);
+    if (changedErrors.length) fail(`terminate 后记录非法，未写入文件：\n${changedErrors.join('\n')}`);
+    save(file, record, 'terminate');
+    console.log(`迭代已终止，状态：${target}（终态，不可恢复）`);
+    break;
+  }
   case 'check': check(); break;
   case 'test': test(); break;
-  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype --user-confirmed-prototype <iteration_id>|invalidate|migrate|check|test');
+  default: fail('用法：init|submit-brief|confirm-brief --user-confirmed-brief <iteration_id>|submit-prototype --user-confirmed-prototype <iteration_id>|invalidate|block|resume|terminate --user-confirmed-termination <iteration_id> --target cancelled|superseded|migrate|check|test');
 }

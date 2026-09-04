@@ -39,7 +39,7 @@
 
 ## 三技能主链路
 
-- 新需求或业务范围变化：`wego-product` 形成并确认 `prototype_brief`。
+- 新需求或业务范围变化：`wego-product` 形成并提交简要简报（薄档），原型循环后终局确认。
 - 已确认范围内的页面设计与实现：`wego-design`。
 - 组件、Token、Preview、UI Kit、消费规则、守卫和工作流维护：`wego-uxsystem-iterate`。
 
@@ -50,8 +50,8 @@
 - 经验收口先于 worktree 清理：交付单元验收合并前必须扫描 `.tasks/experience-inbox.json`（有草稿分流沉淀、无草稿明示无信号后清空），未扫描不得清理或删除该 worktree；会话中断漏扫由 task-intake 启动巡检兜底。L1/L2 经验数据随当前业务 PR 进 main，新建场景技能或改规则等结构性改动攒批走工作流短周期 PR。
 
 <!-- rule-id: requirement-input-must-create-iteration-first -->
-- 业务需求（自然语言、参考图、Figma）必须先经 `wego-product` 创建迭代并确认 `prototype_brief`，不得跳过直接做页面；简报状态规则以 `wego-product/references/iteration-workflow.md` 为唯一权威。
-- 已确认简报即设计授权；`wego-design` 不补造业务事实、不改设计系统本体；验收以源码一致性、真实交互和浏览器视口为准；组件/规范问题验收时提出交 `wego-uxsystem-iterate`。
+- 业务需求（自然语言、参考图、Figma）必须先经 `wego-product` 创建迭代并提交简要简报（立项确认 + 薄档 submit-brief 即原型授权），不得跳过直接做页面；终局确认（confirm-brief）与验收合一，简报状态规则以 `wego-product/references/iteration-workflow.md` 为唯一权威。
+- 立项确认 + 已提交简要简报即原型授权；终局确认（AI 补全终版 spec.md + 验收账本全绿 + 用户过目）与验收合一，通过后方可冻结；`wego-design` 不补造业务事实、不改设计系统本体；验收以源码一致性、真实交互和浏览器视口为准；组件/规范问题验收时提出交 `wego-uxsystem-iterate`。
 
 ## Git 与交付硬约束
 
@@ -73,7 +73,7 @@
 - 业务页面请求进入 `wego-product` 或 `wego-design` 前必须先经 `wego-github-delivery` 完成交付单元核对。
 
 <!-- rule-id: agent-must-pull-before-task-start -->
-- 开工前先 `git pull --rebase origin main` 同步最新 `main`；具体执行时机见启动清单（完整启动时执行，轻量启动时按需）。
+- 开工前先同步最新 `main`（完整启动执行 `git pull --rebase origin main`，轻量启动至少执行 `git fetch origin`）；具体执行时机见启动清单。
 
 <!-- rule-id: open-pr-must-sync-main-when-behind -->
 - 接手交付单元或更新开放 PR 前，其分支落后 `main` 时先 merge 最新 `main` 并解决冲突再继续；等待合并的 PR 同样适用，闲置不是豁免理由。
