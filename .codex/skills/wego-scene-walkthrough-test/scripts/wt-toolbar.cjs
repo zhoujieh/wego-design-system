@@ -17,6 +17,45 @@ function check(name, ok, detail = '') {
   console.log(`${ok ? 'PASS' : 'FAIL'}  [${ts}]  ${name}${detail ? '  → ' + detail : ''}`);
 }
 
+async function inspectPanels(page) {
+  return page.evaluate(async () => {
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const host = document.querySelector('wego-walkthrough');
+    const root = host.shadowRoot;
+    const rect = el => {
+      const r = el.getBoundingClientRect();
+      return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
+    };
+    const visibleInViewport = r => r.width > 0 && r.height > 0 && r.left >= 7 && r.right <= window.innerWidth - 7 && r.top >= 7 && r.bottom <= window.innerHeight - 7;
+    const toolbarRect = rect(host);
+    const out = { toolbar: toolbarRect };
+
+    root.querySelector('[data-tool="overview"]').click();
+    await wait(420);
+    const overview = root.querySelector('wego-wt-overview-panel');
+    out.overview = { hidden: overview.hasAttribute('hidden'), rect: rect(overview) };
+    out.overview.ok = !out.overview.hidden && visibleInViewport(out.overview.rect) && out.overview.rect.bottom <= toolbarRect.top + 2;
+    root.querySelector('[data-tool="overview"]').click();
+
+    root.querySelector('[data-action="debug-log"]').click();
+    await wait(420);
+    const debug = root.querySelector('[data-debug-panel]');
+    out.debug = { hidden: debug.hasAttribute('hidden'), rect: rect(debug) };
+    out.debug.ok = !out.debug.hidden && visibleInViewport(out.debug.rect) && out.debug.rect.bottom <= toolbarRect.top + 2;
+    root.querySelector('[data-action="debug-log"]').click();
+
+    root.querySelector('[data-tool="more"]').click();
+    await wait(420);
+    const more = root.querySelector('[data-subpanel="more"]');
+    const moreAnchor = root.querySelector('[data-tool="more"]');
+    out.more = { rect: rect(more), anchor: rect(moreAnchor), open: more.classList.contains('is-open') };
+    out.more.ok = out.more.open && visibleInViewport(out.more.rect) && out.more.rect.bottom <= toolbarRect.top - 7 &&
+      Math.abs((out.more.rect.left + out.more.rect.width / 2) - (out.more.anchor.left + out.more.anchor.width / 2)) <= 2;
+    root.querySelector('[data-tool="more"]').click();
+    return out;
+  });
+}
+
 (async () => {
   const browser = await chromium.launch();
   const errors = [];
@@ -38,7 +77,7 @@ function check(name, ok, detail = '') {
         host: { left: host.getBoundingClientRect().left, top: host.getBoundingClientRect().top, right: host.getBoundingClientRect().right, bottom: host.getBoundingClientRect().bottom, width: host.getBoundingClientRect().width, height: host.getBoundingClientRect().height },
         nav: { left: nav.getBoundingClientRect().left, top: nav.getBoundingClientRect().top, right: nav.getBoundingClientRect().right, bottom: nav.getBoundingClientRect().bottom, width: nav.getBoundingClientRect().width, height: nav.getBoundingClientRect().height },
         fixed: toolbar.classList.contains('is-fixed'),
-        savedIgnored: host.style.left === '50%' && host.style.top === 'auto',
+        savedIgnored: host.style.left !== '96px' && host.style.top === 'auto' && host.style.transform === 'none',
         tooltip: host.shadowRoot.querySelector('[data-fab-btn]').dataset.tooltip,
       };
     });
@@ -58,7 +97,7 @@ function check(name, ok, detail = '') {
       count.hidden = true;
       return state;
     });
-    check('有修改数量时仍保留叉图标', countState.icon !== 'none' && countState.count === 'flex', JSON.stringify(countState));
+    check('有修改数量时显示数字替换叉图标', countState.icon === 'none' && (countState.count === 'inline-flex' || countState.count === 'flex'), JSON.stringify(countState));
 
     const beforeDrag = desktopInitial.host;
     await page.mouse.move(beforeDrag.left + beforeDrag.width / 2, beforeDrag.top + beforeDrag.height / 2);
@@ -113,6 +152,11 @@ function check(name, ok, detail = '') {
     });
     check('工具入口 Tooltip 均显示在按钮上方', tooltipChecks.every(item => item.visible && item.above && item.actual === item.expected && item.nativeTitleRemoved), JSON.stringify(tooltipChecks));
 
+    const desktopPanels = await inspectPanels(page);
+    check('桌面配置列表可见且位于工具栏上方', desktopPanels.overview.ok, JSON.stringify(desktopPanels.overview));
+    check('桌面日志面板可见且位于工具栏上方', desktopPanels.debug.ok, JSON.stringify(desktopPanels.debug));
+    check('桌面更多面板锚定对应入口', desktopPanels.more.ok, JSON.stringify(desktopPanels.more));
+
     await page.setViewportSize({ width: 1082, height: 490 });
     await page.waitForTimeout(350);
     const shortViewport = await page.evaluate(() => {
@@ -122,12 +166,16 @@ function check(name, ok, detail = '') {
     });
     check('矮视口仍居中且不挡底部导航', Math.abs(shortViewport.host.left + shortViewport.host.width / 2 - 541) <= 1 && shortViewport.host.bottom <= shortViewport.nav.top - 15,
       JSON.stringify(shortViewport));
+    const shortPanels = await inspectPanels(page);
+    check('矮视口三个面板均完整可见', shortPanels.overview.ok && shortPanels.debug.ok && shortPanels.more.ok, JSON.stringify(shortPanels));
     if (args.screenshot) {
       await page.evaluate(() => {
         const root = document.querySelector('wego-walkthrough').shadowRoot;
-        root.querySelector('[data-tool="overview"]').dispatchEvent(new MouseEvent('mouseenter'));
+        root.querySelector('[data-tool="overview"]').click();
       });
+      await page.waitForTimeout(420);
       await page.screenshot({ path: args.screenshot });
+      await page.evaluate(() => document.querySelector('wego-walkthrough').shadowRoot.querySelector('[data-tool="overview"]').click());
     }
     await desktop.close();
 

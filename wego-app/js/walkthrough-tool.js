@@ -3183,7 +3183,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         this.style.top = rect.bottom + gap + 'px';
         this.removeAttribute('hidden');
         void this.offsetHeight;
-        const panelHeight = this.getBoundingClientRect().height;
+        // 用布局高度而非动画中的缩放后高度，避免首次打开测量偏小导致面板下移覆盖工具栏
+        const panelHeight = this.offsetHeight;
         let top = rect.bottom + gap;
         if (top + panelHeight > window.innerHeight - 8) top = rect.top - panelHeight - gap;
         if (top < 8) top = 8;
@@ -8197,26 +8198,14 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .fab-btn .fab-icon { display: inline-flex; align-items: center; justify-content: center; }
           .fab-btn .fab-count {
             display: none;
-            position: absolute;
-            top: 1px;
-            right: 1px;
-            min-width: 16px;
-            height: 16px;
-            box-sizing: border-box;
-            padding: 0 4px;
-            border-radius: 999px;
-            background: #ff6b35;
-            border: 2px solid rgba(30,30,30,0.85);
-            font-size: 9px;
-            font-weight: 700;
+            font-size: 15px;
+            font-weight: 600;
             color: #fff;
             line-height: 1;
             white-space: nowrap;
-            align-items: center;
-            justify-content: center;
           }
-          .fab-btn[data-has-count="true"] .fab-count { display: flex; }
-          .fab-btn[data-has-count="true"] .fab-dot { display: none; }
+          .fab-btn[data-has-count="true"] .fab-icon { display: none; }
+          .fab-btn[data-has-count="true"] .fab-count { display: inline-flex; }
 
           /* 子面板 */
           .subpanel {
@@ -8966,11 +8955,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .sort((a, b) => b.rect.top - a.rect.top)[0];
         if (docked) bottom = Math.max(24, window.innerHeight - docked.rect.top + 16);
       } catch (e) {}
-      this.style.left = '50%';
       this.style.right = 'auto';
       this.style.top = 'auto';
       this.style.bottom = bottom + 'px';
-      this.style.transform = 'translateX(-50%)';
+      this.style.transform = 'none';
+      const width = this.getBoundingClientRect().width || 48;
+      this.style.left = Math.max(8, (window.innerWidth - width) / 2) + 'px';
     }
 
     _onToolbarViewportChange = () => {
@@ -9051,7 +9041,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       //    右侧(dir=left)：以起始态右边缘为锚点，展开向左扩展、收起向右收缩
       //    左侧(dir=right)向右展开：边界检查，避免右侧超出视口
       let startLeft = null, endLeft = null;
-      if (!desktopFixed && dir === 'left') {
+      if (desktopFixed) {
+        startLeft = startHostRect.left;
+        endLeft = Math.max(8, (window.innerWidth - endWidth) / 2);
+      } else if (dir === 'left') {
         const rightEdge = startHostRect.left + startWidth;
         startLeft = rightEdge - startWidth;
         endLeft = Math.max(8, rightEdge - endWidth);
@@ -9175,7 +9168,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
       this._shadow.querySelectorAll('[data-subpanel]').forEach(panel => {
         // 左右定位
-        if (dir === 'left') {
+        if (!IS_MOBILE_UA) {
+          const anchor = this._shadow.querySelector(`[data-tool="${panel.dataset.subpanel}"]`);
+          if (anchor) {
+            const hostRect = this.getBoundingClientRect();
+            const anchorRect = anchor.getBoundingClientRect();
+            const panelWidth = panel.offsetWidth || 180;
+            let left = anchorRect.left - hostRect.left + anchorRect.width / 2 - panelWidth / 2;
+            const minLeft = 8 - hostRect.left;
+            const maxLeft = window.innerWidth - 8 - panelWidth - hostRect.left;
+            left = Math.max(minLeft, Math.min(left, maxLeft));
+            panel.style.left = left + 'px';
+            panel.style.right = 'auto';
+          }
+        } else if (dir === 'left') {
           panel.style.left = '0';
           panel.style.right = 'auto';
         } else {
