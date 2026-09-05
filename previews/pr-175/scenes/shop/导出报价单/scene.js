@@ -92,8 +92,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           <button type="button" class="bottom-action-bar__selection-toggle quote-bar-count-btn" data-dom-id="quote-count-dropdown" aria-haspopup="menu" aria-expanded="false">
             <span class="bottom-action-bar__selection-value"><span data-role="quote-count-label">0/100</span><i class="bottom-action-bar__selection-caret wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></span>
           </button>
-          <span class="quote-batch-divider" aria-hidden="true"></span>
-          <button type="button" class="link quote-view-selected-btn" data-component-slug="link" data-dom-id="quote-view-selected">
+          <span class="quote-batch-divider" aria-hidden="true" hidden></span>
+          <button type="button" class="link quote-view-selected-btn" data-component-slug="link" data-dom-id="quote-view-selected" hidden>
             查看已选
           </button>
           <div class="popmenu popmenu--select quote-count-menu" data-component-slug="popmenu" data-role="quote-count-menu" role="listbox" data-state="closed" hidden>
@@ -213,6 +213,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       var toolbarEl = root.querySelector('.quote-search-toolbar');
       var toolbarWrap = root.querySelector('.quote-select-toolbar');
       var viewSelectedBtn = root.querySelector('[data-dom-id="quote-view-selected"]');
+      var viewSelectedDivider = root.querySelector('.quote-batch-divider');
 
       function currentList() {
         var query = state.query.trim().toLowerCase();
@@ -428,7 +429,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         else nextBtn.removeAttribute('aria-disabled');
         nextBtn.setAttribute('aria-label', count === 0 ? '下一步，请先选择要导出的产品' : '下一步');
         viewSelectedBtn.disabled = count === 0;
+        viewSelectedBtn.hidden = count === 0;
         viewSelectedBtn.classList.toggle('is-disabled', count === 0);
+        if (viewSelectedDivider) viewSelectedDivider.hidden = count === 0;
         var allChecked = batchState.complete;
         setCheckboxState(selectAllBtn.querySelector('[data-role="quote-check"]'), allChecked);
         selectAllBtn.setAttribute('aria-pressed', allChecked ? 'true' : 'false');
@@ -470,6 +473,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       }
 
       function openSelectedSheet() {
+        if (selectedCount() === 0) return;
         var mode = state.selectMode;
         var itemsHtml = selectedItemsHtml(selectedRows(mode));
         var html = '<div class="modal modal--frame-x quote-selected-modal" data-component-slug="modal" role="dialog" aria-modal="true" aria-labelledby="quote-selected-title" data-state="open">'
@@ -658,7 +662,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       });
 
       /* 交互 data-dom-id 显式绑定 */
-      root.querySelector('[data-dom-id="quote-back"]').addEventListener('click', function () { ctx.navigateBack(); });
+      root.querySelector('[data-dom-id="quote-back"]').addEventListener('click', function () { ctx.navigate('my'); });
       root.querySelector('[data-dom-id="quote-records-entry"]').addEventListener('click', function () { ctx.toast('报价记录将在后续阶段接入'); });
       modeButton.addEventListener('click', function () {
         syncModeMenuSelection();
