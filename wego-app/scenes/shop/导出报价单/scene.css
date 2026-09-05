@@ -639,6 +639,14 @@
   color: var(--text-secondary);
   font-size: var(--size-20);
 }
+.quote-language-button .quote-language-caret {
+  color: var(--text-tertiary);
+  font-size: var(--size-16);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.quote-language-button.is-open .quote-language-caret {
+  transform: rotate(180deg);
+}
 .quote-language-menu {
   position: fixed;
   /* 挂在 body 下，需高于全屏模态浮层（z=500）才能不被遮挡 */
@@ -665,6 +673,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* 选中项：语言原名加粗，原名与中文说明文字变绿（对勾组件已绿） */
+.quote-language-menu .popmenu__item--selected .quote-language-option__native {
+  font-weight: var(--font-weight-medium);
+}
+.quote-language-menu .popmenu__item--selected .quote-language-option__native,
+.quote-language-menu .popmenu__item--selected .quote-language-option__cn {
+  color: var(--status-success-default);
 }
 .quote-preview-toolbar {
   display: flex;

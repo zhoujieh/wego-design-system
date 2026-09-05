@@ -343,7 +343,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '<div class="quote-preview-total" data-role="quote-total"><strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span></div></div>'
       + '<div class="quote-preview-title input-group" data-component-slug="input"><label class="field-label" for="quote-title-input">报价单标题</label><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '" aria-label="报价单标题"></div></div>'
       + '</section>'
-      + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><i class="wego-iconfont-s icon-yuyanqiehuanxian" aria-hidden="true"></i><span data-role="quote-language-label">' + escapeHtml(lang.cn || lang.label) + '</span></button>'
+      + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><i class="wego-iconfont-s icon-yuyanqiehuanxian" aria-hidden="true"></i><span data-role="quote-language-label">' + escapeHtml(lang.cn || lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16 quote-language-caret" aria-hidden="true"></i></button>'
       + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed">' + languageMenuHtml(state.language) + '</div></div></div></section>'
       + '<div class="quote-sticky-head-slot" data-role="quote-sticky-head-slot"' + (state.quoteRows.length ? '' : ' hidden') + '>' + quoteStickyHeaderHtml() + '</div>'
       + '<section class="quote-table-shell" data-role="quote-table-shell">' + quoteTableHtml(state.quoteRows) + '</section>'
@@ -1702,6 +1702,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           else languageMenu.setAttribute('data-state', 'closed');
           syncLanguageButtonOpenState();
         }
+        function onPreviewScroll() { hideLanguageMenu(); }
         function cleanupPreview() {
           if (languageMenuHandle) languageMenuHandle.destroy();
           if (languageMenuObserver) languageMenuObserver.disconnect();
@@ -1735,15 +1736,20 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (window.WegoPopmenu && languageButton && languageMenu) {
           /* app 浮层基座（app-overlay-layer）带 transform，会改变 fixed 定位坐标基准
              （相对浮层而非视口），WegoPopmenu 用视口坐标计算会导致气泡错位；
-             先把菜单挂到无 transform 的 body 下，再用组件通用定位 */
+             先把菜单挂到无 transform 的 body 下，再用组件通用定位。
+             dismissOnScroll 关闭组件级滚动收起：菜单 max-height 内滚动列表时不应收起，
+             预览内容（询单滚动容器）滚动仍按外面滚动收起，避免气泡悬空错位 */
           if (languageMenu.parentElement !== document.body) document.body.appendChild(languageMenu);
           languageMenu.style.position = 'fixed';
           languageMenuHandle = window.WegoPopmenu.bind(languageButton, languageMenu, {
             beforeShow: function () { closeAllMenus(); },
             onItemClick: function (item) {
               applyLanguage(previewRoot, item.getAttribute('data-lang'));
-            }
+            },
+            dismissOnScroll: false
           });
+          var previewScrollEl = previewRoot.querySelector('[data-role="quote-preview-scroll"]');
+          if (previewScrollEl) previewScrollEl.addEventListener('scroll', onPreviewScroll);
           languageMenuObserver = new MutationObserver(syncLanguageButtonOpenState);
           languageMenuObserver.observe(languageMenu, { attributes: true, attributeFilter: ['data-state'] });
           syncLanguageButtonOpenState();
