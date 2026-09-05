@@ -1461,7 +1461,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         return '<div class="quote-filter-card__title">'
           + '<div class="quote-filter-card__label"><strong>' + escapeHtml(title) + '</strong>' + (kind === 'source' ? '<span>仅自己可见</span>' : '') + '</div>'
           + '<div class="quote-filter-card__right">'
-          + (active ? '<button type="button" class="quote-filter-card__selected" data-filter-clear-kind="' + escapeHtml(kind) + '" aria-label="清除' + escapeHtml(title) + '"><span>' + escapeHtml(selectedFilterLabel(kind, activeValue)) + '</span><i class="wego-iconfont-s icon-yuancha-mian" aria-hidden="true"></i></button>' : '')
+          + (active ? '<button type="button" class="quote-filter-card__selected" data-filter-clear-kind="' + escapeHtml(kind) + '" aria-label="清除' + escapeHtml(title) + '"><span>' + escapeHtml(selectedFilterLabel(kind, activeValue)) + '</span><i class="wego-iconfont-s icon-chatoast" aria-hidden="true"></i></button>' : '')
           + (kind ? filterSearchControlHtml(kind) : '')
           + '</div></div>';
       }
@@ -1556,7 +1556,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           var content = filterRoot.querySelector('[data-role="quote-filter-content"]');
           if (!content) return;
           var scrollState = [];
-          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-role="quote-filter-scroll"], [data-role="quote-filter-source-list"]'), function (el) {
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-role="quote-filter-scroll"]'), function (el) {
             scrollState.push({ el: el, top: el.scrollTop });
           });
           content.innerHTML = filterContentHtml();
@@ -1572,6 +1572,15 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         }
         function updateDraft(next, changedField) {
           state.filterDraft = normalizeFilters(next, changedField);
+        }
+        function loadNextSourcePageIfNeeded(scrollEl, allowFill) {
+          var total = filterOptions('source').filter(function (item) { return filterOptionMatches(item, state.filterSearch.source); }).length;
+          var bottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 16;
+          var underfilled = allowFill && scrollEl.scrollHeight <= scrollEl.clientHeight + 1;
+          if ((bottom || underfilled) && !state.filterSearch.source && state.sourceVisibleCount < total) {
+            state.sourceVisibleCount += SOURCE_PAGE_SIZE;
+            refresh();
+          }
         }
         function toggleChipsActiveInPlace(kind, current) {
           Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-filter-option][data-filter-kind="' + kind + '"]'), function (chip) {
@@ -1659,6 +1668,19 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               refresh({ focusKind: kind });
             });
           });
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('.quote-filter-inline-search'), function (box) {
+            box.addEventListener('focusout', function () {
+              window.setTimeout(function () {
+                if (box.contains(document.activeElement)) return;
+                var input = box.querySelector('[data-role="quote-filter-search-input"]');
+                var kind = input ? input.getAttribute('data-filter-kind') : '';
+                if (kind && !state.filterSearch[kind] && state.filterSearchOpen === kind) {
+                  state.filterSearchOpen = '';
+                  refresh();
+                }
+              }, 80);
+            });
+          });
           Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-role="quote-filter-search-clear"]'), function (btn) {
             btn.addEventListener('click', function () {
               var kind = btn.getAttribute('data-filter-kind');
@@ -1672,15 +1694,13 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             state.filterSearch.category = '';
             refresh({ focusKind: 'category' });
           });
-          var sourceList = filterRoot.querySelector('[data-role="quote-filter-source-list"]');
-          if (sourceList) sourceList.addEventListener('scroll', function () {
-            var bottom = sourceList.scrollTop + sourceList.clientHeight >= sourceList.scrollHeight - 16;
-            var total = filterOptions('source').filter(function (item) { return filterOptionMatches(item, state.filterSearch.source); }).length;
-            if (bottom && !state.filterSearch.source && state.sourceVisibleCount < total) {
-              state.sourceVisibleCount += SOURCE_PAGE_SIZE;
-              refresh();
-            }
-          });
+          var filterScroll = filterRoot.querySelector('[data-role="quote-filter-scroll"]');
+          if (filterScroll) {
+            filterScroll.addEventListener('scroll', function () { loadNextSourcePageIfNeeded(filterScroll, false); });
+            window.setTimeout(function () {
+              if (filterScroll.isConnected) loadNextSourcePageIfNeeded(filterScroll, true);
+            }, 0);
+          }
           var optionBack = filterRoot.querySelector('[data-dom-id="quote-filter-option-back"]');
           if (optionBack) optionBack.addEventListener('click', function () {
             state.filterPanel = '';
