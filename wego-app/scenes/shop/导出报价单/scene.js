@@ -3,7 +3,7 @@
  * 阶段B/C：入口分流、选品页与报价单预览编辑。入口来自「我的」内容管理-批量-批量导出（见 我的/scene.js）。
  * 选品页支持：按产品报价 / 按图报价 两种模式切换、商品搜索（名称/货号/搜索码）、
  * 列表/宫格视图、商品勾选、底部批量栏（全选/已选计数下拉/查看已选/下一步）、分页滚动加载。
- * 筛选面板、分享导出、报价记录在后续阶段接入（筛选按钮当前展示条件条占位）。
+ * 筛选面板、分享导出、报价记录在后续阶段接入。
  */
 const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id="quote-export" data-route-id="quote-export" data-layout-mode="composed" data-bg="page" data-component-slug="layout-page">
   <div class="layout-page__top">
@@ -123,6 +123,28 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   var PAGE_SIZE = 6;
   var DEFAULT_BATCH_SELECT_VALUE = '100';
   var BATCH_SELECT_VALUES = ['50', '100', '200'];
+  var SOURCE_PAGE_SIZE = 9;
+  var DATE_PRESETS = [
+    { key: 'today', label: '今天' },
+    { key: 'yesterday', label: '昨天' },
+    { key: 'thisMonth', label: '本月' }
+  ];
+  var BATCH_PRICE_MODES = [
+    { key: 'set', label: '统一价格' },
+    { key: 'increase', label: '统一加价' },
+    { key: 'decrease', label: '统一减价' },
+    { key: 'tail', label: '尾数处理' }
+  ];
+  var BATCH_PRICE_UNITS = [
+    { key: 'percent', label: '按比例' },
+    { key: 'amount', label: '按金额' }
+  ];
+  var BATCH_PRICE_TAILS = [
+    { key: 'none', label: '不处理' },
+    { key: 'round', label: '去小数' },
+    { key: 'tail9', label: '个位9' },
+    { key: 'tail99', label: '十位99' }
+  ];
   var CNY_TO_USD = 7.1;
   var LANGUAGE_OPTIONS = [
     { code: 'zh-CN', label: '中文', short: '中', rtl: false },
@@ -202,6 +224,28 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     var pad = function (n) { return String(n).padStart(2, '0'); };
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
+  function addDays(date, days) {
+    var next = new Date(date);
+    next.setDate(next.getDate() + days);
+    return next;
+  }
+  function todayValue() {
+    return formatDate(new Date());
+  }
+  function normalizeDateValue(value) {
+    var text = String(value || '').trim().replace(/\//g, '-');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return '';
+    var parts = text.split('-');
+    var date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    if (Number.isNaN(date.getTime()) || formatDate(date) !== text) return '';
+    var today = todayValue();
+    return text > today ? today : text;
+  }
+  function formatDateLabel(value) {
+    var normalized = normalizeDateValue(value);
+    if (!normalized) return '';
+    return normalized.replace(/-/g, '/');
+  }
   function defaultQuoteTitle() {
     var d = new Date();
     var pad = function (n) { return String(n).padStart(2, '0'); };
@@ -250,10 +294,16 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     });
     return { cny: hasRange ? '¥' + formatMoney(min) + ' ~ ¥' + formatMoney(max) : '¥' + formatMoney(min), usd: hasRange ? '$' + formatUsd(min) + ' ~ $' + formatUsd(max) : '$' + formatUsd(min) };
   }
+  function quoteRowUsdText(row) {
+    if (row.priceMax && moneyNumber(row.priceMax) !== moneyNumber(row.priceMin)) {
+      return '$' + formatUsd(row.priceMin) + ' ~ $' + formatUsd(row.priceMax);
+    }
+    return '$' + formatUsd(row.priceMin);
+  }
   function quotePreviewTemplate(state) {
     var lang = getLanguage(state.language);
     var totals = quoteTotals(state.quoteRows);
-    return '<div class="modal modal--fullscreen quote-preview-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="报价单预览" style="--modal-panel-bg: var(--bg-page)">'
+    return '<div class="modal modal--fullscreen modal--has-actions quote-preview-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="报价单预览" style="--modal-panel-bg: var(--bg-page)">'
       + '<div class="modal__panel">'
       + '<div class="modal__title modal__title--default">'
       + '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body">'
@@ -273,29 +323,61 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '<div class="quote-translate-status" data-role="quote-translate-status" hidden><span data-role="quote-translate-text">正在翻译中 0/0</span><button type="button" class="link link--14" data-component-slug="link" data-dom-id="quote-translate-cancel">取消</button></div>'
       + '</section>'
       + '<section class="quote-preview-toolbar"><button type="button" class="btn btn--weak btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jiahao" aria-hidden="true"></i>继续添加产品</button></section>'
+      + '<div class="quote-sticky-head-slot" data-role="quote-sticky-head-slot"' + (state.quoteRows.length ? '' : ' hidden') + '>' + quoteStickyHeaderHtml() + '</div>'
       + '<section class="quote-table-shell" data-role="quote-table-shell">' + quoteTableHtml(state.quoteRows) + '</section>'
       + '</div>'
       + '</div>'
-      + '<div class="modal__actions quote-preview-actions"><div class="modal__action-gradient"></div><div class="quote-share-format" role="tablist" aria-label="导出格式"><button type="button" class="quote-format-tab is-active" data-format="excel" aria-selected="true">Excel</button><button type="button" class="quote-format-tab" data-format="pdf" aria-selected="false">PDF</button></div><button type="button" class="btn btn--strong btn--lg quote-share-button" data-component-slug="button" data-dom-id="quote-share-main">分享报价单</button></div>'
+      + '<div class="modal__actions quote-preview-actions"><div class="modal__action-gradient"></div><div class="quote-share-format" role="group" aria-label="导出格式">' + quoteFormatStackHtml('excel', 'Excel', state.exportFormat) + quoteFormatStackHtml('pdf', 'PDF', state.exportFormat) + '</div><button type="button" class="btn btn--strong btn--lg quote-share-button" data-component-slug="button" data-dom-id="quote-share-main">分享报价单</button></div>'
       + '</div>'
       + '</div>';
+  }
+  function quoteFormatStackHtml(format, label, currentFormat) {
+    var selected = format === currentFormat;
+    return '<button type="button" class="stack quote-format-stack' + (selected ? ' stack--selected' : '') + '" data-component-slug="stack" data-format="' + escapeHtml(format) + '" aria-pressed="' + (selected ? 'true' : 'false') + '">'
+      + '<span class="stack__bg"><span class="stack__label">' + escapeHtml(label) + '</span><span class="stack__check-corner" aria-hidden="true"><i class="wego-iconfont-s icon-gou16 stack__check-icon"></i></span></span>'
+      + '</button>';
+  }
+  function quoteChoiceStackHtml(extraClass, attrName, value, label, selected) {
+    return '<button type="button" class="stack ' + escapeHtml(extraClass) + (selected ? ' stack--selected' : '') + '" data-component-slug="stack" ' + attrName + '="' + escapeHtml(value) + '" aria-pressed="' + (selected ? 'true' : 'false') + '">'
+      + '<span class="stack__bg"><span class="stack__label">' + escapeHtml(label) + '</span><span class="stack__check-corner" aria-hidden="true"><i class="wego-iconfont-s icon-gou16 stack__check-icon"></i></span></span>'
+      + '</button>';
+  }
+  function quoteTableColgroupHtml() {
+    return '<colgroup><col class="quote-col-image"><col class="quote-col-price"><col class="quote-col-spec"><col class="quote-col-code"><col class="quote-col-name"><col class="quote-col-action"></colgroup>';
+  }
+  function quoteHeaderCellHtml(kind, label, secondary) {
+    if (kind === 'price') {
+      return '<th class="quote-table__price"><span class="quote-price-header-title"><span>' + escapeHtml(label) + '</span><button type="button" class="link link--14 quote-price-batch" data-component-slug="link" data-dom-id="quote-batch-price">批量</button></span>' + (secondary ? '<small>' + escapeHtml(secondary) + '</small>' : '') + '</th>';
+    }
+    return '<th class="quote-table__' + escapeHtml(kind) + '"><span>' + escapeHtml(label) + '</span>' + (secondary ? '<small>' + escapeHtml(secondary) + '</small>' : '') + '</th>';
+  }
+  function quoteHeaderRowHtml() {
+    return '<thead><tr>'
+      + quoteHeaderCellHtml('image', '图', '')
+      + quoteHeaderCellHtml('price', '价格', '￥ / $')
+      + quoteHeaderCellHtml('spec', '规格', '')
+      + quoteHeaderCellHtml('code', '货号', '')
+      + quoteHeaderCellHtml('name', '商品名', '')
+      + quoteHeaderCellHtml('action', '操作', '')
+      + '</tr></thead>';
+  }
+  function quoteStickyHeaderHtml() {
+    return '<div class="quote-sticky-head"><table class="quote-table quote-table--sticky-head" aria-hidden="true">' + quoteTableColgroupHtml() + quoteHeaderRowHtml() + '</table><div class="quote-sticky-frozen-image-header" aria-hidden="true"><span>图</span></div></div>';
   }
   function quoteTableHtml(rows) {
     if (!rows.length) {
       return '<div class="quote-table-empty"><strong>暂无报价商品</strong><span>可继续添加产品生成报价行</span></div>';
     }
-    return '<div class="quote-table-scroll"><table class="quote-table"><thead><tr>'
-      + '<th class="quote-table__image">图</th><th class="quote-table__price">价格 <button type="button" class="link link--14 quote-price-batch" data-component-slug="link" data-dom-id="quote-batch-price">批量</button></th><th>规格</th><th>货号</th><th>商品名</th><th class="quote-table__action">操作</th>'
-      + '</tr></thead><tbody>' + rows.map(quoteTableRowHtml).join('') + '</tbody></table></div>';
+    return '<div class="quote-table-scroll" data-role="quote-table-scroll"><table class="quote-table quote-table--body">' + quoteTableColgroupHtml() + '<tbody>' + rows.map(quoteTableRowHtml).join('') + '</tbody></table></div>';
   }
   function quoteTableRowHtml(row) {
     return '<tr data-quote-row-id="' + escapeHtml(row.id) + '">'
       + '<td class="quote-table__image"><div class="wg-image wg-image--rounded-sm quote-row-image" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.image) + '" alt="' + escapeHtml(row.name) + '"></div></td>'
-      + '<td class="quote-table__price"><div class="quote-price-inputs"><div class="number-input number-input--surface-white" data-component-slug="input"><input class="number-input__field" inputmode="decimal" data-quote-field="priceMin" value="' + escapeHtml(row.priceMin) + '" aria-label="最低价格"><span class="number-input__suffix">¥</span></div><span class="quote-price-separator">~</span><div class="number-input number-input--surface-white" data-component-slug="input"><input class="number-input__field" inputmode="decimal" data-quote-field="priceMax" value="' + escapeHtml(row.priceMax) + '" aria-label="最高价格"><span class="number-input__suffix">¥</span></div></div><div class="quote-usd-text">$' + escapeHtml(formatUsd(row.priceMax || row.priceMin)) + '</div></td>'
-      + '<td><div class="input-group input-group--surface-white quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-spec-' + escapeHtml(row.id) + '">规格</label><textarea id="quote-spec-' + escapeHtml(row.id) + '" rows="2" data-quote-field="specification">' + escapeHtml(row.specification) + '</textarea></div></td>'
+      + '<td class="quote-table__price"><div class="quote-price-inputs"><div class="number-input number-input--surface-white" data-component-slug="input" data-number-input><input class="number-input__field" type="text" inputmode="decimal" data-quote-field="priceMin" value="' + escapeHtml(row.priceMin) + '" aria-label="最低价格"><span class="number-input__suffix">￥</span></div><span class="quote-price-separator">~</span><div class="number-input number-input--surface-white" data-component-slug="input" data-number-input><input class="number-input__field" type="text" inputmode="decimal" data-quote-field="priceMax" value="' + escapeHtml(row.priceMax) + '" aria-label="最高价格"><span class="number-input__suffix">￥</span></div></div><div class="quote-usd-text">' + escapeHtml(quoteRowUsdText(row)) + '</div></td>'
+      + '<td><div class="input-group input-group--surface-white quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-spec-' + escapeHtml(row.id) + '">规格</label><textarea id="quote-spec-' + escapeHtml(row.id) + '" rows="2" class="quote-cell-textarea" data-quote-field="specification">' + escapeHtml(row.specification) + '</textarea></div></td>'
       + '<td><div class="input-group input-group--surface-white quote-cell-field quote-cell-field--short" data-component-slug="input"><label class="field-label" for="quote-no-' + escapeHtml(row.id) + '">货号</label><div class="input-wrapper"><input id="quote-no-' + escapeHtml(row.id) + '" type="text" data-quote-field="itemNo" value="' + escapeHtml(row.itemNo) + '"></div></div></td>'
-      + '<td><div class="input-group input-group--surface-white quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-name-' + escapeHtml(row.id) + '">商品名</label><textarea id="quote-name-' + escapeHtml(row.id) + '" rows="2" data-quote-field="name">' + escapeHtml(row.name) + '</textarea></div></td>'
-      + '<td class="quote-table__action"><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-dom-id="quote-row-delete-' + escapeHtml(row.id) + '" data-quote-delete-row="' + escapeHtml(row.id) + '" aria-label="删除报价行"><i class="btn__icon wego-iconfont-s icon-shanchu" aria-hidden="true"></i></button></td>'
+      + '<td><div class="input-group input-group--surface-white quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-name-' + escapeHtml(row.id) + '">商品名</label><textarea id="quote-name-' + escapeHtml(row.id) + '" rows="2" class="quote-cell-textarea" data-quote-field="name">' + escapeHtml(row.name) + '</textarea></div></td>'
+      + '<td class="quote-table__action"><button type="button" class="btn btn--danger btn--sm btn--icon-only" data-component-slug="button" data-quote-delete-row="' + escapeHtml(row.id) + '" aria-label="删除报价行"><i class="btn__icon wego-iconfont-s icon-shanchu" aria-hidden="true"></i></button></td>'
       + '</tr>';
   }
 
@@ -321,6 +403,14 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         language: 'zh-CN',
         exportFormat: 'excel',
         quoteRows: [],
+        batchPriceDraft: createBatchPriceDraft(),
+        batchPriceRestoreSnapshot: null,
+        filters: createDefaultFilters(),
+        filterDraft: null,
+        filterPanel: '',
+        filterSearch: { category: '', source: '' },
+        filterSearchOpen: '',
+        sourceVisibleCount: SOURCE_PAGE_SIZE,
         dirty: false,
         translateRunId: 0,
         selected: {}          /* 按产品模式：{ product_id: true }；按图模式：{ product_id + ':' + idx: true } */
@@ -344,6 +434,114 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       var viewSelectedBtn = root.querySelector('[data-dom-id="quote-view-selected"]');
       var viewSelectedDivider = root.querySelector('.quote-batch-divider');
 
+      function createDefaultFilters() {
+        return { startDate: '', endDate: '', preset: '', category: 'all', source: 'all' };
+      }
+      function cloneFilters(filters) {
+        return Object.assign(createDefaultFilters(), filters || {});
+      }
+      function normalizeFilters(filters, changedField) {
+        var next = cloneFilters(filters);
+        next.startDate = normalizeDateValue(next.startDate);
+        next.endDate = normalizeDateValue(next.endDate);
+        if (next.startDate && next.endDate && next.startDate > next.endDate) {
+          if (changedField === 'endDate') next.startDate = next.endDate;
+          else next.endDate = next.startDate;
+        }
+        if (!next.category) next.category = 'all';
+        if (!next.source) next.source = 'all';
+        return next;
+      }
+      function activeDraftFilters() {
+        return normalizeFilters(state.filterDraft || state.filters);
+      }
+      function hasActiveFilters(filters) {
+        var f = normalizeFilters(filters || state.filters);
+        return Boolean(f.startDate || f.endDate || f.category !== 'all' || f.source !== 'all');
+      }
+      function selectedFilterLabel(kind, value) {
+        if (!value || value === 'all') return kind === 'source' ? '全部来源' : '全部分类';
+        return String(value);
+      }
+      function dateFilterLabel(filters) {
+        var f = normalizeFilters(filters);
+        if (f.startDate && f.endDate && f.startDate === f.endDate) return formatDateLabel(f.startDate);
+        if (f.startDate && f.endDate) return formatDateLabel(f.startDate) + ' - ' + formatDateLabel(f.endDate);
+        if (f.startDate) return formatDateLabel(f.startDate) + ' 起';
+        if (f.endDate) return formatDateLabel(f.endDate) + ' 前';
+        return '';
+      }
+      function activeFilterBadges(filters) {
+        var f = normalizeFilters(filters || state.filters);
+        var badges = [];
+        if (f.category !== 'all') badges.push({ kind: 'category', label: selectedFilterLabel('category', f.category) });
+        if (f.source !== 'all') badges.push({ kind: 'source', label: selectedFilterLabel('source', f.source) });
+        if (f.startDate || f.endDate) badges.push({ kind: 'date', label: dateFilterLabel(f) });
+        return badges;
+      }
+      function renderFilterStrip() {
+        var strip = root.querySelector('[data-role="quote-filter-strip"]');
+        var btn = root.querySelector('[data-dom-id="quote-filter-sheet-btn"]');
+        var badges = activeFilterBadges(state.filters);
+        var active = badges.length > 0;
+        if (btn) {
+          btn.classList.toggle('is-active', active);
+          btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        }
+        if (!strip) return;
+        strip.hidden = !active;
+        strip.innerHTML = active
+          ? '<div class="quote-filter-badges" aria-label="当前筛选条件">' + badges.map(function (badge) {
+              return '<button type="button" class="quote-filter-badge" data-filter-remove="' + escapeHtml(badge.kind) + '" aria-label="移除' + escapeHtml(badge.label) + '"><span>' + escapeHtml(badge.label) + '</span><i class="wego-iconfont-s icon-yuancha-mian" aria-hidden="true"></i></button>';
+            }).join('') + '</div>'
+          : '';
+      }
+      function uniqueProductValues(field) {
+        var seen = {};
+        var list = [];
+        PRODUCTS.forEach(function (p) {
+          var value = String(p[field] || '').trim();
+          if (!value || seen[value]) return;
+          seen[value] = true;
+          list.push(value);
+        });
+        return list;
+      }
+      function filterOptions(kind) {
+        return uniqueProductValues(kind === 'source' ? 'source' : 'category');
+      }
+      function filterOptionMatches(value, query) {
+        var text = String(value || '').toLowerCase();
+        var q = String(query || '').trim().toLowerCase();
+        return !q || text.indexOf(q) >= 0;
+      }
+      function highlightFilterLabel(value, query) {
+        var text = String(value == null ? '' : value);
+        var q = String(query || '').trim();
+        var index = text.toLowerCase().indexOf(q.toLowerCase());
+        if (!q || index < 0) return escapeHtml(text);
+        return escapeHtml(text.slice(0, index))
+          + '<mark class="quote-filter-highlight">' + escapeHtml(text.slice(index, index + q.length)) + '</mark>'
+          + escapeHtml(text.slice(index + q.length));
+      }
+      function productDateValue(product) {
+        var raw = product.created_at || product.createdAt || product.created_date || product.updated_at || product.updatedAt || product.updated_date || '';
+        var normalized = normalizeDateValue(raw);
+        if (normalized) return normalized;
+        var index = PRODUCTS.indexOf(product);
+        return formatDate(addDays(new Date(), -Math.max(0, index)));
+      }
+      function productPassesFilters(product) {
+        var filters = normalizeFilters(state.filters);
+        if (filters.category !== 'all' && product.category !== filters.category) return false;
+        if (filters.source !== 'all' && product.source !== filters.source) return false;
+        if (filters.startDate || filters.endDate) {
+          var date = productDateValue(product);
+          if (filters.startDate && date < filters.startDate) return false;
+          if (filters.endDate && date > filters.endDate) return false;
+        }
+        return true;
+      }
       function currentList() {
         var query = state.query.trim().toLowerCase();
         return PRODUCTS.filter(function (p) {
@@ -353,7 +551,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               || (p.search_code || '').toLowerCase().indexOf(query) >= 0;
             if (!hit) return false;
           }
-          return true;
+          return productPassesFilters(p);
         });
       }
       function highlightSearchMatch(value) {
@@ -569,8 +767,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var list = currentList();
         var pageItems = list.slice(0, state.page * PAGE_SIZE);
         state.hasMore = pageItems.length < list.length;
-        var noResult = list.length === 0 && state.query.trim() !== '';
-        var initialEmpty = PRODUCTS.length === 0 && state.query.trim() === '';
+        var noResult = list.length === 0 && PRODUCTS.length > 0;
+        var initialEmpty = PRODUCTS.length === 0;
         if (toolbarWrap) toolbarWrap.hidden = initialEmpty;
         if (toolbarEl) toolbarEl.hidden = false;
         var html = '';
@@ -590,6 +788,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               ? '<div class="quote-empty__result"><div class="result" data-component-slug="result" role="group" aria-label="无搜索结果"><div class="result__title">未搜索到相关商品</div></div></div>'
               : '<div class="card card--filled quote-empty__card" data-component-slug="card"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i><strong>暂无商品</strong><span>商品库暂无可选商品</span></div>')
           : '';
+        renderFilterStrip();
         updateBar();
       }
 
@@ -776,17 +975,27 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var totals = quoteTotals(state.quoteRows);
         totalEl.innerHTML = '<strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span>';
       }
+      function syncQuoteStickyHeadX(previewRoot) {
+        var scroller = previewRoot.querySelector('[data-role="quote-table-scroll"]');
+        var sticky = previewRoot.querySelector('.quote-table--sticky-head');
+        if (!scroller || !sticky) return;
+        sticky.style.transform = 'translate3d(' + (-Math.round(scroller.scrollLeft || 0)) + 'px, 0, 0)';
+      }
       function refreshPreviewTable(previewRoot) {
         var shell = previewRoot.querySelector('[data-role="quote-table-shell"]');
         if (!shell) return;
         shell.innerHTML = quoteTableHtml(state.quoteRows);
+        var stickySlot = previewRoot.querySelector('[data-role="quote-sticky-head-slot"]');
+        if (stickySlot) stickySlot.hidden = !state.quoteRows.length;
         activateImages(shell);
         updatePreviewTotals(previewRoot);
         bindPreviewTableControls(previewRoot);
+        syncQuoteStickyHeadX(previewRoot);
       }
       function bindPreviewTableControls(previewRoot) {
         var batch = previewRoot.querySelector('[data-dom-id="quote-batch-price"]');
-        if (batch) {
+        if (batch && !batch.dataset.quoteBatchBound) {
+          batch.dataset.quoteBatchBound = 'true';
           batch.addEventListener('click', function (e) {
             e.stopPropagation();
             openBatchPriceSheet(previewRoot);
@@ -799,6 +1008,28 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             state.quoteRows = state.quoteRows.filter(function (row) { return row.id !== id; });
             state.dirty = true;
             refreshPreviewTable(previewRoot);
+          });
+        });
+        var tableScroll = previewRoot.querySelector('[data-role="quote-table-scroll"]');
+        if (tableScroll) tableScroll.addEventListener('scroll', function () { syncQuoteStickyHeadX(previewRoot); });
+        Array.prototype.forEach.call(previewRoot.querySelectorAll('.quote-cell-textarea'), function (field) {
+          field.addEventListener('focus', function () {
+            previewRoot.classList.add('is-input-focused');
+            field.classList.add('is-expanded');
+            window.setTimeout(function () { field.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }, 0);
+          });
+          field.addEventListener('blur', function () {
+            field.classList.remove('is-expanded');
+            if (!previewRoot.querySelector('[data-quote-field]:focus')) previewRoot.classList.remove('is-input-focused');
+          });
+        });
+        Array.prototype.forEach.call(previewRoot.querySelectorAll('input[data-quote-field]'), function (field) {
+          field.addEventListener('focus', function () {
+            previewRoot.classList.add('is-input-focused');
+            window.setTimeout(function () { field.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }, 0);
+          });
+          field.addEventListener('blur', function () {
+            if (!previewRoot.querySelector('[data-quote-field]:focus')) previewRoot.classList.remove('is-input-focused');
           });
         });
       }
@@ -873,51 +1104,503 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           if (runId === state.translateRunId) setTranslateStatus(previewRoot, false, '');
         });
       }
-      function openBatchPriceSheet(previewRoot) {
-        var template = '<div class="modal modal--frame modal--align-left quote-batch-price-modal" data-component-slug="modal" role="dialog" aria-modal="true" data-state="open" aria-labelledby="quote-batch-price-title">'
+      function createBatchPriceDraft() {
+        return {
+          mode: 'set',
+          unit: 'percent',
+          values: {
+            set: '',
+            increase: { percent: '', amount: '' },
+            decrease: { percent: '', amount: '' }
+          },
+          tail: 'none'
+        };
+      }
+      function normalizeBatchMode(value) {
+        return BATCH_PRICE_MODES.some(function (item) { return item.key === value; }) ? value : 'set';
+      }
+      function normalizeBatchUnit(value) {
+        return value === 'amount' ? 'amount' : 'percent';
+      }
+      function normalizeBatchTail(value) {
+        return BATCH_PRICE_TAILS.some(function (item) { return item.key === value; }) ? value : 'none';
+      }
+      function batchDraftValue() {
+        var draft = state.batchPriceDraft || createBatchPriceDraft();
+        var mode = normalizeBatchMode(draft.mode);
+        var unit = normalizeBatchUnit(draft.unit);
+        var values = draft.values || createBatchPriceDraft().values;
+        if (mode === 'set') return String(values.set || '');
+        if (mode === 'increase' || mode === 'decrease') return String((values[mode] && values[mode][unit]) || '');
+        return '';
+      }
+      function setBatchDraftValue(value) {
+        var draft = state.batchPriceDraft || createBatchPriceDraft();
+        state.batchPriceDraft = draft;
+        draft.values = draft.values || createBatchPriceDraft().values;
+        var mode = normalizeBatchMode(draft.mode);
+        var unit = normalizeBatchUnit(draft.unit);
+        if (mode === 'set') draft.values.set = value;
+        else if (mode === 'increase' || mode === 'decrease') {
+          draft.values[mode] = draft.values[mode] || { percent: '', amount: '' };
+          draft.values[mode][unit] = value;
+        }
+      }
+      function batchPriceModeStackHtml(current) {
+        return BATCH_PRICE_MODES.map(function (mode) {
+          return quoteChoiceStackHtml('quote-batch-price-mode', 'data-batch-price-mode', mode.key, mode.label, current === mode.key);
+        }).join('');
+      }
+      function batchPriceUnitStackHtml(current) {
+        return BATCH_PRICE_UNITS.map(function (unit) {
+          return quoteChoiceStackHtml('quote-batch-price-unit', 'data-batch-price-unit', unit.key, unit.label, current === unit.key);
+        }).join('');
+      }
+      function batchPriceTailStackHtml(current) {
+        return BATCH_PRICE_TAILS.map(function (tail) {
+          return quoteChoiceStackHtml('quote-batch-price-tail', 'data-batch-price-tail', tail.key, tail.label, current === tail.key);
+        }).join('');
+      }
+      function batchPriceEditorHtml() {
+        var draft = state.batchPriceDraft || createBatchPriceDraft();
+        var mode = normalizeBatchMode(draft.mode);
+        var unit = normalizeBatchUnit(draft.unit);
+        var tail = normalizeBatchTail(draft.tail);
+        var value = batchDraftValue();
+        var label = mode === 'set' ? '统一价格' : (mode === 'increase' ? '加价' : '减价') + (unit === 'percent' ? '比例' : '金额');
+        var valueField = '';
+        if (mode !== 'tail') {
+          valueField = '<div class="quote-batch-value-row">'
+            + (mode === 'set' ? '' : '<div class="quote-batch-unit-row" role="group" aria-label="加减价方式">' + batchPriceUnitStackHtml(unit) + '</div>')
+            + '<div class="input-group input-group--surface-white quote-batch-value-field" data-component-slug="input"><label class="field-label" for="quote-batch-price-input">' + escapeHtml(label) + '</label><div class="input-wrapper"><input id="quote-batch-price-input" type="text" inputmode="decimal" data-role="quote-batch-price-input" value="' + escapeHtml(value) + '" placeholder="' + (unit === 'percent' && mode !== 'set' ? '输入比例' : '输入金额') + '"></div></div>'
+            + '</div>';
+        }
+        return '<div class="quote-batch-mode-grid" role="group" aria-label="改价方式">' + batchPriceModeStackHtml(mode) + '</div>'
+          + '<section class="quote-batch-editor">'
+          + valueField
+          + '<div class="quote-batch-tail-block"><div class="quote-batch-section-title">尾数处理</div><div class="quote-batch-tail-grid" role="group" aria-label="尾数处理">' + batchPriceTailStackHtml(tail) + '</div></div>'
+          + '</section>';
+      }
+      function batchPriceSheetTemplate() {
+        var canRestore = Boolean(state.batchPriceRestoreSnapshot && state.batchPriceRestoreSnapshot.rows && state.batchPriceRestoreSnapshot.rows.length);
+        return '<div class="modal modal--frame-x modal--has-actions quote-batch-price-modal" data-component-slug="modal" role="dialog" aria-modal="true" data-state="open" aria-label="批量改价">'
           + '<div class="modal__panel">'
-          + '<div class="modal__title modal__title--info"><div class="modal__title-text" id="quote-batch-price-title">批量改价</div><div class="modal__subtitle">统一改动当前报价表的价格</div></div>'
-          + '<div class="modal__body quote-batch-price-body"><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="quote-batch-price-value">统一价格</label><div class="input-wrapper"><input id="quote-batch-price-value" type="text" inputmode="decimal" data-dom-id="quote-batch-price-value" placeholder="输入价格"></div></div></div>'
+          + '<div class="modal__title modal__title--default"><nav class="navbar" data-component-slug="navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-batch-price-close" aria-label="关闭批量改价"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">批量改价</span></div><div class="navbar__right"><button type="button" class="btn btn--weak btn--sm quote-batch-price-restore" data-component-slug="button" data-dom-id="quote-batch-price-restore"' + (canRestore ? '' : ' disabled') + '>恢复改价前</button></div></div></nav></div>'
+          + '<div class="modal__body quote-batch-price-body" data-role="quote-batch-price-body">' + batchPriceEditorHtml() + '</div>'
           + '<div class="modal__actions"><div class="modal__action-gradient"></div><div class="modal__buttons"><button type="button" class="btn btn--weak btn--lg" data-component-slug="button" data-dom-id="quote-batch-price-cancel">取消</button><button type="button" class="btn btn--strong btn--lg" data-component-slug="button" data-dom-id="quote-batch-price-confirm">确定</button></div></div>'
           + '</div></div>';
-        ctx.openSheet(template, {
+      }
+      function refreshBatchPriceSheetBody(sheetRoot) {
+        var body = sheetRoot.querySelector('[data-role="quote-batch-price-body"]');
+        if (body) body.innerHTML = batchPriceEditorHtml();
+        var restore = sheetRoot.querySelector('[data-dom-id="quote-batch-price-restore"]');
+        if (restore) restore.disabled = !(state.batchPriceRestoreSnapshot && state.batchPriceRestoreSnapshot.rows && state.batchPriceRestoreSnapshot.rows.length);
+      }
+      function rememberBatchPriceSnapshot() {
+        state.batchPriceRestoreSnapshot = {
+          rows: state.quoteRows.map(function (row) {
+            return { id: row.id, priceMin: row.priceMin, priceMax: row.priceMax };
+          })
+        };
+      }
+      function restoreBatchPrices(previewRoot, sheetCtx) {
+        var snapshot = state.batchPriceRestoreSnapshot;
+        if (!snapshot || !snapshot.rows || !snapshot.rows.length) {
+          sheetCtx.toast('暂无可恢复的改价');
+          return;
+        }
+        var byId = {};
+        snapshot.rows.forEach(function (row) { byId[row.id] = row; });
+        state.quoteRows.forEach(function (row) {
+          if (!byId[row.id]) return;
+          row.priceMin = byId[row.id].priceMin;
+          row.priceMax = byId[row.id].priceMax;
+        });
+        state.batchPriceRestoreSnapshot = null;
+        state.dirty = true;
+        refreshPreviewTable(previewRoot);
+        sheetCtx.close();
+        sheetCtx.toast('已恢复改价前价格');
+      }
+      function batchPriceNumber(value) {
+        var normalized = normalizePriceValue(value);
+        if (!normalized) return 0;
+        var n = Number(normalized);
+        return Number.isFinite(n) ? n : 0;
+      }
+      function applyTailValue(value, tail) {
+        var n = Number(value);
+        if (!Number.isFinite(n) || n <= 0) return 0;
+        if (tail === 'tail9') return Math.floor(n / 10) * 10 + 9;
+        if (tail === 'tail99') return Math.floor(n / 100) * 100 + 99;
+        if (tail === 'round') return Math.floor(n);
+        return n;
+      }
+      function calculateBatchPrice(current, draft) {
+        var mode = normalizeBatchMode(draft.mode);
+        var unit = normalizeBatchUnit(draft.unit);
+        var value = batchPriceNumber(batchDraftValue());
+        if (mode === 'set') {
+          if (!value) return { error: '请输入大于0的统一价格' };
+          return value;
+        }
+        if (mode === 'tail') return current;
+        if (!value) return { error: '请输入大于0的' + (unit === 'percent' ? '比例' : '金额') };
+        if (mode === 'decrease' && unit === 'percent' && value >= 100) return { error: '减价比例需小于100%' };
+        var direction = mode === 'increase' ? 1 : -1;
+        var next = unit === 'percent' ? current * (1 + direction * value / 100) : current + direction * value;
+        if (!Number.isFinite(next) || next <= 0) return { error: '调整后价格需大于0' };
+        return next;
+      }
+      function applyBatchPriceChanges(previewRoot, sheetCtx) {
+        var draft = state.batchPriceDraft || createBatchPriceDraft();
+        var tail = normalizeBatchTail(draft.tail);
+        if (!state.quoteRows.length) {
+          sheetCtx.toast('暂无可改价商品');
+          return;
+        }
+        var nextRows = [];
+        for (var i = 0; i < state.quoteRows.length; i++) {
+          var row = state.quoteRows[i];
+          var low = moneyNumber(row.priceMin);
+          var high = moneyNumber(row.priceMax);
+          var nextLow = calculateBatchPrice(low, draft);
+          if (nextLow && nextLow.error) {
+            sheetCtx.toast(nextLow.error);
+            return;
+          }
+          var nextHigh = high ? calculateBatchPrice(high, draft) : 0;
+          if (nextHigh && nextHigh.error) {
+            sheetCtx.toast(nextHigh.error);
+            return;
+          }
+          nextLow = applyTailValue(nextLow, tail);
+          nextHigh = high ? applyTailValue(nextHigh, tail) : 0;
+          if (!nextLow || (high && !nextHigh)) {
+            sheetCtx.toast(tail === 'round' ? '有商品价格小于1元，不能去小数' : '处理后价格需大于0');
+            return;
+          }
+          if (nextHigh && nextLow > nextHigh) {
+            var temp = nextLow;
+            nextLow = nextHigh;
+            nextHigh = temp;
+          }
+          nextRows.push({ row: row, priceMin: formatMoney(nextLow), priceMax: nextHigh && nextHigh !== nextLow ? formatMoney(nextHigh) : '' });
+        }
+        rememberBatchPriceSnapshot();
+        nextRows.forEach(function (item) {
+          item.row.priceMin = item.priceMin;
+          item.row.priceMax = item.priceMax;
+        });
+        state.dirty = true;
+        refreshPreviewTable(previewRoot);
+        sheetCtx.close();
+        sheetCtx.toast('已批量调整' + nextRows.length + '款商品');
+      }
+      function openBatchPriceSheet(previewRoot) {
+        state.batchPriceDraft = createBatchPriceDraft();
+        ctx.openSheet(batchPriceSheetTemplate(), {
           label: '批量改价',
           init: function (sheetCtx) {
-            var input = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-value"]');
+            var sheetRoot = sheetCtx.root;
+            var close = sheetRoot.querySelector('[data-dom-id="quote-batch-price-close"]');
             var cancel = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-cancel"]');
             var confirm = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-confirm"]');
-            input.addEventListener('input', function () { input.value = normalizePriceValue(input.value); });
+            var restore = sheetRoot.querySelector('[data-dom-id="quote-batch-price-restore"]');
+            close.addEventListener('click', function () { sheetCtx.close(); });
             cancel.addEventListener('click', function () { sheetCtx.close(); });
-            confirm.addEventListener('click', function () {
-              var value = normalizePriceValue(input.value);
-              if (!value) {
-                sheetCtx.toast('请输入价格');
+            confirm.addEventListener('click', function () { applyBatchPriceChanges(previewRoot, sheetCtx); });
+            restore.addEventListener('click', function () { restoreBatchPrices(previewRoot, sheetCtx); });
+            sheetRoot.addEventListener('input', function (e) {
+              if (!e.target.matches('[data-role="quote-batch-price-input"]')) return;
+              e.target.value = normalizePriceValue(e.target.value);
+              setBatchDraftValue(e.target.value);
+            });
+            sheetRoot.addEventListener('click', function (e) {
+              var modeBtn = e.target.closest('[data-batch-price-mode]');
+              if (modeBtn) {
+                state.batchPriceDraft.mode = normalizeBatchMode(modeBtn.getAttribute('data-batch-price-mode'));
+                if (state.batchPriceDraft.mode === 'tail' && state.batchPriceDraft.tail === 'none') state.batchPriceDraft.tail = 'round';
+                refreshBatchPriceSheetBody(sheetRoot);
                 return;
               }
-              state.quoteRows.forEach(function (row) {
-                row.priceMin = value;
-                row.priceMax = '';
-              });
-              state.dirty = true;
-              refreshPreviewTable(previewRoot);
-              sheetCtx.close();
+              var unitBtn = e.target.closest('[data-batch-price-unit]');
+              if (unitBtn) {
+                state.batchPriceDraft.unit = normalizeBatchUnit(unitBtn.getAttribute('data-batch-price-unit'));
+                refreshBatchPriceSheetBody(sheetRoot);
+                return;
+              }
+              var tailBtn = e.target.closest('[data-batch-price-tail]');
+              if (tailBtn) {
+                state.batchPriceDraft.tail = normalizeBatchTail(tailBtn.getAttribute('data-batch-price-tail'));
+                refreshBatchPriceSheetBody(sheetRoot);
+              }
             });
           }
         });
       }
-      function openFilterPlaceholder() {
-        var template = '<div class="modal modal--frame quote-filter-placeholder" data-component-slug="modal" role="dialog" aria-modal="true" data-state="open" aria-labelledby="quote-filter-placeholder-title">'
-          + '<div class="modal__panel">'
-          + '<div class="modal__title modal__title--info"><div class="modal__title-text" id="quote-filter-placeholder-title">筛选</div><div class="modal__subtitle">筛选面板将在后续阶段接入</div></div>'
-          + '<div class="modal__actions"><div class="modal__action-gradient"></div><div class="modal__buttons"><button type="button" class="btn btn--strong btn--lg" data-component-slug="button" data-dom-id="quote-filter-cancel">知道了</button></div></div>'
+      function presetRange(preset) {
+        var today = new Date();
+        var start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        if (preset === 'today') return { startDate: formatDate(start), endDate: formatDate(start) };
+        if (preset === 'yesterday') {
+          var yesterday = addDays(start, -1);
+          return { startDate: formatDate(yesterday), endDate: formatDate(yesterday) };
+        }
+        if (preset === 'thisMonth') return { startDate: formatDate(new Date(start.getFullYear(), start.getMonth(), 1)), endDate: formatDate(start) };
+        return { startDate: '', endDate: '' };
+      }
+      function dateInputConstraints(field, filters) {
+        var f = normalizeFilters(filters);
+        var today = todayValue();
+        if (field === 'endDate') return { min: f.startDate, max: today };
+        return { min: '', max: f.endDate && f.endDate < today ? f.endDate : today };
+      }
+      function filterDateFieldHtml(field, label, draft) {
+        var value = draft[field] || '';
+        var limits = dateInputConstraints(field, draft);
+        return '<label class="quote-filter-date-field' + (value ? '' : ' is-empty') + '">'
+          + '<span class="quote-filter-date-field__display">' + escapeHtml(formatDateLabel(value) || label) + '</span>'
+          + '<input type="date" data-filter-date-field="' + escapeHtml(field) + '" value="' + escapeHtml(value) + '"' + (limits.min ? ' min="' + escapeHtml(limits.min) + '"' : '') + ' max="' + escapeHtml(limits.max) + '" aria-label="' + escapeHtml(label) + '">'
+          + '</label>';
+      }
+      function filterSearchControlHtml(kind) {
+        var open = state.filterSearchOpen === kind;
+        var value = state.filterSearch[kind] || '';
+        if (!open) {
+          return '<button type="button" class="quote-filter-search-trigger" data-role="quote-filter-search-trigger" data-filter-kind="' + escapeHtml(kind) + '" aria-label="搜索' + (kind === 'source' ? '来源' : '分类') + '"><i class="wego-iconfont-s icon-sousuo" aria-hidden="true"></i><span>搜索</span></button>';
+        }
+        return '<label class="searchbox searchbox--sm searchbox--gray quote-filter-inline-search" data-component-slug="search">'
+          + '<span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span>'
+          + '<div class="searchbox__input"><input class="searchbox__field" data-role="quote-filter-search-input" data-filter-kind="' + escapeHtml(kind) + '" type="search" value="' + escapeHtml(value) + '" placeholder="搜索' + (kind === 'source' ? '来源' : '分类') + '" aria-label="搜索' + (kind === 'source' ? '来源' : '分类') + '"></div>'
+          + '<div class="searchbox__actions"><button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" data-role="quote-filter-search-clear" data-filter-kind="' + escapeHtml(kind) + '" type="button" aria-label="清除搜索"' + (value ? '' : ' hidden') + '></button></div>'
+          + '</label>';
+      }
+      function filterTitleHtml(title, kind, draft) {
+        var activeValue = kind ? draft[kind] : '';
+        var active = activeValue && activeValue !== 'all';
+        return '<div class="quote-filter-card__title">'
+          + '<div class="quote-filter-card__label"><strong>' + escapeHtml(title) + '</strong>' + (kind === 'source' ? '<span>仅自己可见</span>' : '') + '</div>'
+          + '<div class="quote-filter-card__right">'
+          + (active ? '<button type="button" class="quote-filter-card__selected" data-filter-clear-kind="' + escapeHtml(kind) + '" aria-label="清除' + escapeHtml(title) + '"><span>' + escapeHtml(selectedFilterLabel(kind, activeValue)) + '</span><i class="wego-iconfont-s icon-yuancha-mian" aria-hidden="true"></i></button>' : '')
+          + (kind ? filterSearchControlHtml(kind) : '')
           + '</div></div>';
-        ctx.openSheet(template, {
+      }
+      function filterChipHtml(kind, value, label, current, query, extraClass) {
+        var selected = current === value;
+        return '<button type="button" class="quote-filter-chip' + (selected ? ' is-active' : '') + (extraClass ? ' ' + extraClass : '') + '" data-filter-option data-filter-kind="' + escapeHtml(kind) + '" data-filter-value="' + escapeHtml(value) + '">'
+          + highlightFilterLabel(label, query)
+          + '</button>';
+      }
+      function filterEmptyHtml() {
+        return '<p class="quote-filter-option-empty">没有匹配的结果</p>';
+      }
+      function filterCategoryGridHtml(draft) {
+        var query = state.filterSearch.category || '';
+        var options = filterOptions('category').filter(function (item) { return filterOptionMatches(item, query); });
+        var preview = query ? options : options.slice(0, 8);
+        var html = preview.map(function (item) { return filterChipHtml('category', item, item, draft.category, query, ''); }).join('');
+        if (!query && options.length) {
+          html += '<button type="button" class="quote-filter-chip quote-filter-chip--more" data-role="quote-filter-more-category">查看更多 <i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>';
+        }
+        return html || filterEmptyHtml();
+      }
+      function filterSourceGridHtml(draft) {
+        var query = state.filterSearch.source || '';
+        var options = filterOptions('source').filter(function (item) { return filterOptionMatches(item, query); });
+        var visible = query ? options : options.slice(0, state.sourceVisibleCount);
+        var html = visible.map(function (item) { return filterChipHtml('source', item, item, draft.source, query, 'quote-filter-chip--source'); }).join('');
+        if (!html) return filterEmptyHtml();
+        if (!query && visible.length < options.length) {
+          html += '<div class="quote-filter-source-footer"><span></span><em>继续下滑，加载更多</em><span></span></div>';
+        } else {
+          html += '<div class="quote-filter-source-footer"><span></span><em>已到底</em><span></span></div>';
+        }
+        return html;
+      }
+      function filterMainContentHtml(draft) {
+        return '<div class="quote-filter-safe-top"></div>'
+          + '<div class="quote-filter-scroll" data-role="quote-filter-scroll">'
+          + '<section class="quote-filter-card">'
+          + filterTitleHtml('时间区间', '', draft)
+          + '<div class="quote-filter-date-row">' + filterDateFieldHtml('startDate', '开始日期', draft) + '<span>-</span>' + filterDateFieldHtml('endDate', '结束日期', draft) + '</div>'
+          + '<div class="quote-filter-chip-grid">' + DATE_PRESETS.map(function (preset) { return filterChipHtml('preset', preset.key, preset.label, draft.preset, '', ''); }).join('') + '</div>'
+          + '</section>'
+          + '<section class="quote-filter-card">' + filterTitleHtml('分类', 'category', draft) + '<div class="quote-filter-chip-grid">' + filterCategoryGridHtml(draft) + '</div></section>'
+          + '<section class="quote-filter-card quote-filter-card--source">' + filterTitleHtml('来源', 'source', draft) + '<div class="quote-filter-chip-grid quote-filter-source-grid" data-role="quote-filter-source-list">' + filterSourceGridHtml(draft) + '</div></section>'
+          + '</div>'
+          + '<div class="quote-filter-actions"><button type="button" class="btn btn--weak btn--md quote-filter-reset" data-component-slug="button" data-dom-id="quote-filter-reset">重置</button><button type="button" class="btn btn--strong btn--md quote-filter-confirm" data-component-slug="button" data-dom-id="quote-filter-confirm">确定</button></div>'
+          + '<div class="quote-filter-safe-bottom"></div>';
+      }
+      function filterOptionPanelHtml(kind, draft) {
+        var title = kind === 'source' ? '来源' : '分类';
+        var query = state.filterSearch[kind] || '';
+        var options = filterOptions(kind).filter(function (item) { return filterOptionMatches(item, query); });
+        return '<section class="quote-filter-option-panel" role="dialog" aria-modal="true" aria-label="' + escapeHtml(title) + '">'
+          + '<div class="quote-filter-safe-top"></div>'
+          + '<header class="quote-filter-option-nav"><button type="button" class="navbar__left-btn" data-dom-id="quote-filter-option-back" aria-label="返回筛选"><i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i></button><strong>' + escapeHtml(title) + '</strong><span></span></header>'
+          + '<div class="quote-filter-option-search"><label class="searchbox searchbox--md searchbox--gray" data-component-slug="search"><span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span><div class="searchbox__input"><input class="searchbox__field" data-role="quote-filter-panel-search-input" data-filter-kind="' + escapeHtml(kind) + '" type="search" value="' + escapeHtml(query) + '" placeholder="搜索" aria-label="搜索' + escapeHtml(title) + '"></div><div class="searchbox__actions"><button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" data-dom-id="quote-filter-panel-search-clear" type="button" aria-label="清除搜索"' + (query ? '' : ' hidden') + '></button></div></label></div>'
+          + '<div class="quote-filter-chip-grid quote-filter-option-grid">' + (options.map(function (item) { return filterChipHtml(kind, item, item, draft[kind], query, ''); }).join('') || filterEmptyHtml()) + '</div>'
+          + '<div class="quote-filter-option-actions"><span>已选 <em>' + (draft[kind] === 'all' ? '0' : '1') + '/' + (kind === 'source' ? '1' : '1') + '</em></span><button type="button" class="btn btn--weak btn--md" data-component-slug="button" data-dom-id="quote-filter-option-clear">清除</button><button type="button" class="btn btn--strong btn--md" data-component-slug="button" data-dom-id="quote-filter-option-confirm">确定</button></div>'
+          + '<div class="quote-filter-safe-bottom"></div>'
+          + '</section>';
+      }
+      function filterShellHtml() {
+        var draft = activeDraftFilters();
+        return '<button type="button" class="quote-filter-mask" data-dom-id="quote-filter-close-mask" aria-label="关闭筛选"></button>'
+          + '<aside class="quote-filter-drawer" role="dialog" aria-modal="true" aria-label="筛选">'
+          + filterMainContentHtml(draft)
+          + (state.filterPanel ? filterOptionPanelHtml(state.filterPanel, draft) : '')
+          + '</aside>';
+      }
+      function filterOverlayTemplate() {
+        return '<div class="modal modal--fullscreen quote-filter-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="筛选" style="--modal-panel-bg: transparent"><div class="quote-filter-shell" data-role="quote-filter-shell">' + filterShellHtml() + '</div></div>';
+      }
+      function openFilterDrawer() {
+        state.filterDraft = normalizeFilters(state.filters);
+        state.filterPanel = '';
+        state.filterSearch = { category: '', source: '' };
+        state.filterSearchOpen = '';
+        state.sourceVisibleCount = SOURCE_PAGE_SIZE;
+        closeAllMenus();
+        ctx.openFullScreenModal(filterOverlayTemplate(), {
           label: '筛选',
-          init: function (sheetCtx) {
-            var cancel = sheetCtx.root.querySelector('[data-dom-id="quote-filter-cancel"]');
-            if (cancel) cancel.addEventListener('click', function () { sheetCtx.close(); });
-          }
+          init: bindFilterOverlay
         });
+      }
+      function bindFilterOverlay(filterCtx) {
+        var filterRoot = filterCtx.root;
+        function refresh(options) {
+          var shell = filterRoot.querySelector('[data-role="quote-filter-shell"]');
+          if (!shell) return;
+          shell.innerHTML = filterShellHtml();
+          bindControls();
+          if (options && options.focusKind) {
+            var input = filterRoot.querySelector('[data-role="quote-filter-search-input"][data-filter-kind="' + options.focusKind + '"]')
+              || filterRoot.querySelector('[data-role="quote-filter-panel-search-input"][data-filter-kind="' + options.focusKind + '"]');
+            if (input) input.focus();
+          }
+        }
+        function updateDraft(next, changedField) {
+          state.filterDraft = normalizeFilters(next, changedField);
+        }
+        function bindControls() {
+          var closeMask = filterRoot.querySelector('[data-dom-id="quote-filter-close-mask"]');
+          var resetBtn = filterRoot.querySelector('[data-dom-id="quote-filter-reset"]');
+          var confirmBtn = filterRoot.querySelector('[data-dom-id="quote-filter-confirm"]');
+          if (closeMask) closeMask.addEventListener('click', function () {
+            state.filterDraft = null;
+            state.filterPanel = '';
+            filterCtx.close();
+          });
+          if (resetBtn) resetBtn.addEventListener('click', function () {
+            state.filterDraft = createDefaultFilters();
+            state.filterPanel = '';
+            state.filterSearch = { category: '', source: '' };
+            state.filterSearchOpen = '';
+            state.sourceVisibleCount = SOURCE_PAGE_SIZE;
+            refresh();
+          });
+          if (confirmBtn) confirmBtn.addEventListener('click', function () {
+            state.filters = normalizeFilters(activeDraftFilters());
+            state.filterDraft = null;
+            state.filterPanel = '';
+            state.page = 1;
+            filterCtx.close();
+            renderList();
+          });
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-filter-date-field]'), function (input) {
+            input.addEventListener('input', function () {
+              var field = input.getAttribute('data-filter-date-field');
+              var draft = activeDraftFilters();
+              updateDraft(Object.assign({}, draft, { preset: '', [field]: input.value }), field);
+              refresh();
+            });
+          });
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-filter-option]'), function (btn) {
+            btn.addEventListener('click', function () {
+              var kind = btn.getAttribute('data-filter-kind');
+              var value = btn.getAttribute('data-filter-value');
+              var draft = activeDraftFilters();
+              if (kind === 'preset') {
+                updateDraft(Object.assign({}, draft, presetRange(value), { preset: value }), '');
+              } else {
+                updateDraft(Object.assign({}, draft, { [kind]: draft[kind] === value ? 'all' : value }), '');
+              }
+              refresh({ focusKind: state.filterSearchOpen || state.filterPanel });
+            });
+          });
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-filter-clear-kind]'), function (btn) {
+            btn.addEventListener('click', function () {
+              var kind = btn.getAttribute('data-filter-clear-kind');
+              var draft = activeDraftFilters();
+              updateDraft(Object.assign({}, draft, { [kind]: 'all' }), '');
+              refresh({ focusKind: state.filterSearchOpen || state.filterPanel });
+            });
+          });
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-role="quote-filter-search-trigger"]'), function (btn) {
+            btn.addEventListener('click', function () {
+              state.filterSearchOpen = btn.getAttribute('data-filter-kind') || '';
+              refresh({ focusKind: state.filterSearchOpen });
+            });
+          });
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-role="quote-filter-search-input"], [data-role="quote-filter-panel-search-input"]'), function (input) {
+            input.addEventListener('input', function () {
+              var kind = input.getAttribute('data-filter-kind');
+              state.filterSearch[kind] = input.value;
+              if (kind === 'source') state.sourceVisibleCount = SOURCE_PAGE_SIZE;
+              refresh({ focusKind: kind });
+            });
+          });
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-role="quote-filter-search-clear"]'), function (btn) {
+            btn.addEventListener('click', function () {
+              var kind = btn.getAttribute('data-filter-kind');
+              state.filterSearch[kind] = '';
+              refresh({ focusKind: kind });
+            });
+          });
+          var categoryMore = filterRoot.querySelector('[data-role="quote-filter-more-category"]');
+          if (categoryMore) categoryMore.addEventListener('click', function () {
+            state.filterPanel = 'category';
+            state.filterSearch.category = '';
+            refresh({ focusKind: 'category' });
+          });
+          var sourceList = filterRoot.querySelector('[data-role="quote-filter-source-list"]');
+          if (sourceList) sourceList.addEventListener('scroll', function () {
+            var bottom = sourceList.scrollTop + sourceList.clientHeight >= sourceList.scrollHeight - 16;
+            var total = filterOptions('source').filter(function (item) { return filterOptionMatches(item, state.filterSearch.source); }).length;
+            if (bottom && !state.filterSearch.source && state.sourceVisibleCount < total) {
+              state.sourceVisibleCount += SOURCE_PAGE_SIZE;
+              refresh();
+            }
+          });
+          var optionBack = filterRoot.querySelector('[data-dom-id="quote-filter-option-back"]');
+          if (optionBack) optionBack.addEventListener('click', function () {
+            state.filterPanel = '';
+            state.filterSearch.category = '';
+            refresh();
+          });
+          var panelClearSearch = filterRoot.querySelector('[data-dom-id="quote-filter-panel-search-clear"]');
+          if (panelClearSearch) panelClearSearch.addEventListener('click', function () {
+            var kind = state.filterPanel || 'category';
+            state.filterSearch[kind] = '';
+            refresh({ focusKind: kind });
+          });
+          var optionClear = filterRoot.querySelector('[data-dom-id="quote-filter-option-clear"]');
+          if (optionClear) optionClear.addEventListener('click', function () {
+            var kind = state.filterPanel || 'category';
+            var draft = activeDraftFilters();
+            updateDraft(Object.assign({}, draft, { [kind]: 'all' }), '');
+            refresh({ focusKind: kind });
+          });
+          var optionConfirm = filterRoot.querySelector('[data-dom-id="quote-filter-option-confirm"]');
+          if (optionConfirm) optionConfirm.addEventListener('click', function () {
+            state.filterPanel = '';
+            state.filterSearch.category = '';
+            refresh();
+          });
+        }
+        bindControls();
       }
       function bindPreview(previewCtx) {
         var previewRoot = previewCtx.root;
@@ -965,13 +1648,13 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             applyLanguage(previewRoot, langOpt.getAttribute('data-lang'));
             return;
           }
-          var formatTab = e.target.closest('.quote-format-tab');
+          var formatTab = e.target.closest('.quote-format-stack');
           if (formatTab) {
             state.exportFormat = formatTab.getAttribute('data-format') || 'excel';
-            Array.prototype.forEach.call(previewRoot.querySelectorAll('.quote-format-tab'), function (tab) {
+            Array.prototype.forEach.call(previewRoot.querySelectorAll('.quote-format-stack'), function (tab) {
               var selected = tab === formatTab;
-              tab.classList.toggle('is-active', selected);
-              tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+              tab.classList.toggle('stack--selected', selected);
+              tab.setAttribute('aria-pressed', selected ? 'true' : 'false');
             });
             return;
           }
@@ -1005,7 +1688,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             e.target.value = normalizePriceValue(e.target.value);
             row[field] = e.target.value;
             var usd = rowEl.querySelector('.quote-usd-text');
-            if (usd) usd.textContent = '$' + formatUsd(row.priceMax || row.priceMin);
+            if (usd) usd.textContent = quoteRowUsdText(row);
             updatePreviewTotals(previewRoot);
           } else {
             row[field] = e.target.value;
@@ -1026,6 +1709,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         }
         state.appendMode = false;
         setAppendMode(false);
+        window.scrollTo(0, 0);
         ctx.openFullScreenModal(quotePreviewTemplate(state), {
           label: '报价单预览',
           init: bindPreview
@@ -1114,12 +1798,23 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       });
       root.querySelector('[data-dom-id="quote-view-toggle"]').addEventListener('click', function () { switchView(state.view === 'grid' ? 'list' : 'grid'); });
       root.querySelector('[data-dom-id="quote-filter-sheet-btn"]').addEventListener('click', function () {
-        var btn = root.querySelector('[data-dom-id="quote-filter-sheet-btn"]');
-        var strip = root.querySelector('[data-role="quote-filter-strip"]');
-        btn.classList.add('is-active');
-        btn.setAttribute('aria-pressed', 'true');
-        strip.hidden = false;
-        openFilterPlaceholder();
+        openFilterDrawer();
+      });
+      root.querySelector('[data-role="quote-filter-strip"]').addEventListener('click', function (e) {
+        var remove = e.target.closest('[data-filter-remove]');
+        if (!remove) return;
+        var kind = remove.getAttribute('data-filter-remove');
+        var next = cloneFilters(state.filters);
+        if (kind === 'category') next.category = 'all';
+        else if (kind === 'source') next.source = 'all';
+        else if (kind === 'date') {
+          next.startDate = '';
+          next.endDate = '';
+          next.preset = '';
+        }
+        state.filters = normalizeFilters(next);
+        state.page = 1;
+        renderList();
       });
       selectAllBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleBatchSelection(); });
       countDropdown.addEventListener('click', function () { toggleMenu(countDropdown, countMenu, countMenu.hidden); });
