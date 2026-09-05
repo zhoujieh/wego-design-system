@@ -927,7 +927,7 @@
   /* 顶对齐原单行输入框位置，宽度与单元格（原输入框）一致。
      输入框脱离文档流后所在输入组高度会塌缩、被 table-cell 垂直居中整体下移，
      聚焦态（is-input-focused）保持输入组最小高度与原单行一致，顶部偏移随之消除。
-     展开动画：淡入 + 轻微上移，与 memo/选择器展开体感一致 */
+     展开动画：以顶部为轴向下生长（scaleY）+ 淡入，不做位移避免抖动 */
   inset-block-start: 0;
   inset-inline: 0;
   z-index: calc(var(--z-sticky) + 1);
@@ -941,7 +941,8 @@
   border: var(--stroke-hairline) solid var(--border-control);
   border-radius: var(--radius-6);
   padding: var(--spacer-8) var(--spacer-12);
-  transform: translateY(0);
+  transform: scaleY(1);
+  transform-origin: top center;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   resize: vertical;
@@ -950,11 +951,11 @@
 @keyframes quote-input-expand {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: scaleY(0.85);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scaleY(1);
   }
 }
 .quote-preview-modal.is-input-focused .quote-cell-field {
