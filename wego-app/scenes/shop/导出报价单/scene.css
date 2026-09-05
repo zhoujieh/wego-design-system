@@ -924,19 +924,24 @@
 }
 .quote-cell-textarea.is-expanded {
   position: absolute;
-  inset-block-start: 50%;
-  inset-inline: var(--spacer-8);
+  /* 顶对齐原单行输入框位置，宽度与单元格（原输入框）一致 */
+  inset-block-start: 0;
+  inset-inline: 0;
   z-index: calc(var(--z-sticky) + 1);
-  width: calc(100% - var(--spacer-16));
+  width: 100%;
   height: auto;
-  min-height: calc(var(--size-96) + var(--size-32));
+  min-height: calc(var(--size-96) + var(--spacer-8));
   max-height: calc(var(--size-96) * 3);
   overflow-y: auto;
   background: var(--bg-surface);
-  transform: translateY(-50%);
+  border: var(--stroke-hairline) solid var(--border-neutral-l2);
+  border-radius: var(--radius-6);
+  padding: var(--spacer-8) var(--spacer-12);
+  transform: none;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  box-shadow: var(--shadow-lg);
+  resize: none;
+  box-shadow: none;
 }
 .quote-table__spec,
 .quote-table__name {
