@@ -148,22 +148,22 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   ];
   var CNY_TO_USD = 7.1;
   var LANGUAGE_OPTIONS = [
-    { code: 'zh-CN', label: '中文', short: '中', rtl: false },
-    { code: 'en', label: 'English', short: '英', rtl: false },
-    { code: 'ja', label: '日本語', short: '日', rtl: false },
-    { code: 'ko', label: '한국어', short: '韩', rtl: false },
-    { code: 'es', label: 'Español', short: '西', rtl: false },
-    { code: 'fr', label: 'Français', short: '法', rtl: false },
-    { code: 'de', label: 'Deutsch', short: '德', rtl: false },
-    { code: 'it', label: 'Italiano', short: '意', rtl: false },
-    { code: 'pt', label: 'Português', short: '葡', rtl: false },
-    { code: 'ru', label: 'Русский', short: '俄', rtl: false },
-    { code: 'ar', label: 'العربية', short: '阿', rtl: true },
-    { code: 'hi', label: 'हिन्दी', short: '印地', rtl: false },
-    { code: 'id', label: 'Indonesia', short: '印尼', rtl: false },
-    { code: 'vi', label: 'Tiếng Việt', short: '越南', rtl: false },
-    { code: 'th', label: 'ไทย', short: '泰', rtl: false },
-    { code: 'tr', label: 'Türkçe', short: '土', rtl: false }
+    { code: 'zh-CN', label: '中文', short: '中', cn: '中文', rtl: false },
+    { code: 'en', label: 'English', short: '英', cn: '英语', rtl: false },
+    { code: 'ja', label: '日本語', short: '日', cn: '日本', rtl: false },
+    { code: 'ko', label: '한국어', short: '韩', cn: '韩国', rtl: false },
+    { code: 'es', label: 'Español', short: '西', cn: '西班牙', rtl: false },
+    { code: 'fr', label: 'Français', short: '法', cn: '法国', rtl: false },
+    { code: 'de', label: 'Deutsch', short: '德', cn: '德国', rtl: false },
+    { code: 'it', label: 'Italiano', short: '意', cn: '意大利', rtl: false },
+    { code: 'pt', label: 'Português', short: '葡', cn: '葡萄牙', rtl: false },
+    { code: 'ru', label: 'Русский', short: '俄', cn: '俄罗斯', rtl: false },
+    { code: 'ar', label: 'العربية', short: '阿', cn: '阿拉伯', rtl: true },
+    { code: 'hi', label: 'हिन्दी', short: '印地', cn: '印度', rtl: false },
+    { code: 'id', label: 'Indonesia', short: '印尼', cn: '印度尼西亚', rtl: false },
+    { code: 'vi', label: 'Tiếng Việt', short: '越南', cn: '越南', rtl: false },
+    { code: 'th', label: 'ไทย', short: '泰', cn: '泰国', rtl: false },
+    { code: 'tr', label: 'Türkçe', short: '土', cn: '土耳其', rtl: false }
   ];
   var translateCache = {};
 
@@ -271,7 +271,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     return '<div class="popmenu__list">' + LANGUAGE_OPTIONS.map(function (lang) {
       var selected = lang.code === currentCode;
       return '<div class="popmenu__item' + (selected ? ' popmenu__item--selected' : '') + '" data-role="quote-language-option" data-lang="' + escapeHtml(lang.code) + '" role="option" aria-selected="' + (selected ? 'true' : 'false') + '">'
-        + '<span class="popmenu__item-text">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span>'
+        + '<span class="quote-language-option__native">' + escapeHtml(lang.label) + '</span>'
+        + '<span class="quote-language-option__cn">' + escapeHtml(lang.cn || lang.label) + '</span>'
         + '<i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>'
         + '</div>';
     }).join('') + '</div>';
@@ -342,7 +343,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '<div class="quote-preview-total" data-role="quote-total"><strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span></div></div>'
       + '<div class="quote-preview-title input-group" data-component-slug="input"><label class="field-label" for="quote-title-input">报价单标题</label><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '" aria-label="报价单标题"></div></div>'
       + '</section>'
-      + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><span data-role="quote-language-label">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>'
+      + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><i class="wego-iconfont-s icon-yuyanqiehuanxian" aria-hidden="true"></i><span data-role="quote-language-label">' + escapeHtml(lang.cn || lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16 quote-language-caret" aria-hidden="true"></i></button>'
       + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed">' + languageMenuHtml(state.language) + '</div></div></div></section>'
       + '<div class="quote-sticky-head-slot" data-role="quote-sticky-head-slot"' + (state.quoteRows.length ? '' : ' hidden') + '>' + quoteStickyHeaderHtml() + '</div>'
       + '<section class="quote-table-shell" data-role="quote-table-shell">' + quoteTableHtml(state.quoteRows) + '</section>'
@@ -515,9 +516,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (btn) {
           btn.classList.toggle('is-active', active);
           btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-          btn.setAttribute('aria-label', active ? '筛选，已选' + badges.length + '项条件' : '筛选');
-          if (active) btn.setAttribute('data-filter-count', String(badges.length));
-          else btn.removeAttribute('data-filter-count');
+          btn.setAttribute('aria-label', '筛选');
         }
         if (!strip) return;
         strip.hidden = !active;
@@ -1026,8 +1025,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function deleteQuoteRow(previewRoot, button) {
         var id = button ? button.getAttribute('data-quote-delete-row') : '';
         var rowEl = button ? button.closest('[data-quote-row-id]') : null;
-        if (!id || !findQuoteRow(id)) return;
-        state.quoteRows = state.quoteRows.filter(function (row) { return row.id !== id; });
+        var row = findQuoteRow(id);
+        if (!id || !row) return;
+        state.quoteRows = state.quoteRows.filter(function (r) { return r.id !== id; });
+        if (row.sourceKey && state.selected[row.sourceKey]) delete state.selected[row.sourceKey];
         state.dirty = true;
         if (!state.quoteRows.length) {
           refreshPreviewTable(previewRoot);
@@ -1089,8 +1090,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function syncLanguageMenu(previewRoot) {
         var lang = getLanguage(state.language);
         var label = previewRoot.querySelector('[data-role="quote-language-label"]');
-        if (label) label.textContent = lang.short + ' · ' + lang.label;
-        Array.prototype.forEach.call(previewRoot.querySelectorAll('[data-role="quote-language-option"]'), function (opt) {
+        if (label) label.textContent = lang.cn || lang.label;
+        Array.prototype.forEach.call(document.querySelectorAll('[data-role="quote-language-option"]'), function (opt) {
           var selected = opt.getAttribute('data-lang') === state.language;
           opt.classList.toggle('popmenu__item--selected', selected);
           opt.setAttribute('aria-selected', selected ? 'true' : 'false');
@@ -1265,9 +1266,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var canRestore = Boolean(state.batchPriceRestoreSnapshot && state.batchPriceRestoreSnapshot.rows && state.batchPriceRestoreSnapshot.rows.length);
         return '<div class="modal modal--frame-x modal--has-actions quote-batch-price-modal" data-component-slug="modal" role="dialog" aria-modal="true" data-state="open" aria-label="批量改价">'
           + '<div class="modal__panel">'
-          + '<div class="modal__title modal__title--default"><nav class="navbar" data-component-slug="navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-batch-price-close" aria-label="关闭批量改价"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">批量改价</span></div><div class="navbar__right"><button type="button" class="btn btn--weak btn--sm quote-batch-price-restore" data-component-slug="button" data-dom-id="quote-batch-price-restore"' + (canRestore ? '' : ' disabled') + '>恢复改价前</button></div></div></nav></div>'
+          + '<div class="modal__title modal__title--default"><nav class="navbar" data-component-slug="navbar"><div class="navbar__body navbar__body--spaced"><div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="quote-batch-price-cancel" aria-label="取消">取消</button></div><div class="navbar__center"><span class="navbar__title">批量改价</span></div><div class="navbar__right navbar__right--button"><button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="quote-batch-price-confirm">确定</button></div></div></nav></div>'
           + '<div class="modal__body quote-batch-price-body" data-role="quote-batch-price-body">' + batchPriceEditorHtml() + '</div>'
-          + '<div class="modal__actions"><div class="modal__action-gradient"></div><div class="modal__buttons"><button type="button" class="btn btn--weak btn--lg" data-component-slug="button" data-dom-id="quote-batch-price-cancel">取消</button><button type="button" class="btn btn--strong btn--lg" data-component-slug="button" data-dom-id="quote-batch-price-confirm">确定</button></div></div>'
+          + '<div class="modal__actions"><div class="modal__links"><button type="button" class="link quote-batch-price-restore' + (canRestore ? '' : ' link--disabled') + '" data-component-slug="link" data-dom-id="quote-batch-price-restore"' + (canRestore ? '' : ' disabled') + '>恢复改价前</button></div></div>'
           + '</div></div>';
       }
       function refreshBatchPriceSheetBody(sheetRoot) {
@@ -1383,11 +1384,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           label: '批量改价',
           init: function (sheetCtx) {
             var sheetRoot = sheetCtx.root;
-            var close = sheetRoot.querySelector('[data-dom-id="quote-batch-price-close"]');
-            var cancel = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-cancel"]');
-            var confirm = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-confirm"]');
+            var cancel = sheetRoot.querySelector('[data-dom-id="quote-batch-price-cancel"]');
+            var confirm = sheetRoot.querySelector('[data-dom-id="quote-batch-price-confirm"]');
             var restore = sheetRoot.querySelector('[data-dom-id="quote-batch-price-restore"]');
-            close.addEventListener('click', function () { sheetCtx.close(); });
             cancel.addEventListener('click', function () { sheetCtx.close(); });
             confirm.addEventListener('click', function () { applyBatchPriceChanges(previewRoot, sheetCtx); });
             restore.addEventListener('click', function () { restoreBatchPrices(previewRoot, sheetCtx); });
@@ -1525,12 +1524,15 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           + '<div class="quote-filter-safe-bottom"></div>'
           + '</section>';
       }
-      function filterShellHtml() {
+      function filterContentHtml() {
         var draft = activeDraftFilters();
+        return filterMainContentHtml(draft)
+          + (state.filterPanel ? filterOptionPanelHtml(state.filterPanel, draft) : '');
+      }
+      function filterShellHtml() {
         return '<button type="button" class="quote-filter-mask" data-dom-id="quote-filter-close-mask" aria-label="关闭筛选"></button>'
           + '<aside class="quote-filter-drawer" role="dialog" aria-modal="true" aria-label="筛选">'
-          + filterMainContentHtml(draft)
-          + (state.filterPanel ? filterOptionPanelHtml(state.filterPanel, draft) : '')
+          + '<div class="quote-filter-content" data-role="quote-filter-content">' + filterContentHtml() + '</div>'
           + '</aside>';
       }
       function filterOverlayTemplate() {
@@ -1551,10 +1553,17 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function bindFilterOverlay(filterCtx) {
         var filterRoot = filterCtx.root;
         function refresh(options) {
-          var shell = filterRoot.querySelector('[data-role="quote-filter-shell"]');
-          if (!shell) return;
-          shell.innerHTML = filterShellHtml();
+          var content = filterRoot.querySelector('[data-role="quote-filter-content"]');
+          if (!content) return;
+          var scrollState = [];
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-role="quote-filter-scroll"], [data-role="quote-filter-source-list"]'), function (el) {
+            scrollState.push({ el: el, top: el.scrollTop });
+          });
+          content.innerHTML = filterContentHtml();
           bindControls();
+          scrollState.forEach(function (item) {
+            if (item.el.isConnected) item.el.scrollTop = item.top;
+          });
           if (options && options.focusKind) {
             var input = filterRoot.querySelector('[data-role="quote-filter-search-input"][data-filter-kind="' + options.focusKind + '"]')
               || filterRoot.querySelector('[data-role="quote-filter-panel-search-input"][data-filter-kind="' + options.focusKind + '"]');
@@ -1564,15 +1573,30 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         function updateDraft(next, changedField) {
           state.filterDraft = normalizeFilters(next, changedField);
         }
+        function toggleChipsActiveInPlace(kind, current) {
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-filter-option][data-filter-kind="' + kind + '"]'), function (chip) {
+            chip.classList.toggle('is-active', chip.getAttribute('data-filter-value') === current);
+          });
+        }
+        function syncDateFieldsInPlace(draft) {
+          ['startDate', 'endDate'].forEach(function (field) {
+            var input = filterRoot.querySelector('[data-filter-date-field="' + field + '"]');
+            if (!input) return;
+            var label = input.closest('.quote-filter-date-field');
+            var value = draft[field] || '';
+            input.value = value;
+            var limits = dateInputConstraints(field, draft);
+            input.min = limits.min || '';
+            input.max = limits.max || '';
+            if (!label) return;
+            label.classList.toggle('is-empty', !value);
+            var display = label.querySelector('.quote-filter-date-field__display');
+            if (display) display.textContent = value ? formatDateLabel(value) : (field === 'startDate' ? '开始日期' : '结束日期');
+          });
+        }
         function bindControls() {
-          var closeMask = filterRoot.querySelector('[data-dom-id="quote-filter-close-mask"]');
           var resetBtn = filterRoot.querySelector('[data-dom-id="quote-filter-reset"]');
           var confirmBtn = filterRoot.querySelector('[data-dom-id="quote-filter-confirm"]');
-          if (closeMask) closeMask.addEventListener('click', function () {
-            state.filterDraft = null;
-            state.filterPanel = '';
-            filterCtx.close();
-          });
           if (resetBtn) resetBtn.addEventListener('click', function () {
             state.filterDraft = createDefaultFilters();
             state.filterPanel = '';
@@ -1603,11 +1627,14 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               var value = btn.getAttribute('data-filter-value');
               var draft = activeDraftFilters();
               if (kind === 'preset') {
-                updateDraft(Object.assign({}, draft, presetRange(value), { preset: value }), '');
+                var next = Object.assign({}, draft, presetRange(value), { preset: value });
+                updateDraft(next, '');
+                toggleChipsActiveInPlace('preset', value);
+                syncDateFieldsInPlace(next);
               } else {
                 updateDraft(Object.assign({}, draft, { [kind]: draft[kind] === value ? 'all' : value }), '');
+                refresh({ focusKind: state.filterSearchOpen || state.filterPanel });
               }
-              refresh({ focusKind: state.filterSearchOpen || state.filterPanel });
             });
           });
           Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-filter-clear-kind]'), function (btn) {
@@ -1680,6 +1707,12 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             refresh();
           });
         }
+        var closeMask = filterRoot.querySelector('[data-dom-id="quote-filter-close-mask"]');
+        if (closeMask) closeMask.addEventListener('click', function () {
+          state.filterDraft = null;
+          state.filterPanel = '';
+          filterCtx.close();
+        });
         bindControls();
       }
       function bindPreview(previewCtx) {
@@ -1701,9 +1734,11 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           else languageMenu.setAttribute('data-state', 'closed');
           syncLanguageButtonOpenState();
         }
+        function onPreviewScroll() { hideLanguageMenu(); }
         function cleanupPreview() {
           if (languageMenuHandle) languageMenuHandle.destroy();
           if (languageMenuObserver) languageMenuObserver.disconnect();
+          if (languageMenu && languageMenu.parentElement === document.body) languageMenu.remove();
           setTranslateLoading(previewRoot, false);
         }
         activateImages(previewRoot);
@@ -1718,24 +1753,35 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           setAppendMode(false);
           cleanupPreview();
           previewCtx.close();
+          syncVisibleSelectionStates();
         });
         previewRoot.querySelector('[data-dom-id="quote-add-more"]').addEventListener('click', function () {
           setAppendMode(true);
           cleanupPreview();
           previewCtx.close();
+          syncVisibleSelectionStates();
           ctx.toast('继续选择要追加的产品');
         });
         previewRoot.querySelector('[data-dom-id="quote-share-main"]').addEventListener('click', function () {
           ctx.toast('分享导出将在后续阶段接入');
         });
         if (window.WegoPopmenu && languageButton && languageMenu) {
+          /* app 浮层基座（app-overlay-layer）带 transform，会改变 fixed 定位坐标基准
+             （相对浮层而非视口），WegoPopmenu 用视口坐标计算会导致气泡错位；
+             先把菜单挂到无 transform 的 body 下，再用组件通用定位。
+             dismissOnScroll 关闭组件级滚动收起：菜单 max-height 内滚动列表时不应收起，
+             预览内容（询单滚动容器）滚动仍按外面滚动收起，避免气泡悬空错位 */
+          if (languageMenu.parentElement !== document.body) document.body.appendChild(languageMenu);
           languageMenu.style.position = 'fixed';
           languageMenuHandle = window.WegoPopmenu.bind(languageButton, languageMenu, {
             beforeShow: function () { closeAllMenus(); },
             onItemClick: function (item) {
               applyLanguage(previewRoot, item.getAttribute('data-lang'));
-            }
+            },
+            dismissOnScroll: false
           });
+          var previewScrollEl = previewRoot.querySelector('[data-role="quote-preview-scroll"]');
+          if (previewScrollEl) previewScrollEl.addEventListener('scroll', onPreviewScroll);
           languageMenuObserver = new MutationObserver(syncLanguageButtonOpenState);
           languageMenuObserver.observe(languageMenu, { attributes: true, attributeFilter: ['data-state'] });
           syncLanguageButtonOpenState();

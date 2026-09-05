@@ -118,24 +118,6 @@
 .quote-filter-btn {
   position: relative;
 }
-.quote-filter-btn[data-filter-count]::after {
-  content: attr(data-filter-count);
-  position: absolute;
-  top: var(--spacer-2);
-  right: var(--spacer-6);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--size-16);
-  height: var(--size-16);
-  padding: 0 var(--spacer-4);
-  border-radius: var(--radius-full);
-  background: var(--bg-brand);
-  color: var(--text-inverse);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  font-weight: var(--font-weight-medium);
-}
 .quote-filter-btn.is-active {
   color: var(--text-brand);
 }
@@ -143,11 +125,10 @@
   color: var(--icon-brand);
 }
 
-/* ===== 筛选条件条占位（阶段C接入后承载已应用条件） ===== */
+/* ===== 筛选条件条（承载已应用条件） ===== */
 .quote-filter-strip {
   padding: var(--spacer-8) var(--spacer-16);
-  background: var(--bg-surface);
-  border-block-end: var(--stroke-hairline) solid var(--border-neutral-l2);
+  background: var(--bg-page);
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   color: var(--text-secondary);
@@ -623,7 +604,7 @@
 .quote-language-button {
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--spacer-8);
   width: fit-content;
   height: var(--size-40);
@@ -635,14 +616,52 @@
   font-size: var(--body-md-font-size);
   line-height: var(--body-md-line-height);
 }
-.quote-language-button.is-open .wego-iconfont-s {
+.quote-language-button .wego-iconfont-s {
+  color: var(--text-secondary);
+  font-size: var(--size-20);
+}
+.quote-language-button .quote-language-caret {
+  color: var(--text-tertiary);
+  font-size: var(--size-16);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.quote-language-button.is-open .quote-language-caret {
   transform: rotate(180deg);
 }
 .quote-language-menu {
   position: fixed;
-  z-index: var(--z-popover);
+  /* 挂在 body 下，需高于全屏模态浮层（z=500）才能不被遮挡 */
+  z-index: var(--z-modal);
   max-height: calc(var(--size-96) * 3);
   overflow-y: auto;
+}
+.quote-language-option__native {
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.quote-language-option__cn {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 选中项：语言原名加粗，原名与中文说明文字变绿（对勾组件已绿） */
+.quote-language-menu .popmenu__item--selected .quote-language-option__native {
+  font-weight: var(--font-weight-medium);
+}
+.quote-language-menu .popmenu__item--selected .quote-language-option__native,
+.quote-language-menu .popmenu__item--selected .quote-language-option__cn {
+  color: var(--status-success-default);
 }
 .quote-preview-toolbar {
   display: flex;
@@ -884,21 +903,47 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.quote-cell-textarea.is-expanded {
+.quote-cell-field .quote-cell-textarea.is-expanded {
   position: absolute;
-  inset-block-start: 50%;
-  inset-inline: var(--spacer-8);
+  /* 顶对齐原单行输入框位置，宽度与单元格（原输入框）一致。
+     输入框脱离文档流后所在输入组高度会塌缩、被 table-cell 垂直居中整体下移，
+     聚焦态（is-input-focused）保持输入组最小高度与原单行一致，顶部偏移随之消除。
+     展开动画：以顶部为轴向下生长（scaleY）+ 淡入，不做位移避免抖动 */
+  inset-block-start: 0;
+  inset-inline: 0;
   z-index: calc(var(--z-sticky) + 1);
-  width: calc(100% - var(--spacer-16));
+  width: 100%;
   height: auto;
-  min-height: calc(var(--size-96) + var(--size-32));
+  min-height: 96px;
   max-height: calc(var(--size-96) * 3);
   overflow-y: auto;
-  background: var(--bg-surface);
-  transform: translateY(-50%);
+  /* 组件基础输入框样式：灰底 + 可见描边 + 右下角拖拽手柄（覆盖组件默认 focus 边框色） */
+  background: var(--bg-subtle);
+  border: var(--stroke-hairline) solid var(--border-control);
+  border-radius: var(--radius-6);
+  padding: var(--spacer-8) var(--spacer-12);
+  transform: scaleY(1);
+  transform-origin: top center;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  box-shadow: var(--shadow-lg);
+  resize: vertical;
+  animation: quote-input-expand var(--duration-normal) var(--ease-enter) both;
+}
+@keyframes quote-input-expand {
+  from {
+    opacity: 0;
+    transform: scaleY(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+.quote-preview-modal.is-input-focused .quote-cell-field {
+  min-height: var(--size-40);
+}
+.quote-cell-field .quote-cell-textarea.is-expanded:focus {
+  border-color: var(--border-control);
 }
 .quote-table__spec,
 .quote-table__name {
@@ -975,10 +1020,6 @@
 .quote-batch-price-body .input-group {
   max-width: none;
 }
-.quote-batch-price-restore {
-  max-width: none;
-  white-space: nowrap;
-}
 .quote-batch-mode-grid,
 .quote-batch-unit-row,
 .quote-batch-tail-grid {
@@ -993,8 +1034,12 @@
   border: none;
   background: transparent;
 }
-.quote-batch-price-mode .stack__bg {
-  width: calc(var(--size-72) + var(--spacer-16) + var(--spacer-2));
+.quote-batch-mode-grid .quote-batch-price-mode {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.quote-batch-mode-grid .quote-batch-price-mode .stack__bg {
+  width: 100%;
 }
 .quote-batch-price-unit .stack__bg,
 .quote-batch-price-tail .stack__bg {
@@ -1012,9 +1057,9 @@
 }
 .quote-batch-section-title {
   margin-block-end: var(--spacer-8);
-  color: var(--text-secondary);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
   font-weight: var(--font-weight-medium);
 }
 .quote-batch-tail-block {
@@ -1032,6 +1077,7 @@
   display: flex;
   justify-content: flex-end;
   background: var(--bg-mask-light);
+  animation: quote-filter-mask-in var(--duration-normal) var(--ease-enter) both;
 }
 .quote-filter-mask {
   position: absolute;
@@ -1044,7 +1090,7 @@
   z-index: var(--z-modal);
   display: flex;
   flex-direction: column;
-  width: calc(100% - var(--size-40));
+  width: 86%;
   max-width: calc(var(--size-96) * 3 + var(--size-40) + var(--spacer-6) + var(--stroke-1));
   height: 100%;
   overflow: hidden;
@@ -1052,6 +1098,16 @@
   background: var(--bg-page);
   box-shadow: var(--shadow-lg);
   animation: quote-filter-drawer-in var(--duration-normal) var(--ease-enter) both;
+}
+.quote-filter-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.quote-filter-modal[data-state="closed"] .quote-filter-shell {
+  animation: quote-filter-mask-out var(--duration-normal) var(--ease-exit) both;
 }
 .quote-filter-modal[data-state="closed"] .quote-filter-drawer {
   animation: quote-filter-drawer-out var(--duration-normal) var(--ease-exit) both;
@@ -1082,7 +1138,7 @@
   background: var(--bg-surface);
 }
 .quote-filter-card--source {
-  min-height: 0;
+  height: auto;
 }
 .quote-filter-card__title {
   position: sticky;
@@ -1227,14 +1283,21 @@
   caret-color: transparent;
   -webkit-text-fill-color: transparent;
 }
+.quote-filter-date-field input::-webkit-calendar-picker-indicator {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+  width: 0;
+  height: 0;
+}
 .quote-filter-chip-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--size-72) + var(--spacer-16)), 1fr));
   gap: var(--spacer-8);
   padding: 0 var(--spacer-16) var(--spacer-12);
 }
 .quote-filter-chip {
-  min-width: calc(var(--size-72) + var(--spacer-16) + var(--spacer-2));
+  min-width: 0;
   min-height: var(--size-36);
   max-height: var(--size-36);
   overflow: hidden;
@@ -1243,8 +1306,8 @@
   border-radius: var(--radius-6);
   background: var(--bg-subtle);
   color: var(--text-default);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1253,6 +1316,17 @@
   background: var(--status-success-surface-l1);
   color: var(--text-brand);
   font-weight: var(--font-weight-medium);
+}
+.quote-filter-chip--source {
+  height: var(--size-40);
+  min-height: var(--size-40);
+  max-height: var(--size-40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: normal;
+  text-overflow: clip;
 }
 .quote-filter-chip--more {
   display: inline-flex;
@@ -1269,7 +1343,7 @@
   font-weight: var(--font-weight-medium);
 }
 .quote-filter-source-grid {
-  max-height: calc(var(--size-72) + var(--spacer-8));
+  max-height: calc(var(--size-40) * 2 + var(--spacer-8));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1394,8 +1468,9 @@
   padding: 0 var(--spacer-10);
   border: none;
   border-radius: var(--radius-16);
-  background: var(--bg-subtle);
-  color: var(--text-secondary);
+  background: var(--bg-surface);
+  color: var(--text-default);
+  box-shadow: var(--shadow-xs);
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
 }
@@ -1417,6 +1492,22 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+@keyframes quote-filter-mask-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes quote-filter-mask-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 @keyframes quote-filter-drawer-out {
@@ -1441,7 +1532,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .quote-filter-drawer,
+  .quote-filter-shell,
   .quote-filter-modal[data-state="closed"] .quote-filter-drawer,
+  .quote-filter-modal[data-state="closed"] .quote-filter-shell,
   .quote-filter-option-panel {
     animation: none;
   }
