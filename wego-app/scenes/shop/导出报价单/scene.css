@@ -623,7 +623,7 @@
 .quote-language-button {
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--spacer-8);
   width: fit-content;
   height: var(--size-40);
@@ -635,14 +635,36 @@
   font-size: var(--body-md-font-size);
   line-height: var(--body-md-line-height);
 }
-.quote-language-button.is-open .wego-iconfont-s {
-  transform: rotate(180deg);
+.quote-language-button .wego-iconfont-s {
+  color: var(--text-secondary);
+  font-size: var(--size-20);
 }
 .quote-language-menu {
   position: fixed;
-  z-index: var(--z-popover);
+  /* 挂在 body 下，需高于全屏模态浮层（z=500）才能不被遮挡 */
+  z-index: var(--z-modal);
   max-height: calc(var(--size-96) * 3);
   overflow-y: auto;
+}
+.quote-language-option__native {
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+  color: var(--text-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.quote-language-option__cn {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .quote-preview-toolbar {
   display: flex;

@@ -148,22 +148,22 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   ];
   var CNY_TO_USD = 7.1;
   var LANGUAGE_OPTIONS = [
-    { code: 'zh-CN', label: '中文', short: '中', rtl: false },
-    { code: 'en', label: 'English', short: '英', rtl: false },
-    { code: 'ja', label: '日本語', short: '日', rtl: false },
-    { code: 'ko', label: '한국어', short: '韩', rtl: false },
-    { code: 'es', label: 'Español', short: '西', rtl: false },
-    { code: 'fr', label: 'Français', short: '法', rtl: false },
-    { code: 'de', label: 'Deutsch', short: '德', rtl: false },
-    { code: 'it', label: 'Italiano', short: '意', rtl: false },
-    { code: 'pt', label: 'Português', short: '葡', rtl: false },
-    { code: 'ru', label: 'Русский', short: '俄', rtl: false },
-    { code: 'ar', label: 'العربية', short: '阿', rtl: true },
-    { code: 'hi', label: 'हिन्दी', short: '印地', rtl: false },
-    { code: 'id', label: 'Indonesia', short: '印尼', rtl: false },
-    { code: 'vi', label: 'Tiếng Việt', short: '越南', rtl: false },
-    { code: 'th', label: 'ไทย', short: '泰', rtl: false },
-    { code: 'tr', label: 'Türkçe', short: '土', rtl: false }
+    { code: 'zh-CN', label: '中文', short: '中', cn: '中文', rtl: false },
+    { code: 'en', label: 'English', short: '英', cn: '英语', rtl: false },
+    { code: 'ja', label: '日本語', short: '日', cn: '日本', rtl: false },
+    { code: 'ko', label: '한국어', short: '韩', cn: '韩国', rtl: false },
+    { code: 'es', label: 'Español', short: '西', cn: '西班牙', rtl: false },
+    { code: 'fr', label: 'Français', short: '法', cn: '法国', rtl: false },
+    { code: 'de', label: 'Deutsch', short: '德', cn: '德国', rtl: false },
+    { code: 'it', label: 'Italiano', short: '意', cn: '意大利', rtl: false },
+    { code: 'pt', label: 'Português', short: '葡', cn: '葡萄牙', rtl: false },
+    { code: 'ru', label: 'Русский', short: '俄', cn: '俄罗斯', rtl: false },
+    { code: 'ar', label: 'العربية', short: '阿', cn: '阿拉伯', rtl: true },
+    { code: 'hi', label: 'हिन्दी', short: '印地', cn: '印度', rtl: false },
+    { code: 'id', label: 'Indonesia', short: '印尼', cn: '印度尼西亚', rtl: false },
+    { code: 'vi', label: 'Tiếng Việt', short: '越南', cn: '越南', rtl: false },
+    { code: 'th', label: 'ไทย', short: '泰', cn: '泰国', rtl: false },
+    { code: 'tr', label: 'Türkçe', short: '土', cn: '土耳其', rtl: false }
   ];
   var translateCache = {};
 
@@ -271,7 +271,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     return '<div class="popmenu__list">' + LANGUAGE_OPTIONS.map(function (lang) {
       var selected = lang.code === currentCode;
       return '<div class="popmenu__item' + (selected ? ' popmenu__item--selected' : '') + '" data-role="quote-language-option" data-lang="' + escapeHtml(lang.code) + '" role="option" aria-selected="' + (selected ? 'true' : 'false') + '">'
-        + '<span class="popmenu__item-text">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span>'
+        + '<span class="quote-language-option__native">' + escapeHtml(lang.label) + '</span>'
+        + '<span class="quote-language-option__cn">' + escapeHtml(lang.cn || lang.label) + '</span>'
         + '<i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>'
         + '</div>';
     }).join('') + '</div>';
@@ -342,7 +343,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '<div class="quote-preview-total" data-role="quote-total"><strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span></div></div>'
       + '<div class="quote-preview-title input-group" data-component-slug="input"><label class="field-label" for="quote-title-input">报价单标题</label><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '" aria-label="报价单标题"></div></div>'
       + '</section>'
-      + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><span data-role="quote-language-label">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>'
+      + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><i class="wego-iconfont-s icon-yuyanqiehuanxian" aria-hidden="true"></i><span data-role="quote-language-label">' + escapeHtml(lang.cn || lang.label) + '</span></button>'
       + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed">' + languageMenuHtml(state.language) + '</div></div></div></section>'
       + '<div class="quote-sticky-head-slot" data-role="quote-sticky-head-slot"' + (state.quoteRows.length ? '' : ' hidden') + '>' + quoteStickyHeaderHtml() + '</div>'
       + '<section class="quote-table-shell" data-role="quote-table-shell">' + quoteTableHtml(state.quoteRows) + '</section>'
@@ -1091,8 +1092,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function syncLanguageMenu(previewRoot) {
         var lang = getLanguage(state.language);
         var label = previewRoot.querySelector('[data-role="quote-language-label"]');
-        if (label) label.textContent = lang.short + ' · ' + lang.label;
-        Array.prototype.forEach.call(previewRoot.querySelectorAll('[data-role="quote-language-option"]'), function (opt) {
+        if (label) label.textContent = lang.cn || lang.label;
+        Array.prototype.forEach.call(document.querySelectorAll('[data-role="quote-language-option"]'), function (opt) {
           var selected = opt.getAttribute('data-lang') === state.language;
           opt.classList.toggle('popmenu__item--selected', selected);
           opt.setAttribute('aria-selected', selected ? 'true' : 'false');
@@ -1704,6 +1705,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         function cleanupPreview() {
           if (languageMenuHandle) languageMenuHandle.destroy();
           if (languageMenuObserver) languageMenuObserver.disconnect();
+          if (languageMenu && languageMenu.parentElement === document.body) languageMenu.remove();
           setTranslateLoading(previewRoot, false);
         }
         activateImages(previewRoot);
@@ -1731,6 +1733,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           ctx.toast('分享导出将在后续阶段接入');
         });
         if (window.WegoPopmenu && languageButton && languageMenu) {
+          /* app 浮层基座（app-overlay-layer）带 transform，会改变 fixed 定位坐标基准
+             （相对浮层而非视口），WegoPopmenu 用视口坐标计算会导致气泡错位；
+             先把菜单挂到无 transform 的 body 下，再用组件通用定位 */
+          if (languageMenu.parentElement !== document.body) document.body.appendChild(languageMenu);
           languageMenu.style.position = 'fixed';
           languageMenuHandle = window.WegoPopmenu.bind(languageButton, languageMenu, {
             beforeShow: function () { closeAllMenus(); },
