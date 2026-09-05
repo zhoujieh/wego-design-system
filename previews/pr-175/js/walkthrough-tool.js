@@ -158,7 +158,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (route.entry && route.entry.label) return route.entry.label;
         // 主 tab 场景从 style 路径提取场景目录名（如 ./scenes/shop/动态/scene.css → 动态）
         if (route.style) {
-          const match = route.style.match(/\/scenes\/[^/]+\/([^/]+)\//);
+          const match = route.style.match(/(?:^|\/)scenes\/[^/]+\/([^/]+)\//);
           if (match) return match[1];
         }
       }
@@ -3791,13 +3791,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _buildPrompt() {
       const route = this._route || 'default';
-      const routeLabel = route === 'default' ? getCurrentRouteLabel() : getRouteLabel(route);
+      const routeLabel = this._routeLabel || (route === 'default' ? getCurrentRouteLabel() : getRouteLabel(route));
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const changes = this._changes || [];
       const annotations = this._annotations || [];
       if (changes.length === 0 && annotations.length === 0) {
         const metaLine = getPreviewMetaLine(viewport, this._promptPrNumber || getCurrentPrNumber());
-        return `## 走查工单 #/${routeLabel}\n${metaLine}\n\n当前还没有记录到任何配置修改或批注。`;
+        return `## 走查变更单 #/${routeLabel}\n${metaLine}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
@@ -3857,10 +3857,18 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
       // 辅助：提取类名锚点
       const getClassAnchor = (g) => {
-        if (g.componentClass) return g.componentClass;
+        if (g.componentClass) return g.componentClass.replace(/^\./, '');
         if (g.elementClass) return g.elementClass.split(/\s+/)[0];
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
+      };
+      const getBusinessClass = (g) => {
+        const componentClass = g.componentClass;
+        const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
+        if (!classes.length) return '';
+        const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
+        if (biz) return biz;
+        return '';
       };
       // 辅助：格式化 flex 值为友好描述
       const formatFlexLabel = (v) => {
@@ -3872,41 +3880,45 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return v;
       };
       const metaLine = getPreviewMetaLine(viewport, this._promptPrNumber || getCurrentPrNumber());
-      const lines = [
-        `## 走查工单 #/${routeLabel}`,
-        metaLine,
-        '',
-        '> 执行：按可见结果改源码，优先语义类；修后跑对应回归，经验信号写入 `.tasks/experience-inbox.json`。',
-        '',
-      ];
       const machine = [];
       const fullSelectors = [];
       // 样式变更组
       const styleGroups = groupList.filter(g => g.changes.length > 0);
       const noteOnlyGroups = pureAnnotations;
-      if (styleGroups.length) {
-        lines.push(`### 样式（${styleGroups.length} 组）`);
+      const requirementTotal = reorderInfos.length + styleGroups.length + noteOnlyGroups.length;
+      const lines = [
+        `## 走查变更单 #/${routeLabel}`,
+        metaLine,
+        '',
+        `> 只处理本轮 ${requirementTotal} 项需求，按账本逐项销账；优先语义类/data-dom-id，兜底选择器仅失败时看；业务修完后如发现走查工具导致遗漏/误报/臃肿，就在当前分支修工具并验证；经验信号写入 \`.tasks/experience-inbox.json\`。`,
+        '',
+      ];
+      let requirementIndex = 0;
+      if (requirementTotal) {
+        lines.push(`### 需求账本（${requirementTotal} 项）`);
         lines.push('');
       }
       // 元素顺序调整（功能 4 reorder 变更）
       if (reorderInfos.length) {
-        lines.push(`### 元素顺序调整（${reorderInfos.length} 处）`);
-        lines.push('');
         reorderInfos.forEach((c, ri) => {
+          const idx = ++requirementIndex;
           const anchor = (c.elementText || '').replace(/\s+/g, ' ').trim();
           const containerLabel = anchor ? `（${anchor.slice(0, 16)}）` : '';
-          lines.push(`${ri + 1}. 容器 ${c.selector}${containerLabel} 内 ${c.order.length} 个子元素顺序已调整`);
-          fullSelectors.push({ idx: '顺序' + (ri + 1), classAnchor: '', selector: c.selector });
+          lines.push(`#### ${idx}. ${routeLabel} / 元素顺序`);
+          lines.push(`- 对象：容器 ${c.selector}${containerLabel}`);
+          lines.push(`- 需求：容器内 ${c.order.length} 个子元素顺序已调整`);
+          lines.push('');
+          fullSelectors.push({ idx, classAnchor: '', selector: c.selector });
         });
-        lines.push('');
       }
       styleGroups.forEach((g, i) => {
+        const requirementIdx = ++requirementIndex;
         const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
         const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
         const classAnchor = getClassAnchor(g);
         const role = shortAnchor || classAnchor || g.elementTag;
         // 标题行
-        let title = `${i + 1}. ${role}`;
+        let title = `#### ${requirementIdx}. ${routeLabel} / ${role}`;
         if (classAnchor) title += ` · .${classAnchor}`;
         if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
         lines.push(title);
@@ -3924,35 +3936,59 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const changeLines = [];
         // 加类
         addClassChanges.forEach(c => {
-          changeLines.push(`   add-class: ${c.intentClass}`);
+          changeLines.push(`加结构类 \`${c.intentClass}\``);
         });
         iconChanges.forEach(c => {
-          changeLines.push(`   icon: ${c.oldValue} -> ${c.newValue}`);
+          changeLines.push(`替换图标 \`${c.oldValue}\` → \`${c.newValue}\``);
         });
         // 顺序移动
         orderChanges.forEach(c => {
           const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
           const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
-          changeLines.push(`   order: ${posTxt}${orderTxt}`);
+          changeLines.push(`顺序 ${posTxt}${orderTxt}`);
         });
         // 其他样式
         otherChanges.forEach(c => {
           const propLabel = c.property === 'flex' ? '宽度' : c.property;
           const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-          changeLines.push(`   ${propLabel}: ${valLabel}`);
+          changeLines.push(`${propLabel}: ${valLabel}`);
         });
         if (changeLines.length) {
-          changeLines.forEach(l => lines.push(l));
+          lines.push(`- 变更：${changeLines.join('；')}`);
+        }
+        // 改法
+        const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
+        const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
+        const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
+        const iconSnippet = iconChanges.map(c => `\`${c.oldValue}\` → \`${c.newValue}\``).join('，');
+        let fixLine = '- 改法：';
+        if (iconSnippet && !classAnchor && !cssSnippet && !orderSnippet && !addSnippet) {
+          fixLine += `将目标元素的图标类 ${iconSnippet}`;
+        } else if (classAnchor) {
+          const businessClass = getBusinessClass(g);
+          fixLine += `修改 \`.${classAnchor}\``;
+          if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
+          if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+          if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
+          if (iconSnippet) fixLine += `，替换图标类 ${iconSnippet}`;
+        } else {
+          fixLine += `在源码对应 CSS 中设置：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+          if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
+        }
+        lines.push(fixLine);
+        if (g.shared) {
+          lines.push(`- 范围：仅限 ${routeLabel} 当前上下文中这组共享元素`);
         }
         // 组内备注
         if (g.annotation) {
-          lines.push(`   备注：${g.annotation}`);
+          lines.push(`- 备注：${g.annotation}`);
         }
         lines.push('');
         // 完整选择器备选
-        fullSelectors.push({ idx: i + 1, classAnchor, selector: g.selector });
+        fullSelectors.push({ idx: requirementIdx, classAnchor, selector: g.selector });
         // machine JSON（保持向后兼容）
         machine.push({
+          requirementIndex: requirementIdx,
           selector: g.selector,
           elementText: anchor,
           role,
@@ -3966,21 +4002,35 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
       // 纯备注（无样式变更）
       if (noteOnlyGroups.length) {
-        lines.push(`### 备注（${noteOnlyGroups.length} 条）`);
-        lines.push('');
         noteOnlyGroups.forEach((a, i) => {
+          const requirementIdx = ++requirementIndex;
           const anchor = (a.elementText || '').replace(/\s+/g, ' ').trim();
           const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
           const aClass = (a.elementClass || '').split(/\s+/)[0] || '';
           const role = shortAnchor || aClass || a.elementTag;
-          lines.push(`${i + 1}. ${role}：${a.text}`);
-          fullSelectors.push({ idx: '备注' + (i + 1), classAnchor: aClass, selector: a.selector });
+          let title = `#### ${requirementIdx}. ${routeLabel} / ${role}`;
+          if (aClass) title += ` · .${aClass}`;
+          lines.push(title);
+          lines.push(`- 需求：${a.text}`);
+          lines.push('');
+          fullSelectors.push({ idx: requirementIdx, classAnchor: aClass, selector: a.selector });
+          machine.push({
+            requirementIndex: requirementIdx,
+            selector: a.selector,
+            elementText: anchor,
+            role,
+            adds: [],
+            icons: [],
+            css: [],
+            annotation: a.text || '',
+            shared: false,
+            sharedCount: 0,
+          });
         });
-        lines.push('');
       }
       // 完整定位选择器备选（折叠区）
       if (fullSelectors.length) {
-        lines.push('<details><summary>完整定位选择器（备选，主定位失效时使用）</summary>');
+        lines.push('<details><summary>定位兜底（执行失败时再看）</summary>');
         lines.push('');
         fullSelectors.forEach(f => {
           lines.push(`${f.idx}. ${f.classAnchor ? '.' + f.classAnchor + ' → ' : ''}\`${f.selector}\``);
@@ -4009,7 +4059,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
             const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
             if (changes.length > 0 || annotations.length > 0) {
-              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
+              scenes.push({ routeId, routeLabel: data.routeLabel || data.sceneLabel || getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
             }
           } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
         }
@@ -4030,7 +4080,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const scenes = this._loadAllScenesChanges();
       if (scenes.length === 0) {
         const metaLine = getPreviewMetaLine(viewport);
-        return `## 走查工单（跨场景汇总）\n${metaLine}\n\n当前还没有记录到任何配置修改或批注。`;
+        return `## 走查变更单（跨场景汇总）\n${metaLine}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 只有一个场景时，直接用单场景格式
       if (scenes.length === 1) {
@@ -4039,33 +4089,63 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const savedAnnotations = this._annotations;
         const savedRoute = this._route;
         const savedPromptPrNumber = this._promptPrNumber;
+        const savedRouteLabel = this._routeLabel;
         this._changes = s.changes;
         this._annotations = s.annotations;
         this._route = s.routeId;
         this._promptPrNumber = s.prNumber || null;
+        this._routeLabel = s.routeLabel;
         // 临时覆盖 getCurrentRouteLabel 用场景名
         const prompt = this._buildPrompt();
         this._changes = savedChanges;
         this._annotations = savedAnnotations;
         this._route = savedRoute;
         this._promptPrNumber = savedPromptPrNumber;
+        this._routeLabel = savedRouteLabel;
         return prompt;
       }
       // 多场景：按场景分组输出（PR 号取场景数据中的记录，优先当前场景；无记录时回退 URL 解析，均无则标本地预览）
       const scenePr = scenes.find(s => s.prNumber)?.prNumber || getCurrentPrNumber();
       const metaLine = getPreviewMetaLine(viewport, scenePr);
+      const countSceneRequirements = (scene) => {
+        const groups = {};
+        let reorderCount = 0;
+        scene.changes.forEach(c => {
+          if (c.type === 'reorder') { reorderCount++; return; }
+          const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
+          const gkey = c.sharedKey ? componentClass : c.selector;
+          if (!groups[gkey]) {
+            groups[gkey] = { selector: c.selector, componentClass };
+          }
+        });
+        let noteOnlyCount = 0;
+        scene.annotations.forEach(a => {
+          if (!a.text || !a.text.trim()) return;
+          const aComponentClass = (a.elementClass || '').split(/\s+/)[0] || '';
+          const matched = Object.values(groups).some(g => g.selector === a.selector || (g.componentClass && aComponentClass && g.componentClass === aComponentClass));
+          if (!matched) noteOnlyCount++;
+        });
+        return reorderCount + Object.keys(groups).length + noteOnlyCount;
+      };
+      const sceneRequirementCounts = new Map();
+      let requirementTotal = 0;
+      scenes.forEach(scene => {
+        const count = countSceneRequirements(scene);
+        sceneRequirementCounts.set(scene.routeId, count);
+        requirementTotal += count;
+      });
       const lines = [
-        `## 走查工单（跨场景汇总，共 ${scenes.length} 个场景）`,
+        `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景，${requirementTotal} 项需求）`,
         metaLine,
         '',
-        '> 执行：按可见结果改源码，优先语义类；修后跑对应回归，经验信号写入 `.tasks/experience-inbox.json`。',
+        `> 只处理本轮 ${requirementTotal} 项需求，按账本逐项销账；优先语义类/data-dom-id，兜底选择器仅失败时看；业务修完后如发现走查工具导致遗漏/误报/臃肿，就在当前分支修工具并验证；经验信号写入 \`.tasks/experience-inbox.json\`。`,
         '',
       ];
       const allMachine = [];
       const allFullSelectors = [];
       // 辅助函数（复用 _buildPrompt 中的逻辑）
       const getClassAnchor = (g) => {
-        if (g.componentClass) return g.componentClass;
+        if (g.componentClass) return g.componentClass.replace(/^\./, '');
         if (g.elementClass) return g.elementClass.split(/\s+/)[0];
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
@@ -4078,12 +4158,24 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
       };
+      const getBusinessClass = (g) => {
+        const componentClass = g.componentClass;
+        const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
+        if (!classes.length) return '';
+        const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
+        if (biz) return biz;
+        return '';
+      };
       scenes.forEach((scene, sceneIdx) => {
-        lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}）`);
+        const sceneRequirementTotal = sceneRequirementCounts.get(scene.routeId) || 0;
+        let requirementIndex = 0;
+        lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}，共 ${sceneRequirementTotal} 项）`);
         lines.push('');
         // 分组逻辑（同 _buildPrompt）
+        const reorderInfos = [];
         const groups = {};
         scene.changes.forEach(c => {
+          if (c.type === 'reorder') { reorderInfos.push(c); return; }
           const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
           const gkey = c.sharedKey ? componentClass : c.selector;
           if (!groups[gkey]) {
@@ -4122,16 +4214,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         });
         const styleGroups = groupList.filter(g => g.changes.length > 0);
         const noteOnlyGroups = pureAnnotations;
-        if (styleGroups.length) {
-          lines.push(`#### 样式（${styleGroups.length} 组）`);
+        if (sceneRequirementTotal) {
+          lines.push(`#### 需求账本（${sceneRequirementTotal} 项）`);
           lines.push('');
         }
+        reorderInfos.forEach((c) => {
+          const idx = ++requirementIndex;
+          const anchor = (c.elementText || '').replace(/\s+/g, ' ').trim();
+          const containerLabel = anchor ? `（${anchor.slice(0, 16)}）` : '';
+          lines.push(`##### ${idx}. ${scene.routeLabel} / 元素顺序`);
+          lines.push(`- 对象：容器 ${c.selector}${containerLabel}`);
+          lines.push(`- 需求：容器内 ${c.order.length} 个子元素顺序已调整`);
+          lines.push('');
+          allFullSelectors.push({ scene: scene.routeLabel, idx, classAnchor: '', selector: c.selector });
+        });
         styleGroups.forEach((g, i) => {
+          const requirementIdx = ++requirementIndex;
           const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
           const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
           const classAnchor = getClassAnchor(g);
           const role = shortAnchor || classAnchor || g.elementTag;
-          let title = `${i + 1}. ${role}`;
+          let title = `##### ${requirementIdx}. ${scene.routeLabel} / ${role}`;
           if (classAnchor) title += ` · .${classAnchor}`;
           if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
           lines.push(title);
@@ -4146,25 +4249,49 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const orderChanges = cssChanges.filter(c => c.property === 'order');
           const otherChanges = cssChanges.filter(c => c.property !== 'order');
           const changeLines = [];
-          addClassChanges.forEach(c => { changeLines.push(`   add-class: ${c.intentClass}`); });
-          iconChanges.forEach(c => { changeLines.push(`   icon: ${c.oldValue} -> ${c.newValue}`); });
+          addClassChanges.forEach(c => { changeLines.push(`加结构类 \`${c.intentClass}\``); });
+          iconChanges.forEach(c => { changeLines.push(`替换图标 \`${c.oldValue}\` → \`${c.newValue}\``); });
           orderChanges.forEach(c => {
             const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
             const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
-            changeLines.push(`   order: ${posTxt}${orderTxt}`);
+            changeLines.push(`顺序 ${posTxt}${orderTxt}`);
           });
           otherChanges.forEach(c => {
             const propLabel = c.property === 'flex' ? '宽度' : c.property;
             const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-            changeLines.push(`   ${propLabel}: ${valLabel}`);
+            changeLines.push(`${propLabel}: ${valLabel}`);
           });
           if (changeLines.length) {
-            changeLines.forEach(l => lines.push(l));
+            lines.push(`- 变更：${changeLines.join('；')}`);
           }
-          if (g.annotation) lines.push(`   备注：${g.annotation}`);
+          const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
+          const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
+          const addSnippet = addClassChanges.map(c => c.intentClass).join(' ');
+          const iconSnippet = iconChanges.map(c => `\`${c.oldValue}\` → \`${c.newValue}\``).join('，');
+          let fixLine = '- 改法：';
+          if (iconSnippet && !classAnchor && !cssSnippet && !orderSnippet && !addSnippet) {
+            fixLine += `将目标元素的图标类 ${iconSnippet}`;
+          } else if (classAnchor) {
+            const businessClass = getBusinessClass(g);
+            fixLine += `修改 \`.${classAnchor}\``;
+            if (businessClass && businessClass !== classAnchor) fixLine += `（业务类 \`.${businessClass}\`）`;
+            if (cssSnippet || orderSnippet) fixLine += `：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+            if (addSnippet) fixLine += `，加类 \`${addSnippet}\``;
+            if (iconSnippet) fixLine += `，替换图标类 ${iconSnippet}`;
+          } else {
+            fixLine += `在源码对应 CSS 中设置：\`${[cssSnippet, orderSnippet].filter(Boolean).join('; ')}\``;
+            if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
+          }
+          lines.push(fixLine);
+          if (g.shared) {
+            lines.push(`- 范围：仅限 ${scene.routeLabel} 当前上下文中这组共享元素`);
+          }
+          if (g.annotation) lines.push(`- 备注：${g.annotation}`);
           lines.push('');
-          allFullSelectors.push({ scene: scene.routeLabel, idx: i + 1, classAnchor, selector: g.selector });
+          allFullSelectors.push({ scene: scene.routeLabel, idx: requirementIdx, classAnchor, selector: g.selector });
           allMachine.push({
+            sceneIndex: sceneIdx + 1,
+            requirementIndex: requirementIdx,
             routeId: scene.routeId,
             routeLabel: scene.routeLabel,
             selector: g.selector,
@@ -4179,22 +4306,39 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           });
         });
         if (noteOnlyGroups.length) {
-          lines.push(`#### 备注（${noteOnlyGroups.length} 条）`);
-          lines.push('');
           noteOnlyGroups.forEach((a, i) => {
+            const requirementIdx = ++requirementIndex;
             const anchor = (a.elementText || '').replace(/\s+/g, ' ').trim();
             const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
             const aClass = (a.elementClass || '').split(/\s+/)[0] || '';
             const role = shortAnchor || aClass || a.elementTag;
-            lines.push(`${i + 1}. ${role}：${a.text}`);
-            allFullSelectors.push({ scene: scene.routeLabel, idx: '备注' + (i + 1), classAnchor: aClass, selector: a.selector });
+            let title = `##### ${requirementIdx}. ${scene.routeLabel} / ${role}`;
+            if (aClass) title += ` · .${aClass}`;
+            lines.push(title);
+            lines.push(`- 需求：${a.text}`);
+            lines.push('');
+            allFullSelectors.push({ scene: scene.routeLabel, idx: requirementIdx, classAnchor: aClass, selector: a.selector });
+            allMachine.push({
+              sceneIndex: sceneIdx + 1,
+              requirementIndex: requirementIdx,
+              routeId: scene.routeId,
+              routeLabel: scene.routeLabel,
+              selector: a.selector,
+              elementText: anchor,
+              role,
+              adds: [],
+              icons: [],
+              css: [],
+              annotation: a.text || '',
+              shared: false,
+              sharedCount: 0,
+            });
           });
-          lines.push('');
         }
       });
       // 完整定位选择器备选（折叠区，按场景分组）
       if (allFullSelectors.length) {
-        lines.push('<details><summary>完整定位选择器（备选，主定位失效时使用）</summary>');
+        lines.push('<details><summary>定位兜底（执行失败时再看）</summary>');
         lines.push('');
         const byScene = {};
         allFullSelectors.forEach(f => {
@@ -11201,6 +11345,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         localStorage.setItem(key, JSON.stringify({
           sceneRoute: state.currentRoute,
+          routeLabel: getRouteLabel(state.currentRoute),
           lastModified: Date.now(),
           prNumber: getCurrentPrNumber(),
           changes: state.changes,
@@ -11225,7 +11370,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
             const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
             if (changes.length > 0 || annotations.length > 0) {
-              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
+              scenes.push({ routeId, routeLabel: data.routeLabel || data.sceneLabel || getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
             }
           } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
         }
