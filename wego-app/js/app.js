@@ -410,14 +410,29 @@
     };
   }
 
+  // 返回样式就绪 Promise：平铺渲染（renderSceneTo）需要等私有 scene.css 落地后再挂载，
+  // 否则只用到全局组件样式、场景私有 class 会短暂或持续失样。幂等且并发去重。
   function ensureStyle(href) {
-    if (!href || loadedStyles.has(href)) return;
-    var link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    link.dataset.sceneStyle = href;
-    document.head.appendChild(link);
-    loadedStyles.add(href);
+    if (!href) return Promise.resolve();
+    if (loadedStyles.has(href)) return Promise.resolve();
+    var inflight = ensureStyle._inflight;
+    if (inflight && inflight.has(href)) return inflight.get(href);
+    var promise = new Promise(function (resolve) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.dataset.sceneStyle = href;
+      var done = function () {
+        loadedStyles.add(href);
+        if (ensureStyle._inflight) ensureStyle._inflight.delete(href);
+        resolve();
+      };
+      link.onload = done;
+      link.onerror = done; // 样式加载失败也放行，避免平铺渲染被永久挂起
+      document.head.appendChild(link);
+    });
+    (ensureStyle._inflight || (ensureStyle._inflight = new Map())).set(href, promise);
+    return promise;
   }
 
   function ensureScript(routeId, src) {
@@ -2222,6 +2237,39 @@
     registerScene: function (scene) {
       if (!scene || !scene.routeId) return;
       scenes.set(scene.routeId, scene);
+    },
+    // 将指定场景渲染到调用方提供的容器（迭代画布等"页面平铺"场景使用）。
+    // 与 openRoute 不同：不依赖 hash、不落到全局 sceneLayer/overlayLayer，
+    // 页面 DOM 挂载到 host 内，事件绑定到 host（页面保持可交互）。
+    // 返回 Promise<{ destroy }>；脚本未加载时先异步加载再渲染。
+    renderSceneTo: function (routeId, host) {
+      var config = routeConfigs.get(routeId);
+      if (!config || !host) return Promise.resolve(null);
+      var render = function () {
+        var scene = scenes.get(routeId);
+        if (!scene) return null;
+        host.innerHTML = scene.template || '';
+        var ctx = sceneContext(scene, host);
+        if (typeof scene.init === 'function') {
+          try { scene.init(ctx); } catch (e) { console.warn('[wego-app] renderSceneTo init error:', e); }
+        }
+        window.WegoApp.layoutAllBottomActionBars(host);
+        window.WegoApp.layoutAllNavbars(host);
+        return {
+          scene: scene,
+          ctx: ctx,
+          destroy: function () {
+            runSceneDestroy(scene, host);
+            host.replaceChildren();
+          }
+        };
+      };
+      var scriptReady = scenes.has(routeId) ? Promise.resolve() : ensureScript(routeId, config.script);
+      // 平铺渲染同样要确保目标场景私有样式表就绪，否则场景私有 class 失样
+      return Promise.all([scriptReady, ensureStyle(config.style)]).then(render).catch(function (e) {
+        console.warn('[wego-app] renderSceneTo load failed:', e);
+        return null;
+      });
     },
     navigate: navigate,
     openRoute: openRoute,
