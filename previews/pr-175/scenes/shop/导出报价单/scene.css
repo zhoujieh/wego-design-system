@@ -902,6 +902,7 @@
   resize: none;
   white-space: nowrap;
   text-overflow: ellipsis;
+  transition: width var(--duration-normal) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard);
 }
 .quote-cell-field .quote-cell-textarea.is-expanded {
   position: absolute;
@@ -1091,7 +1092,6 @@
   display: flex;
   flex-direction: column;
   width: 86%;
-  max-width: calc(var(--size-96) * 3 + var(--size-40) + var(--spacer-6) + var(--stroke-1));
   height: 100%;
   overflow: hidden;
   border-radius: var(--radius-16) 0 0 var(--radius-16);
@@ -1131,6 +1131,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scroll-behavior: smooth;
 }
 .quote-filter-card {
   flex: 0 0 auto;
@@ -1231,6 +1232,8 @@
   --searchbox-icon-slot: var(--size-32);
   --searchbox-icon-size: var(--body-md-font-size);
   --searchbox-font-size: var(--body-xs-font-size);
+  transform-origin: right center;
+  animation: quote-filter-search-expand var(--duration-normal) var(--ease-enter) both;
 }
 .quote-filter-date-row {
   display: grid;
@@ -1261,8 +1264,8 @@
   overflow: hidden;
   padding: 0 var(--spacer-4);
   color: var(--text-default);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1281,6 +1284,8 @@
   background: transparent;
   color: transparent;
   caret-color: transparent;
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
   -webkit-text-fill-color: transparent;
 }
 .quote-filter-date-field input::-webkit-calendar-picker-indicator {
@@ -1343,10 +1348,8 @@
   font-weight: var(--font-weight-medium);
 }
 .quote-filter-source-grid {
-  max-height: calc(var(--size-40) * 2 + var(--spacer-8));
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  max-height: none;
+  overflow: visible;
 }
 .quote-filter-source-footer {
   grid-column: 1 / -1;
@@ -1510,6 +1513,16 @@
     opacity: 0;
   }
 }
+@keyframes quote-filter-search-expand {
+  from {
+    opacity: 0;
+    transform: scaleX(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
 @keyframes quote-filter-drawer-out {
   from {
     opacity: 1;
@@ -1535,6 +1548,7 @@
   .quote-filter-shell,
   .quote-filter-modal[data-state="closed"] .quote-filter-drawer,
   .quote-filter-modal[data-state="closed"] .quote-filter-shell,
+  .quote-filter-inline-search,
   .quote-filter-option-panel {
     animation: none;
   }
