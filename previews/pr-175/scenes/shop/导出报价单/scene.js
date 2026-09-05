@@ -1,9 +1,9 @@
 /**
  * 导出报价单场景（shop244）：选品 → 预览编辑 → 分享导出 → 报价记录 全闭环。
- * 阶段B：入口分流与选品页。入口来自「我的」内容管理-批量-批量导出（见 我的/scene.js）。
+ * 阶段B/C：入口分流、选品页与报价单预览编辑。入口来自「我的」内容管理-批量-批量导出（见 我的/scene.js）。
  * 选品页支持：按产品报价 / 按图报价 两种模式切换、商品搜索（名称/货号/搜索码）、
  * 列表/宫格视图、商品勾选、底部批量栏（全选/已选计数下拉/查看已选/下一步）、分页滚动加载。
- * 筛选面板与预览编辑、分享导出、报价记录在后续阶段接入（筛选按钮当前展示条件条占位）。
+ * 筛选面板、分享导出、报价记录在后续阶段接入（筛选按钮当前展示条件条占位）。
  */
 const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id="quote-export" data-route-id="quote-export" data-layout-mode="composed" data-bg="page" data-component-slug="layout-page">
   <div class="layout-page__top">
@@ -64,7 +64,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             <span class="search-toolbar__action-icon wego-iconfont-s icon-liebiao" data-role="quote-view-icon" aria-hidden="true"></span>
             <span data-role="quote-view-label">列表</span>
           </button>
-          <button class="search-toolbar__action quote-filter-btn" data-dom-id="quote-filter-btn" type="button" aria-pressed="false">
+          <button class="search-toolbar__action quote-filter-btn" data-dom-id="quote-filter-sheet-btn" type="button" aria-pressed="false">
             <span class="search-toolbar__action-icon wego-iconfont-s icon-shaixuan" aria-hidden="true"></span>
             筛选
           </button>
@@ -105,7 +105,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           </div>
         </div>
         <div class="bottom-action-bar__trailing">
-          <button type="button" class="btn btn--strong btn--md btn--disabled" data-component-slug="button" data-dom-id="quote-next" aria-disabled="true" aria-label="下一步，请先选择要导出的产品">下一步</button>
+          <button type="button" class="btn btn--strong btn--md btn--disabled" data-component-slug="button" data-dom-id="quote-open-preview" aria-disabled="true" aria-label="下一步，请先选择要导出的产品">下一步</button>
         </div>
       </div>
     </div>
@@ -123,6 +123,26 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   var PAGE_SIZE = 6;
   var DEFAULT_BATCH_SELECT_VALUE = '100';
   var BATCH_SELECT_VALUES = ['50', '100', '200'];
+  var CNY_TO_USD = 7.1;
+  var LANGUAGE_OPTIONS = [
+    { code: 'zh-CN', label: '中文', short: '中', rtl: false },
+    { code: 'en', label: 'English', short: '英', rtl: false },
+    { code: 'ja', label: '日本語', short: '日', rtl: false },
+    { code: 'ko', label: '한국어', short: '韩', rtl: false },
+    { code: 'es', label: 'Español', short: '西', rtl: false },
+    { code: 'fr', label: 'Français', short: '法', rtl: false },
+    { code: 'de', label: 'Deutsch', short: '德', rtl: false },
+    { code: 'it', label: 'Italiano', short: '意', rtl: false },
+    { code: 'pt', label: 'Português', short: '葡', rtl: false },
+    { code: 'ru', label: 'Русский', short: '俄', rtl: false },
+    { code: 'ar', label: 'العربية', short: '阿', rtl: true },
+    { code: 'hi', label: 'हिन्दी', short: '印地', rtl: false },
+    { code: 'id', label: 'Indonesia', short: '印尼', rtl: false },
+    { code: 'vi', label: 'Tiếng Việt', short: '越南', rtl: false },
+    { code: 'th', label: 'ไทย', short: '泰', rtl: false },
+    { code: 'tr', label: 'Türkçe', short: '土', rtl: false }
+  ];
+  var translateCache = {};
 
   function safeReadJSON(key, fallback) {
     try {
@@ -177,6 +197,107 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       if (img.complete && img.naturalWidth) img.classList.add('is-loaded');
     });
   }
+  function formatDate(date) {
+    var d = date || new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function defaultQuoteTitle() {
+    var d = new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return '报价单 ' + formatDate(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function moneyNumber(value) {
+    var n = Number(String(value == null ? '' : value).replace(/[^\d.]/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+  function formatMoney(value) {
+    var n = moneyNumber(value);
+    return n.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+  function formatUsd(value) {
+    var n = moneyNumber(value) / CNY_TO_USD;
+    return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function getLanguage(code) {
+    return LANGUAGE_OPTIONS.filter(function (item) { return item.code === code; })[0] || LANGUAGE_OPTIONS[0];
+  }
+  function languageMenuHtml(currentCode) {
+    return '<div class="popmenu__list">' + LANGUAGE_OPTIONS.map(function (lang) {
+      var selected = lang.code === currentCode;
+      return '<div class="popmenu__item' + (selected ? ' popmenu__item--selected' : '') + '" data-role="quote-language-option" data-lang="' + escapeHtml(lang.code) + '" role="option" aria-selected="' + (selected ? 'true' : 'false') + '">'
+        + '<span class="popmenu__item-text">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span>'
+        + '<i class="wego-iconfont-s icon-gou-jiacu popmenu__item-check"></i>'
+        + '</div>';
+    }).join('') + '</div>';
+  }
+  function normalizePriceValue(value) {
+    var normalized = String(value == null ? '' : value).replace(/[^\d.]/g, '');
+    var pieces = normalized.split('.');
+    if (pieces.length > 1) normalized = pieces.shift() + '.' + pieces.join('');
+    return normalized;
+  }
+  function quoteTotals(rows) {
+    var min = 0;
+    var max = 0;
+    var hasRange = false;
+    rows.forEach(function (row) {
+      var low = moneyNumber(row.priceMin);
+      var high = moneyNumber(row.priceMax);
+      min += low;
+      max += high || low;
+      if (high && high !== low) hasRange = true;
+    });
+    return { cny: hasRange ? '¥' + formatMoney(min) + ' ~ ¥' + formatMoney(max) : '¥' + formatMoney(min), usd: hasRange ? '$' + formatUsd(min) + ' ~ $' + formatUsd(max) : '$' + formatUsd(min) };
+  }
+  function quotePreviewTemplate(state) {
+    var lang = getLanguage(state.language);
+    var totals = quoteTotals(state.quoteRows);
+    return '<div class="modal modal--fullscreen quote-preview-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="报价单预览" style="--modal-panel-bg: var(--bg-page)">'
+      + '<div class="modal__panel">'
+      + '<div class="modal__title modal__title--default">'
+      + '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body">'
+      + '<div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-preview-back" aria-label="返回"><i class="wego-iconfont-s icon-zuojiantou16" aria-hidden="true"></i></button></div>'
+      + '<div class="navbar__center"><span class="navbar__title">报价单预览</span></div>'
+      + '<div class="navbar__right"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-dom-id="quote-preview-save">保存</button></div>'
+      + '</div></nav>'
+      + '</div>'
+      + '<div class="modal__body quote-preview-body">'
+      + '<div class="layout-scroll quote-preview-scroll" data-component-slug="layout-scroll" data-role="quote-preview-scroll">'
+      + '<section class="quote-preview-summary">'
+      + '<div class="quote-preview-summary__top"><div><div class="quote-preview-dir">默认目录</div><div class="quote-preview-date">' + escapeHtml(formatDate(new Date(state.createdAt))) + '</div></div>'
+      + '<div class="quote-preview-total" data-role="quote-total"><strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span></div></div>'
+      + '<div class="quote-preview-title input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="quote-title-input">标题</label><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '"></div></div>'
+      + '<div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><span data-role="quote-language-label">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>'
+      + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed" hidden>' + languageMenuHtml(state.language) + '</div></div>'
+      + '<div class="quote-translate-status" data-role="quote-translate-status" hidden><span data-role="quote-translate-text">正在翻译中 0/0</span><button type="button" class="link link--14" data-component-slug="link" data-dom-id="quote-translate-cancel">取消</button></div>'
+      + '</section>'
+      + '<section class="quote-preview-toolbar"><button type="button" class="btn btn--weak btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jiahao" aria-hidden="true"></i>继续添加产品</button></section>'
+      + '<section class="quote-table-shell" data-role="quote-table-shell">' + quoteTableHtml(state.quoteRows) + '</section>'
+      + '</div>'
+      + '</div>'
+      + '<div class="modal__actions quote-preview-actions"><div class="modal__action-gradient"></div><div class="quote-share-format" role="tablist" aria-label="导出格式"><button type="button" class="quote-format-tab is-active" data-format="excel" aria-selected="true">Excel</button><button type="button" class="quote-format-tab" data-format="pdf" aria-selected="false">PDF</button></div><button type="button" class="btn btn--strong btn--lg quote-share-button" data-component-slug="button" data-dom-id="quote-share-main">分享报价单</button></div>'
+      + '</div>'
+      + '</div>';
+  }
+  function quoteTableHtml(rows) {
+    if (!rows.length) {
+      return '<div class="quote-table-empty"><strong>暂无报价商品</strong><span>可继续添加产品生成报价行</span></div>';
+    }
+    return '<div class="quote-table-scroll"><table class="quote-table"><thead><tr>'
+      + '<th class="quote-table__image">图</th><th class="quote-table__price">价格 <button type="button" class="link link--14 quote-price-batch" data-component-slug="link" data-dom-id="quote-batch-price">批量</button></th><th>规格</th><th>货号</th><th>商品名</th><th class="quote-table__action">操作</th>'
+      + '</tr></thead><tbody>' + rows.map(quoteTableRowHtml).join('') + '</tbody></table></div>';
+  }
+  function quoteTableRowHtml(row) {
+    return '<tr data-quote-row-id="' + escapeHtml(row.id) + '">'
+      + '<td class="quote-table__image"><div class="wg-image wg-image--rounded-sm quote-row-image" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.image) + '" alt="' + escapeHtml(row.name) + '"></div></td>'
+      + '<td class="quote-table__price"><div class="quote-price-inputs"><div class="number-input number-input--surface-white" data-component-slug="input"><input class="number-input__field" inputmode="decimal" data-quote-field="priceMin" value="' + escapeHtml(row.priceMin) + '" aria-label="最低价格"><span class="number-input__suffix">¥</span></div><span class="quote-price-separator">~</span><div class="number-input number-input--surface-white" data-component-slug="input"><input class="number-input__field" inputmode="decimal" data-quote-field="priceMax" value="' + escapeHtml(row.priceMax) + '" aria-label="最高价格"><span class="number-input__suffix">¥</span></div></div><div class="quote-usd-text">$' + escapeHtml(formatUsd(row.priceMax || row.priceMin)) + '</div></td>'
+      + '<td><div class="input-group input-group--surface-white quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-spec-' + escapeHtml(row.id) + '">规格</label><textarea id="quote-spec-' + escapeHtml(row.id) + '" rows="2" data-quote-field="specification">' + escapeHtml(row.specification) + '</textarea></div></td>'
+      + '<td><div class="input-group input-group--surface-white quote-cell-field quote-cell-field--short" data-component-slug="input"><label class="field-label" for="quote-no-' + escapeHtml(row.id) + '">货号</label><div class="input-wrapper"><input id="quote-no-' + escapeHtml(row.id) + '" type="text" data-quote-field="itemNo" value="' + escapeHtml(row.itemNo) + '"></div></div></td>'
+      + '<td><div class="input-group input-group--surface-white quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-name-' + escapeHtml(row.id) + '">商品名</label><textarea id="quote-name-' + escapeHtml(row.id) + '" rows="2" data-quote-field="name">' + escapeHtml(row.name) + '</textarea></div></td>'
+      + '<td class="quote-table__action"><button type="button" class="btn btn--weak btn--sm btn--icon-only" data-component-slug="button" data-dom-id="quote-row-delete-' + escapeHtml(row.id) + '" data-quote-delete-row="' + escapeHtml(row.id) + '" aria-label="删除报价行"><i class="btn__icon wego-iconfont-s icon-shanchu" aria-hidden="true"></i></button></td>'
+      + '</tr>';
+  }
 
   window.WegoApp.registerScene({
     routeId: 'quote-export',
@@ -194,6 +315,14 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         hasMore: true,
         loading: false,
         batchSelectValue: DEFAULT_BATCH_SELECT_VALUE,
+        appendMode: false,
+        title: defaultQuoteTitle(),
+        createdAt: Date.now(),
+        language: 'zh-CN',
+        exportFormat: 'excel',
+        quoteRows: [],
+        dirty: false,
+        translateRunId: 0,
         selected: {}          /* 按产品模式：{ product_id: true }；按图模式：{ product_id + ':' + idx: true } */
       };
       var listEl = root.querySelector('[data-role="quote-list"]');
@@ -203,7 +332,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       var searchInput = root.querySelector('[data-dom-id="quote-search-input"]');
       var searchClear = root.querySelector('[data-dom-id="quote-search-clear"]');
       var countLabel = root.querySelector('[data-role="quote-count-label"]');
-      var nextBtn = root.querySelector('[data-dom-id="quote-next"]');
+      var nextBtn = root.querySelector('[data-dom-id="quote-open-preview"]');
       var selectAllBtn = root.querySelector('[data-dom-id="quote-select-all"]');
       var modeButton = root.querySelector('[data-dom-id="quote-mode-button"]');
       var modeMenu = root.querySelector('[data-role="quote-mode-menu"]');
@@ -354,6 +483,40 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             + '</div>';
         }).join('') || '<div class="quote-selected-empty">暂无可展示的已选商品</div>';
       }
+      function quoteRowFromSelection(row) {
+        var p = row.p;
+        var sourceParts = row.key.split(':');
+        var imageIndex = sourceParts.length > 1 ? Number(sourceParts[1]) : 0;
+        return {
+          id: row.key.replace(/[^a-zA-Z0-9_-]/g, '-') + '-' + state.quoteRows.length,
+          sourceKey: row.key,
+          productId: p.product_id,
+          imageIndex: imageIndex,
+          image: row.img,
+          priceMin: String(p.price || ''),
+          priceMax: '',
+          originalName: p.title || '',
+          originalSpec: p.specification || '',
+          name: p.title || '',
+          specification: p.specification || '',
+          itemNo: p.item_no || ''
+        };
+      }
+      function appendSelectedQuoteRows() {
+        var existing = {};
+        state.quoteRows.forEach(function (row) { existing[row.sourceKey] = true; });
+        selectedRows(state.selectMode).forEach(function (row) {
+          if (!existing[row.key]) {
+            state.quoteRows.push(quoteRowFromSelection(row));
+            existing[row.key] = true;
+          }
+        });
+      }
+      function setAppendMode(enabled) {
+        state.appendMode = Boolean(enabled);
+        nextBtn.textContent = state.appendMode ? '确定' : '下一步';
+        nextBtn.setAttribute('aria-label', state.appendMode ? '确定追加产品' : (selectedCount() === 0 ? '下一步，请先选择要导出的产品' : '下一步'));
+      }
 
       function productRowHtml(p) {
         var img = productImages(p)[0];
@@ -443,7 +606,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         nextBtn.classList.toggle('btn--disabled', count === 0);
         if (count === 0) nextBtn.setAttribute('aria-disabled', 'true');
         else nextBtn.removeAttribute('aria-disabled');
-        nextBtn.setAttribute('aria-label', count === 0 ? '下一步，请先选择要导出的产品' : '下一步');
+        nextBtn.textContent = state.appendMode ? '确定' : '下一步';
+        nextBtn.setAttribute('aria-label', state.appendMode ? '确定追加产品' : (count === 0 ? '下一步，请先选择要导出的产品' : '下一步'));
         viewSelectedBtn.disabled = count === 0;
         viewSelectedBtn.hidden = count === 0;
         viewSelectedBtn.classList.toggle('is-disabled', count === 0);
@@ -603,6 +767,270 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           }, 4000);
         }
       }
+      function findQuoteRow(id) {
+        return state.quoteRows.filter(function (row) { return row.id === id; })[0];
+      }
+      function updatePreviewTotals(previewRoot) {
+        var totalEl = previewRoot.querySelector('[data-role="quote-total"]');
+        if (!totalEl) return;
+        var totals = quoteTotals(state.quoteRows);
+        totalEl.innerHTML = '<strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span>';
+      }
+      function refreshPreviewTable(previewRoot) {
+        var shell = previewRoot.querySelector('[data-role="quote-table-shell"]');
+        if (!shell) return;
+        shell.innerHTML = quoteTableHtml(state.quoteRows);
+        activateImages(shell);
+        updatePreviewTotals(previewRoot);
+        bindPreviewTableControls(previewRoot);
+      }
+      function bindPreviewTableControls(previewRoot) {
+        var batch = previewRoot.querySelector('[data-dom-id="quote-batch-price"]');
+        if (batch) {
+          batch.addEventListener('click', function (e) {
+            e.stopPropagation();
+            openBatchPriceSheet(previewRoot);
+          });
+        }
+        Array.prototype.forEach.call(previewRoot.querySelectorAll('[data-quote-delete-row]'), function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var id = btn.getAttribute('data-quote-delete-row');
+            state.quoteRows = state.quoteRows.filter(function (row) { return row.id !== id; });
+            state.dirty = true;
+            refreshPreviewTable(previewRoot);
+          });
+        });
+      }
+      function syncLanguageMenu(previewRoot) {
+        var lang = getLanguage(state.language);
+        var label = previewRoot.querySelector('[data-role="quote-language-label"]');
+        if (label) label.textContent = lang.short + ' · ' + lang.label;
+        Array.prototype.forEach.call(previewRoot.querySelectorAll('[data-role="quote-language-option"]'), function (opt) {
+          var selected = opt.getAttribute('data-lang') === state.language;
+          opt.classList.toggle('popmenu__item--selected', selected);
+          opt.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+        var scroll = previewRoot.querySelector('[data-role="quote-preview-scroll"]');
+        if (scroll) scroll.setAttribute('dir', lang.rtl ? 'rtl' : 'ltr');
+      }
+      function setTranslateStatus(previewRoot, visible, text) {
+        var status = previewRoot.querySelector('[data-role="quote-translate-status"]');
+        var label = previewRoot.querySelector('[data-role="quote-translate-text"]');
+        if (!status || !label) return;
+        status.hidden = !visible;
+        if (text) label.textContent = text;
+      }
+      function translateText(text, targetLang) {
+        var source = String(text || '');
+        if (!source || targetLang === 'zh-CN') return Promise.resolve(source);
+        var key = targetLang + '|' + source;
+        if (translateCache[key]) return Promise.resolve(translateCache[key]);
+        var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=' + encodeURIComponent(targetLang) + '&dt=t&q=' + encodeURIComponent(source);
+        return fetch(url).then(function (res) {
+          if (!res.ok) throw new Error('translate failed');
+          return res.json();
+        }).then(function (data) {
+          var translated = data && data[0] ? data[0].map(function (part) { return part[0]; }).join('') : source;
+          translateCache[key] = translated || source;
+          return translateCache[key];
+        }).catch(function () { return source; });
+      }
+      function applyLanguage(previewRoot, code) {
+        state.language = code;
+        state.translateRunId += 1;
+        var runId = state.translateRunId;
+        syncLanguageMenu(previewRoot);
+        if (code === 'zh-CN') {
+          state.quoteRows.forEach(function (row) {
+            row.name = row.originalName;
+            row.specification = row.originalSpec;
+          });
+          refreshPreviewTable(previewRoot);
+          setTranslateStatus(previewRoot, false, '');
+          return;
+        }
+        var work = [];
+        state.quoteRows.forEach(function (row) {
+          work.push({ row: row, field: 'name', text: row.originalName });
+          work.push({ row: row, field: 'specification', text: row.originalSpec });
+        });
+        if (!work.length) return;
+        setTranslateStatus(previewRoot, true, '正在翻译中 0/' + work.length);
+        var done = 0;
+        work.reduce(function (chain, item) {
+          return chain.then(function () {
+            if (runId !== state.translateRunId) return null;
+            return translateText(item.text, code).then(function (translated) {
+              if (runId !== state.translateRunId) return;
+              item.row[item.field] = translated;
+              done += 1;
+              setTranslateStatus(previewRoot, true, '正在翻译中 ' + done + '/' + work.length);
+              refreshPreviewTable(previewRoot);
+            });
+          });
+        }, Promise.resolve()).then(function () {
+          if (runId === state.translateRunId) setTranslateStatus(previewRoot, false, '');
+        });
+      }
+      function openBatchPriceSheet(previewRoot) {
+        var template = '<div class="modal modal--frame modal--align-left quote-batch-price-modal" data-component-slug="modal" role="dialog" aria-modal="true" data-state="open" aria-labelledby="quote-batch-price-title">'
+          + '<div class="modal__panel">'
+          + '<div class="modal__title modal__title--info"><div class="modal__title-text" id="quote-batch-price-title">批量改价</div><div class="modal__subtitle">统一改动当前报价表的价格</div></div>'
+          + '<div class="modal__body quote-batch-price-body"><div class="input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="quote-batch-price-value">统一价格</label><div class="input-wrapper"><input id="quote-batch-price-value" type="text" inputmode="decimal" data-dom-id="quote-batch-price-value" placeholder="输入价格"></div></div></div>'
+          + '<div class="modal__actions"><div class="modal__action-gradient"></div><div class="modal__buttons"><button type="button" class="btn btn--weak btn--lg" data-component-slug="button" data-dom-id="quote-batch-price-cancel">取消</button><button type="button" class="btn btn--strong btn--lg" data-component-slug="button" data-dom-id="quote-batch-price-confirm">确定</button></div></div>'
+          + '</div></div>';
+        ctx.openSheet(template, {
+          label: '批量改价',
+          init: function (sheetCtx) {
+            var input = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-value"]');
+            var cancel = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-cancel"]');
+            var confirm = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-confirm"]');
+            input.addEventListener('input', function () { input.value = normalizePriceValue(input.value); });
+            cancel.addEventListener('click', function () { sheetCtx.close(); });
+            confirm.addEventListener('click', function () {
+              var value = normalizePriceValue(input.value);
+              if (!value) {
+                sheetCtx.toast('请输入价格');
+                return;
+              }
+              state.quoteRows.forEach(function (row) {
+                row.priceMin = value;
+                row.priceMax = '';
+              });
+              state.dirty = true;
+              refreshPreviewTable(previewRoot);
+              sheetCtx.close();
+            });
+          }
+        });
+      }
+      function openFilterPlaceholder() {
+        var template = '<div class="modal modal--frame quote-filter-placeholder" data-component-slug="modal" role="dialog" aria-modal="true" data-state="open" aria-labelledby="quote-filter-placeholder-title">'
+          + '<div class="modal__panel">'
+          + '<div class="modal__title modal__title--info"><div class="modal__title-text" id="quote-filter-placeholder-title">筛选</div><div class="modal__subtitle">筛选面板将在后续阶段接入</div></div>'
+          + '<div class="modal__actions"><div class="modal__action-gradient"></div><div class="modal__buttons"><button type="button" class="btn btn--strong btn--lg" data-component-slug="button" data-dom-id="quote-filter-cancel">知道了</button></div></div>'
+          + '</div></div>';
+        ctx.openSheet(template, {
+          label: '筛选',
+          init: function (sheetCtx) {
+            var cancel = sheetCtx.root.querySelector('[data-dom-id="quote-filter-cancel"]');
+            if (cancel) cancel.addEventListener('click', function () { sheetCtx.close(); });
+          }
+        });
+      }
+      function bindPreview(previewCtx) {
+        var previewRoot = previewCtx.root;
+        var languageButton = previewRoot.querySelector('[data-dom-id="quote-language-button"]');
+        var languageMenu = previewRoot.querySelector('[data-role="quote-language-menu"]');
+        var titleInput = previewRoot.querySelector('[data-dom-id="quote-title-input"]');
+        activateImages(previewRoot);
+        syncLanguageMenu(previewRoot);
+        bindPreviewTableControls(previewRoot);
+        titleInput.addEventListener('input', function () {
+          state.title = titleInput.value;
+          state.dirty = true;
+        });
+        previewRoot.querySelector('[data-dom-id="quote-preview-back"]').addEventListener('click', function () {
+          state.appendMode = false;
+          setAppendMode(false);
+          previewCtx.close();
+        });
+        previewRoot.querySelector('[data-dom-id="quote-preview-save"]').addEventListener('click', function () {
+          state.dirty = false;
+          previewCtx.toast('已保存当前报价单');
+        });
+        previewRoot.querySelector('[data-dom-id="quote-add-more"]').addEventListener('click', function () {
+          setAppendMode(true);
+          previewCtx.close();
+          ctx.toast('继续选择要追加的产品');
+        });
+        previewRoot.querySelector('[data-dom-id="quote-share-main"]').addEventListener('click', function () {
+          ctx.toast('分享导出将在后续阶段接入');
+        });
+        languageButton.addEventListener('click', function () {
+          var open = languageMenu.hidden;
+          languageMenu.hidden = !open;
+          languageMenu.setAttribute('data-state', open ? 'open' : 'closed');
+          languageButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+          languageButton.classList.toggle('is-open', open);
+        });
+        previewRoot.addEventListener('click', function (e) {
+          var langOpt = e.target.closest('[data-role="quote-language-option"]');
+          if (langOpt) {
+            languageMenu.hidden = true;
+            languageMenu.setAttribute('data-state', 'closed');
+            languageButton.setAttribute('aria-expanded', 'false');
+            languageButton.classList.remove('is-open');
+            applyLanguage(previewRoot, langOpt.getAttribute('data-lang'));
+            return;
+          }
+          var formatTab = e.target.closest('.quote-format-tab');
+          if (formatTab) {
+            state.exportFormat = formatTab.getAttribute('data-format') || 'excel';
+            Array.prototype.forEach.call(previewRoot.querySelectorAll('.quote-format-tab'), function (tab) {
+              var selected = tab === formatTab;
+              tab.classList.toggle('is-active', selected);
+              tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+            });
+            return;
+          }
+          var batch = e.target.closest('[data-dom-id="quote-batch-price"]');
+          if (batch) {
+            openBatchPriceSheet(previewRoot);
+            return;
+          }
+          var del = e.target.closest('[data-quote-delete-row]');
+          if (del) {
+            var id = del.getAttribute('data-quote-delete-row');
+            state.quoteRows = state.quoteRows.filter(function (row) { return row.id !== id; });
+            state.dirty = true;
+            refreshPreviewTable(previewRoot);
+            return;
+          }
+          if (!e.target.closest('[data-role="quote-language-menu"]') && !e.target.closest('[data-dom-id="quote-language-button"]')) {
+            languageMenu.hidden = true;
+            languageMenu.setAttribute('data-state', 'closed');
+            languageButton.setAttribute('aria-expanded', 'false');
+            languageButton.classList.remove('is-open');
+          }
+        });
+        previewRoot.addEventListener('input', function (e) {
+          var field = e.target.getAttribute('data-quote-field');
+          if (!field) return;
+          var rowEl = e.target.closest('[data-quote-row-id]');
+          var row = rowEl ? findQuoteRow(rowEl.getAttribute('data-quote-row-id')) : null;
+          if (!row) return;
+          if (field === 'priceMin' || field === 'priceMax') {
+            e.target.value = normalizePriceValue(e.target.value);
+            row[field] = e.target.value;
+            var usd = rowEl.querySelector('.quote-usd-text');
+            if (usd) usd.textContent = '$' + formatUsd(row.priceMax || row.priceMin);
+            updatePreviewTotals(previewRoot);
+          } else {
+            row[field] = e.target.value;
+          }
+          state.dirty = true;
+        });
+        var cancel = previewRoot.querySelector('[data-dom-id="quote-translate-cancel"]');
+        if (cancel) cancel.addEventListener('click', function () {
+          state.translateRunId += 1;
+          setTranslateStatus(previewRoot, false, '');
+        });
+      }
+      function openQuotePreview() {
+        appendSelectedQuoteRows();
+        if (!state.quoteRows.length) {
+          ctx.toast('请先选择要导出的产品');
+          return;
+        }
+        state.appendMode = false;
+        setAppendMode(false);
+        ctx.openFullScreenModal(quotePreviewTemplate(state), {
+          label: '报价单预览',
+          init: bindPreview
+        });
+      }
 
       function onListClick(e) {
         var target = e.target;
@@ -685,13 +1113,13 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         toggleMenu(modeButton, modeMenu, modeMenu.hidden);
       });
       root.querySelector('[data-dom-id="quote-view-toggle"]').addEventListener('click', function () { switchView(state.view === 'grid' ? 'list' : 'grid'); });
-      root.querySelector('[data-dom-id="quote-filter-btn"]').addEventListener('click', function () {
-        var btn = root.querySelector('[data-dom-id="quote-filter-btn"]');
+      root.querySelector('[data-dom-id="quote-filter-sheet-btn"]').addEventListener('click', function () {
+        var btn = root.querySelector('[data-dom-id="quote-filter-sheet-btn"]');
         var strip = root.querySelector('[data-role="quote-filter-strip"]');
         btn.classList.add('is-active');
         btn.setAttribute('aria-pressed', 'true');
         strip.hidden = false;
-        ctx.toast('筛选面板将在后续阶段接入');
+        openFilterPlaceholder();
       });
       selectAllBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleBatchSelection(); });
       countDropdown.addEventListener('click', function () { toggleMenu(countDropdown, countMenu, countMenu.hidden); });
@@ -701,7 +1129,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           ctx.toast('请先选择要导出的产品');
           return;
         }
-        ctx.toast('已选 ' + selectedCount() + ' 项，预览编辑将在下一阶段接入');
+        openQuotePreview();
       });
       searchInput.addEventListener('input', function () { applySearch(searchInput.value); });
       searchClear.addEventListener('click', function () { searchInput.value = ''; applySearch(''); searchInput.focus(); });
