@@ -26,10 +26,10 @@ description: 基于已提交的简要原型简报消费微购设计系统，在�
 ## 执行约束
 
 <!-- rule-id: scene-contract-precheck-mandatory -->
-- 每轮场景实现完成后，必须运行 `node scripts/validate-scene-contract.mjs <场景路径>` 做场景契约预检，通过后再推送 PR。场景契约问题不得留到合并阶段全量门禁才发现。
+- 每轮场景实现完成后，必须运行 `node scripts/validate-scene-contract.mjs <场景路径>` 做场景契约预检，通过后再交付本地预览；场景契约问题不得留到合并阶段全量门禁才发现。只有用户明确要求 PR/在线预览时才在通过预检后推送。
 
 <!-- rule-id: scene-app-test-before-delivery -->
-- 每轮场景实现完成后必须按 `wego-scene-app-test` 分层门禁做测试：本地小改跑轻量回归，交付节点跑本地关键路径，终局验收前再做全量走查；发现问题先修复并复验同层级用例。
+- 每轮场景实现完成后必须按 `wego-scene-app-test` 分层门禁做测试：本地小改跑轻量回归，本地可验收版本跑本地关键路径，终局验收前再做全量走查；发现问题先修复并复验同层级用例。
 
 <!-- rule-id: experience-signal-to-inbox -->
 - 经验信号自检：会话中出现用户纠正、用户表达偏好、返工、踩坑（CI 失败/守卫拦截/验收打回）时，向当前交付单元 `.tasks/experience-inbox.json` 追加一条草稿（字段与分流规则见 `wego-uxsystem-iterate/references/workflow-iteration.md`），不直接改经验权威源，无信号不动作。
@@ -40,12 +40,12 @@ description: 基于已提交的简要原型简报消费微购设计系统，在�
 
 在已确认范围内自主完成信息分组、布局、组件、Token、反馈和 overlay，不建立第二次确认门禁。实现过程默认处于**本地迭代中**，直到用户明确验收通过：
 
-- 完成每轮修改后运行场景契约预检和关键交互检查；小问题先在本地累计，不为每个细节推送。到达交付节点（首次可验收版本、一组反馈已集中处理完成、用户明确要求更新 PR/在线预览）时，由 `wego-github-delivery` 推送远端分支并创建/更新同一 PR；同一需求固定复用同一个 PR。
-- 从当前任务 worktree 启动或复用本地 HTTP 预览，确认目标 routeId 包含本次改动；尚未推送时返回本地链接，已推送 PR 的交付节点必须返回在线预览链接（不只本地链接）。在线部署有延迟，须等待 publish 检查通过，再 curl 核实 `previews/pr-<N>/` 入口与目标内容；`.wego-deployment-sha` 对应 workflow 事件的 `GITHUB_SHA`，pull_request 事件通常是 merge ref SHA，不直接与 PR head SHA 比较。部署未完成时不得以本地链接代替，须等待或明确告知"在线链接待部署完成后返回"并补齐。
+- 完成每轮修改后运行场景契约预检和关键交互检查；小问题先在本地累计，不为每个细节推送。首次可验收版本、一组反馈已集中处理完成或 Agent 自行判断“完成”后，默认只交付本地预览；只有用户明确要求推送 PR、更新 PR 或在线预览时，才由 `wego-github-delivery` 推送远端分支并创建/更新同一 PR；同一需求固定复用同一个 PR。
+- 从当前任务 worktree 启动或复用本地 HTTP 预览，确认目标 routeId 包含本次改动；默认返回本地链接。用户明确要求 PR/在线预览且已推送 PR 后，必须返回在线预览链接（不只本地链接）。在线部署有延迟，须等待 publish 检查通过，再 curl 核实 `previews/pr-<N>/` 入口与目标内容；`.wego-deployment-sha` 对应 workflow 事件的 `GITHUB_SHA`，pull_request 事件通常是 merge ref SHA，不直接与 PR head SHA 比较。部署未完成时不得以本地链接代替，须等待或明确告知"在线链接待部署完成后返回"并补齐。
 - 原型循环期间保持迭代状态为 `in-development`（spec.md 变化随轮重新 submit-brief）；用户发起终局验收后先展示终版材料，用户确认最终材料时连续执行 `confirm-brief` 与 `submit-prototype`，`prototyping` 只作为冻结前的短暂脚本状态。
 - 每次结果标明：`当前状态：本地迭代中（已推送，PR #<编号>）`；尚未推送时标明`当前状态：本地迭代中（未推送）`。
 
-"改好了""继续""再调整一下"等普通反馈不构成验收授权。即使已有 PR，后续小问题仍先在本地累计修改；到达下一次交付节点时再集中更新同一个 PR。
+"改好了""继续""再调整一下"等普通反馈不构成验收授权，也不构成推送 PR 授权。即使已有 PR，后续小问题仍先在本地累计修改并交付本地预览；只有用户明确要求更新 PR/在线预览时才集中更新同一个 PR。
 
 ## 终局确认（与验收合一）
 
@@ -60,7 +60,7 @@ description: 基于已提交的简要原型简报消费微购设计系统，在�
    node scripts/iteration-record.mjs submit-prototype --file {iteration.json} --user-confirmed-prototype {iteration_id}
    ```
    （脚本终局守门：全量结构 + 充分性 + open_questions 清空 + 账本全绿；submit-prototype 复验账本全绿后才冻结。）
-5. 运行与范围相称的完整静态验证，确认 PR 已包含全部本次交付节点改动。
+5. 运行与范围相称的完整静态验证；若已有 PR，确认 PR 已包含全部待合并改动；若尚未创建 PR，则在用户确认最终材料后创建 PR 并等待必要检查通过再合并。
 6. **经验收口**：扫描 `.tasks/experience-inbox.json`，有草稿则交 `wego-uxsystem-iterate` 先分流需求/普通缺陷并执行质量门，只有合格因果规则进入四层经验体系；无合格经验不输出沉淀提示。处理后清空草稿；未完成本步不得进入 worktree 清理。
 7. 停止对应本地预览服务并删除服务记录，再同步最新 `main`、解决冲突并完成验证，最后合并到 `main`。
 8. 每次结果标明：`当前状态：已验收，合并中（PR #<编号>）`。

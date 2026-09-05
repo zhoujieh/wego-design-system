@@ -67,7 +67,7 @@
 - 每个交付单元必须使用独立 worktree（`git worktree add ../<owner>-<task> -b <分支>`），不得与其它交付单元共享主 worktree；主 worktree 只保留 `main` 用于 `git pull` 同步。
 
 <!-- rule-id: local-iteration-batches-pr-updates -->
-- 本地迭代默认先累计小问题和 checkpoint，不得每改一个细节就推送或更新 PR；只有首次可验收版本、一组反馈集中处理完成、用户明确要求更新 PR/在线预览，或多人协作需要远端同步时，才作为交付节点推送并创建/更新同一个 PR。
+- 本地迭代默认先累计小问题和 checkpoint，完成一轮实现或反馈处理后只启动/复用本地预览并返回本地链接；只有用户明确要求推送 PR、更新 PR、在线预览或多人协作需要远端同步时，才推送并创建/更新同一个 PR，随后等待部署完成再返回在线预览链接。
 
 <!-- rule-id: workflow-maintenance-enters-main-via-pr -->
 - **工作流维护例外**：`wego-uxsystem-iterate` 权威源免业务验收和提交授权，验证通过直接走短周期 PR 合入 `main`；业务原型和设计系统组件/Token/Preview/UI Kit 变更不适用。

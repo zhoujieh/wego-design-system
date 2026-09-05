@@ -933,6 +933,37 @@
         "目标元素填充与面板回显一致"
       ],
       "novelty": "已有规则要求改色后元素/input 同步，但没有约束批量 active 状态刷新中的字段类型分派。"
+    },
+    {
+      "id": "ev-055",
+      "date": "2026-09-05",
+      "summary": "本地迭代完成后默认只给本地预览，PR 和在线预览必须由用户明确要求触发",
+      "source": "user-correction",
+      "scene": "github-delivery-pr-update-cadence",
+      "tags": [
+        "PR节奏",
+        "本地预览",
+        "在线预览",
+        "推送授权",
+        "wego-github-delivery"
+      ],
+      "kind": "experience",
+      "observation": "用户指出此前已调整过 PR 节奏但仍然每次任务完成后推 PR，当前规则仍把首次可验收版本或一组反馈完成当作默认推送触发点。",
+      "mechanism": "上次修正规则只把每个细节推送收敛为交付节点推送，但交付节点仍可由 Agent 自行判断，且写有推送不需要额外授权，导致完成一轮实现仍会自动进入远端 PR 和在线预览流程。",
+      "rule": "本地迭代完成一轮、首次可验收版本、一组反馈完成、checkpoint 或 Agent 自判完成都只返回本地预览；只有用户明确要求推送 PR、更新 PR、在线预览或多人协作远端同步时才推送并返回在线预览。",
+      "scope": [
+        "wego-github-delivery",
+        "wego-design",
+        "wego-uxsystem-iterate",
+        "README 用户流程",
+        "scripts 文档"
+      ],
+      "verification": [
+        "AGENTS.md 的 local-iteration-batches-pr-updates 改为完成一轮默认本地预览",
+        "wego-github-delivery 取消交付节点自动推送和推送不需要额外授权",
+        "wego-design 与 README 改为用户明确要求 PR/在线预览才推送"
+      ],
+      "novelty": "ev-043 只解决推送频率，没有取消首次可验收版本和一组反馈完成这两个自动推送触发条件，也没有建立推送 PR 的明确请求门槛。"
     }
   ]
 }
