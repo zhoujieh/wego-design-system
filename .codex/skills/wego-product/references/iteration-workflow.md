@@ -67,7 +67,7 @@ frozen
 - `block`：draft/in-development/prototyping → blocked，暂停迭代；`resume` 恢复到中断前状态。
 - `terminate`：draft/in-development/prototyping/blocked → cancelled（废弃）或 superseded（被取代），须用户明确确认，终态不可恢复。
 
-`in-development` 承载原型循环：浏览本地预览、修改需求规格说明、重新 submit-brief、完成一次修改、通过轻量检查，都不改变状态，也不触发 confirm。立项确认（开工前的需求沟通）+ 已提交简要简报即原型授权，可交给 `wego-design` 开始实现；循环中每轮用户反馈必须写回 spec.md 对应字段后重新 submit-brief。`confirm-brief` 是终局确认：只在用户明确表达"验收完成"后，由 AI 补全终版 spec.md、核对填写账本、展示补全 diff 与账本，用户过目确认时执行（须带 `--user-confirmed-brief` 授权参数），全量结构校验、充分性与账本全绿由脚本守门。
+`in-development` 承载原型循环：浏览可远程查看的本地预览、修改需求规格说明、重新 submit-brief、完成一次修改、通过轻量检查，都不改变状态，也不触发 confirm。立项确认（开工前的需求沟通）+ 已提交简要简报即原型授权，可交给 `wego-design` 开始实现；循环中每轮用户反馈必须写回 spec.md 对应字段后重新 submit-brief。`confirm-brief` 是终局确认：只在用户明确表达"验收完成"后，由 AI 补全终版 spec.md、核对填写账本、展示补全 diff 与账本，用户过目确认时执行（须带 `--user-confirmed-brief` 授权参数），全量结构校验、充分性与账本全绿由脚本守门。
 
 所有命令都通过统一脚本执行：
 
