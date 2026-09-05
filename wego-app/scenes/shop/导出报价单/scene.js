@@ -304,33 +304,37 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   function quotePreviewTemplate(state) {
     var lang = getLanguage(state.language);
     var totals = quoteTotals(state.quoteRows);
+    var albumName = quoteAlbumName();
     return '<div class="modal modal--fullscreen modal--has-actions quote-preview-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="报价单预览" style="--modal-panel-bg: var(--bg-page)">'
       + '<div class="modal__panel">'
       + '<div class="modal__title modal__title--default">'
       + '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body">'
-      + '<div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-preview-back" aria-label="返回"><i class="wego-iconfont-s icon-zuojiantou16" aria-hidden="true"></i></button></div>'
+      + '<div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-preview-back" aria-label="收起"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div>'
       + '<div class="navbar__center"><span class="navbar__title">报价单预览</span></div>'
-      + '<div class="navbar__right"><button type="button" class="btn btn--weak btn--sm" data-component-slug="button" data-dom-id="quote-preview-save">保存</button></div>'
+      + '<div class="navbar__right"></div>'
       + '</div></nav>'
       + '</div>'
       + '<div class="modal__body quote-preview-body">'
       + '<div class="layout-scroll quote-preview-scroll" data-component-slug="layout-scroll" data-role="quote-preview-scroll">'
       + '<section class="quote-preview-summary">'
-      + '<div class="quote-preview-summary__top"><div><div class="quote-preview-dir">默认目录</div><div class="quote-preview-date">' + escapeHtml(formatDate(new Date(state.createdAt))) + '</div></div>'
+      + '<div class="quote-preview-summary__top"><div><div class="quote-preview-dir">' + escapeHtml(albumName) + '</div><div class="quote-preview-date">' + escapeHtml(formatDate(new Date(state.createdAt))) + '</div></div>'
       + '<div class="quote-preview-total" data-role="quote-total"><strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span></div></div>'
       + '<div class="quote-preview-title input-group input-group--surface-white" data-component-slug="input"><label class="field-label" for="quote-title-input">标题</label><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '"></div></div>'
-      + '<div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><span data-role="quote-language-label">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>'
-      + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed" hidden>' + languageMenuHtml(state.language) + '</div></div>'
-      + '<div class="quote-translate-status" data-role="quote-translate-status" hidden><span data-role="quote-translate-text">正在翻译中 0/0</span><button type="button" class="link link--14" data-component-slug="link" data-dom-id="quote-translate-cancel">取消</button></div>'
       + '</section>'
-      + '<section class="quote-preview-toolbar"><button type="button" class="btn btn--weak btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jiahao" aria-hidden="true"></i>继续添加产品</button></section>'
+      + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><span data-role="quote-language-label">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>'
+      + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed" hidden>' + languageMenuHtml(state.language) + '</div></div></div><div class="quote-translate-status" data-role="quote-translate-status" hidden><span data-role="quote-translate-text">正在翻译中 0/0</span><button type="button" class="link link--14" data-component-slug="link" data-dom-id="quote-translate-cancel">取消</button></div></section>'
       + '<div class="quote-sticky-head-slot" data-role="quote-sticky-head-slot"' + (state.quoteRows.length ? '' : ' hidden') + '>' + quoteStickyHeaderHtml() + '</div>'
       + '<section class="quote-table-shell" data-role="quote-table-shell">' + quoteTableHtml(state.quoteRows) + '</section>'
       + '</div>'
       + '</div>'
-      + '<div class="modal__actions quote-preview-actions"><div class="modal__action-gradient"></div><div class="quote-share-format" role="group" aria-label="导出格式">' + quoteFormatStackHtml('excel', 'Excel', state.exportFormat) + quoteFormatStackHtml('pdf', 'PDF', state.exportFormat) + '</div><button type="button" class="btn btn--strong btn--lg quote-share-button" data-component-slug="button" data-dom-id="quote-share-main">分享报价单</button></div>'
+      + '<div class="modal__actions quote-preview-actions"><div class="bottom-action-bar bottom-action-bar--primary-secondary quote-preview-bottom-bar" data-component-slug="bottom-action-bar" role="toolbar" aria-label="报价单导出操作"><div class="bottom-action-bar__inner"><div class="bottom-action-bar__leading"><div class="quote-share-format" role="group" aria-label="导出格式">' + quoteFormatStackHtml('excel', 'Excel', state.exportFormat) + quoteFormatStackHtml('pdf', 'PDF', state.exportFormat) + '</div></div><div class="bottom-action-bar__trailing"><button type="button" class="btn btn--strong btn--lg quote-share-button" data-component-slug="button" data-dom-id="quote-share-main">分享报价单</button></div></div></div></div>'
       + '</div>'
       + '</div>';
+  }
+  function quoteAlbumName() {
+    var user = DB && DB.currentUser ? DB.currentUser : null;
+    var name = user && (user.album_name || user.albumName || user.merchant_name || user.nickname || user.name);
+    return name ? name + '相册' : '我的相册';
   }
   function quoteFormatStackHtml(format, label, currentFormat) {
     var selected = format === currentFormat;
@@ -348,14 +352,14 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   }
   function quoteHeaderCellHtml(kind, label, secondary) {
     if (kind === 'price') {
-      return '<th class="quote-table__price"><span class="quote-price-header-title"><span>' + escapeHtml(label) + '</span><button type="button" class="link link--14 quote-price-batch" data-component-slug="link" data-dom-id="quote-batch-price">批量</button></span>' + (secondary ? '<small>' + escapeHtml(secondary) + '</small>' : '') + '</th>';
+      return '<th class="quote-table__price"><span class="quote-price-header-title"><span>' + escapeHtml(label) + '</span><button type="button" class="link link--14 quote-price-batch" data-component-slug="link" data-dom-id="quote-batch-price">批量改价</button></span>' + (secondary ? '<small>' + escapeHtml(secondary) + '</small>' : '') + '</th>';
     }
     return '<th class="quote-table__' + escapeHtml(kind) + '"><span>' + escapeHtml(label) + '</span>' + (secondary ? '<small>' + escapeHtml(secondary) + '</small>' : '') + '</th>';
   }
   function quoteHeaderRowHtml() {
     return '<thead><tr>'
-      + quoteHeaderCellHtml('image', '图', '')
-      + quoteHeaderCellHtml('price', '价格', '￥ / $')
+      + quoteHeaderCellHtml('image', '图片', '')
+      + quoteHeaderCellHtml('price', '价格', '')
       + quoteHeaderCellHtml('spec', '规格', '')
       + quoteHeaderCellHtml('code', '货号', '')
       + quoteHeaderCellHtml('name', '商品名', '')
@@ -363,7 +367,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '</tr></thead>';
   }
   function quoteStickyHeaderHtml() {
-    return '<div class="quote-sticky-head"><table class="quote-table quote-table--sticky-head" aria-hidden="true">' + quoteTableColgroupHtml() + quoteHeaderRowHtml() + '</table><div class="quote-sticky-frozen-image-header" aria-hidden="true"><span>图</span></div></div>';
+    return '<div class="quote-sticky-head"><table class="quote-table quote-table--sticky-head" aria-hidden="true">' + quoteTableColgroupHtml() + quoteHeaderRowHtml() + '</table><div class="quote-sticky-frozen-image-header" aria-hidden="true"><span>图片</span></div></div>';
   }
   function quoteTableHtml(rows) {
     if (!rows.length) {
@@ -1622,10 +1626,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           state.appendMode = false;
           setAppendMode(false);
           previewCtx.close();
-        });
-        previewRoot.querySelector('[data-dom-id="quote-preview-save"]').addEventListener('click', function () {
-          state.dirty = false;
-          previewCtx.toast('已保存当前报价单');
         });
         previewRoot.querySelector('[data-dom-id="quote-add-more"]').addEventListener('click', function () {
           setAppendMode(true);

@@ -551,7 +551,7 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--spacer-8) var(--layout-page-margin-m0) calc(var(--safe-area-bottom-content) + var(--size-96) + var(--spacer-24));
+  padding: var(--spacer-8) var(--layout-page-margin-m0) calc(var(--safe-area-bottom-content) + var(--size-56) + var(--spacer-8));
 }
 .quote-preview-summary {
   display: flex;
@@ -602,6 +602,8 @@
   max-width: none;
 }
 .quote-preview-language {
+  flex: 1 1 0;
+  min-width: 0;
   position: relative;
 }
 .quote-language-button {
@@ -644,10 +646,20 @@
   line-height: var(--body-sm-line-height);
 }
 .quote-preview-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
   padding: var(--spacer-8) 0;
 }
+.quote-preview-toolbar__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
 .quote-add-more {
-  width: 100%;
+  flex: 0 0 auto;
+  min-width: 100px;
+  max-width: 100%;
 }
 .quote-table-shell {
   border-radius: var(--radius-8);
@@ -752,13 +764,22 @@
   line-height: var(--body-xs-line-height);
   font-weight: var(--font-weight-regular);
 }
-.quote-price-header-title {
+.quote-table th .quote-price-header-title {
   display: flex;
   align-items: center;
+  width: fit-content;
   gap: var(--spacer-4);
+}
+.quote-table th .quote-price-header-title > span {
+  display: inline;
+  min-width: auto;
+  overflow: visible;
+  text-overflow: clip;
 }
 .quote-price-batch {
   flex: 0 0 auto;
+  justify-content: flex-end;
+  align-items: flex-start;
   border: none;
   background: transparent;
 }
@@ -874,17 +895,22 @@
   line-height: var(--body-md-line-height);
   font-weight: var(--font-weight-semibold);
 }
-.quote-preview-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-12);
+.quote-preview-modal .quote-preview-actions {
+  padding: 0;
+  background: var(--bg-panel);
+}
+.quote-preview-bottom-bar {
+  background: var(--bg-panel);
+}
+.quote-preview-bottom-bar .bottom-action-bar__inner {
   padding-inline: var(--layout-page-margin-m0);
 }
 .quote-share-format {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   display: inline-flex;
   align-items: center;
   gap: var(--spacer-8);
+  min-width: 0;
 }
 .quote-format-stack {
   padding: 0;
@@ -895,10 +921,10 @@
   width: var(--size-64);
 }
 .quote-share-button {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
 }
 .quote-preview-modal.is-input-focused .quote-preview-actions {
-  padding-block-end: var(--spacer-8);
+  padding-block-end: 0;
 }
 .quote-batch-price-body {
   display: flex;
