@@ -451,6 +451,11 @@
   pointer-events: auto;
   cursor: pointer;
 }
+.quote-bottom-bar [data-dom-id="quote-next"][aria-disabled="true"]:active,
+.quote-bottom-bar [data-dom-id="quote-next"][aria-disabled="true"].is-pressed {
+  background: var(--bg-overlay-l1);
+  color: var(--text-disabled);
+}
 .quote-count-menu {
   position: absolute;
   bottom: calc(100% + var(--spacer-4));

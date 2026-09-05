@@ -272,6 +272,22 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         });
         updateBar();
       }
+      function syncVisibleSelectionStates() {
+        if (state.selectMode === 'image') {
+          Array.prototype.forEach.call(listEl.querySelectorAll('.quote-image-group'), function (group) {
+            var pid = group.getAttribute('data-group-id');
+            var product = PRODUCTS.filter(function (x) { return x.product_id === pid; })[0];
+            if (product) syncImageGroupSelection(group, product);
+          });
+          return;
+        }
+        Array.prototype.forEach.call(listEl.querySelectorAll('[data-quote-toggle][data-mode="product"]'), function (toggle) {
+          var pid = toggle.getAttribute('data-id');
+          var product = PRODUCTS.filter(function (x) { return x.product_id === pid; })[0];
+          if (product) setCheckboxState(toggle.querySelector('[data-role="quote-check"]'), isSelected('product', product, 0));
+        });
+        updateBar();
+      }
       function allSelectedInList(list) {
         var total = 0, sel = 0;
         list.forEach(function (p) {
@@ -451,7 +467,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           else state.selected[row.key] = true;
         });
         closeAllMenus();
-        renderList();
+        syncVisibleSelectionStates();
       }
 
       function setBatchSelectValue(value) {
