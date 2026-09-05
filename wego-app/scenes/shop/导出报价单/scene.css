@@ -118,24 +118,6 @@
 .quote-filter-btn {
   position: relative;
 }
-.quote-filter-btn[data-filter-count]::after {
-  content: attr(data-filter-count);
-  position: absolute;
-  top: var(--spacer-2);
-  right: var(--spacer-6);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--size-16);
-  height: var(--size-16);
-  padding: 0 var(--spacer-4);
-  border-radius: var(--radius-full);
-  background: var(--bg-brand);
-  color: var(--text-inverse);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
-  font-weight: var(--font-weight-medium);
-}
 .quote-filter-btn.is-active {
   color: var(--text-brand);
 }
@@ -143,11 +125,10 @@
   color: var(--icon-brand);
 }
 
-/* ===== 筛选条件条占位（阶段C接入后承载已应用条件） ===== */
+/* ===== 筛选条件条（承载已应用条件） ===== */
 .quote-filter-strip {
   padding: var(--spacer-8) var(--spacer-16);
-  background: var(--bg-surface);
-  border-block-end: var(--stroke-hairline) solid var(--border-neutral-l2);
+  background: var(--bg-page);
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
   color: var(--text-secondary);
@@ -1096,6 +1077,7 @@
   display: flex;
   justify-content: flex-end;
   background: var(--bg-mask-light);
+  animation: quote-filter-mask-in var(--duration-normal) var(--ease-enter) both;
 }
 .quote-filter-mask {
   position: absolute;
@@ -1108,7 +1090,7 @@
   z-index: var(--z-modal);
   display: flex;
   flex-direction: column;
-  width: calc(100% - var(--size-40));
+  width: 86%;
   max-width: calc(var(--size-96) * 3 + var(--size-40) + var(--spacer-6) + var(--stroke-1));
   height: 100%;
   overflow: hidden;
@@ -1116,6 +1098,16 @@
   background: var(--bg-page);
   box-shadow: var(--shadow-lg);
   animation: quote-filter-drawer-in var(--duration-normal) var(--ease-enter) both;
+}
+.quote-filter-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.quote-filter-modal[data-state="closed"] .quote-filter-shell {
+  animation: quote-filter-mask-out var(--duration-normal) var(--ease-exit) both;
 }
 .quote-filter-modal[data-state="closed"] .quote-filter-drawer {
   animation: quote-filter-drawer-out var(--duration-normal) var(--ease-exit) both;
@@ -1146,7 +1138,7 @@
   background: var(--bg-surface);
 }
 .quote-filter-card--source {
-  min-height: 0;
+  height: auto;
 }
 .quote-filter-card__title {
   position: sticky;
@@ -1291,14 +1283,21 @@
   caret-color: transparent;
   -webkit-text-fill-color: transparent;
 }
+.quote-filter-date-field input::-webkit-calendar-picker-indicator {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+  width: 0;
+  height: 0;
+}
 .quote-filter-chip-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--size-72) + var(--spacer-16)), 1fr));
   gap: var(--spacer-8);
   padding: 0 var(--spacer-16) var(--spacer-12);
 }
 .quote-filter-chip {
-  min-width: calc(var(--size-72) + var(--spacer-16) + var(--spacer-2));
+  min-width: 0;
   min-height: var(--size-36);
   max-height: var(--size-36);
   overflow: hidden;
@@ -1307,8 +1306,8 @@
   border-radius: var(--radius-6);
   background: var(--bg-subtle);
   color: var(--text-default);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1317,6 +1316,17 @@
   background: var(--status-success-surface-l1);
   color: var(--text-brand);
   font-weight: var(--font-weight-medium);
+}
+.quote-filter-chip--source {
+  height: var(--size-40);
+  min-height: var(--size-40);
+  max-height: var(--size-40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: normal;
+  text-overflow: clip;
 }
 .quote-filter-chip--more {
   display: inline-flex;
@@ -1333,7 +1343,7 @@
   font-weight: var(--font-weight-medium);
 }
 .quote-filter-source-grid {
-  max-height: calc(var(--size-72) + var(--spacer-8));
+  max-height: calc(var(--size-40) * 2 + var(--spacer-8));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1458,8 +1468,9 @@
   padding: 0 var(--spacer-10);
   border: none;
   border-radius: var(--radius-16);
-  background: var(--bg-subtle);
-  color: var(--text-secondary);
+  background: var(--bg-surface);
+  color: var(--text-default);
+  box-shadow: var(--shadow-xs);
   font-size: var(--body-sm-font-size);
   line-height: var(--body-sm-line-height);
 }
@@ -1481,6 +1492,22 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+@keyframes quote-filter-mask-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes quote-filter-mask-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 @keyframes quote-filter-drawer-out {
@@ -1505,7 +1532,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .quote-filter-drawer,
+  .quote-filter-shell,
   .quote-filter-modal[data-state="closed"] .quote-filter-drawer,
+  .quote-filter-modal[data-state="closed"] .quote-filter-shell,
   .quote-filter-option-panel {
     animation: none;
   }

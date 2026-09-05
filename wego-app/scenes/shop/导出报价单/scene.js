@@ -516,9 +516,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (btn) {
           btn.classList.toggle('is-active', active);
           btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-          btn.setAttribute('aria-label', active ? '筛选，已选' + badges.length + '项条件' : '筛选');
-          if (active) btn.setAttribute('data-filter-count', String(badges.length));
-          else btn.removeAttribute('data-filter-count');
+          btn.setAttribute('aria-label', '筛选');
         }
         if (!strip) return;
         strip.hidden = !active;
@@ -1526,12 +1524,15 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           + '<div class="quote-filter-safe-bottom"></div>'
           + '</section>';
       }
-      function filterShellHtml() {
+      function filterContentHtml() {
         var draft = activeDraftFilters();
+        return filterMainContentHtml(draft)
+          + (state.filterPanel ? filterOptionPanelHtml(state.filterPanel, draft) : '');
+      }
+      function filterShellHtml() {
         return '<button type="button" class="quote-filter-mask" data-dom-id="quote-filter-close-mask" aria-label="关闭筛选"></button>'
           + '<aside class="quote-filter-drawer" role="dialog" aria-modal="true" aria-label="筛选">'
-          + filterMainContentHtml(draft)
-          + (state.filterPanel ? filterOptionPanelHtml(state.filterPanel, draft) : '')
+          + '<div class="quote-filter-content" data-role="quote-filter-content">' + filterContentHtml() + '</div>'
           + '</aside>';
       }
       function filterOverlayTemplate() {
@@ -1552,10 +1553,17 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function bindFilterOverlay(filterCtx) {
         var filterRoot = filterCtx.root;
         function refresh(options) {
-          var shell = filterRoot.querySelector('[data-role="quote-filter-shell"]');
-          if (!shell) return;
-          shell.innerHTML = filterShellHtml();
+          var content = filterRoot.querySelector('[data-role="quote-filter-content"]');
+          if (!content) return;
+          var scrollState = [];
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-role="quote-filter-scroll"], [data-role="quote-filter-source-list"]'), function (el) {
+            scrollState.push({ el: el, top: el.scrollTop });
+          });
+          content.innerHTML = filterContentHtml();
           bindControls();
+          scrollState.forEach(function (item) {
+            if (item.el.isConnected) item.el.scrollTop = item.top;
+          });
           if (options && options.focusKind) {
             var input = filterRoot.querySelector('[data-role="quote-filter-search-input"][data-filter-kind="' + options.focusKind + '"]')
               || filterRoot.querySelector('[data-role="quote-filter-panel-search-input"][data-filter-kind="' + options.focusKind + '"]');
@@ -1565,15 +1573,30 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         function updateDraft(next, changedField) {
           state.filterDraft = normalizeFilters(next, changedField);
         }
+        function toggleChipsActiveInPlace(kind, current) {
+          Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-filter-option][data-filter-kind="' + kind + '"]'), function (chip) {
+            chip.classList.toggle('is-active', chip.getAttribute('data-filter-value') === current);
+          });
+        }
+        function syncDateFieldsInPlace(draft) {
+          ['startDate', 'endDate'].forEach(function (field) {
+            var input = filterRoot.querySelector('[data-filter-date-field="' + field + '"]');
+            if (!input) return;
+            var label = input.closest('.quote-filter-date-field');
+            var value = draft[field] || '';
+            input.value = value;
+            var limits = dateInputConstraints(field, draft);
+            input.min = limits.min || '';
+            input.max = limits.max || '';
+            if (!label) return;
+            label.classList.toggle('is-empty', !value);
+            var display = label.querySelector('.quote-filter-date-field__display');
+            if (display) display.textContent = value ? formatDateLabel(value) : (field === 'startDate' ? '开始日期' : '结束日期');
+          });
+        }
         function bindControls() {
-          var closeMask = filterRoot.querySelector('[data-dom-id="quote-filter-close-mask"]');
           var resetBtn = filterRoot.querySelector('[data-dom-id="quote-filter-reset"]');
           var confirmBtn = filterRoot.querySelector('[data-dom-id="quote-filter-confirm"]');
-          if (closeMask) closeMask.addEventListener('click', function () {
-            state.filterDraft = null;
-            state.filterPanel = '';
-            filterCtx.close();
-          });
           if (resetBtn) resetBtn.addEventListener('click', function () {
             state.filterDraft = createDefaultFilters();
             state.filterPanel = '';
@@ -1604,11 +1627,14 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               var value = btn.getAttribute('data-filter-value');
               var draft = activeDraftFilters();
               if (kind === 'preset') {
-                updateDraft(Object.assign({}, draft, presetRange(value), { preset: value }), '');
+                var next = Object.assign({}, draft, presetRange(value), { preset: value });
+                updateDraft(next, '');
+                toggleChipsActiveInPlace('preset', value);
+                syncDateFieldsInPlace(next);
               } else {
                 updateDraft(Object.assign({}, draft, { [kind]: draft[kind] === value ? 'all' : value }), '');
+                refresh({ focusKind: state.filterSearchOpen || state.filterPanel });
               }
-              refresh({ focusKind: state.filterSearchOpen || state.filterPanel });
             });
           });
           Array.prototype.forEach.call(filterRoot.querySelectorAll('[data-filter-clear-kind]'), function (btn) {
@@ -1681,6 +1707,12 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             refresh();
           });
         }
+        var closeMask = filterRoot.querySelector('[data-dom-id="quote-filter-close-mask"]');
+        if (closeMask) closeMask.addEventListener('click', function () {
+          state.filterDraft = null;
+          state.filterPanel = '';
+          filterCtx.close();
+        });
         bindControls();
       }
       function bindPreview(previewCtx) {
