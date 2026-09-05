@@ -540,7 +540,11 @@
 .quote-preview-modal .modal__panel,
 .quote-preview-modal .modal__title,
 .quote-preview-modal .modal__actions {
-  background: var(--bg-page);
+  background: var(--bg-surface);
+}
+.quote-preview-modal .navbar,
+.quote-preview-modal .navbar__body {
+  background: var(--bg-surface);
 }
 .quote-preview-modal.modal--has-actions .quote-preview-body {
   min-height: 0;
@@ -553,6 +557,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--spacer-0) var(--layout-page-margin-m0) calc(var(--safe-area-bottom-content) + var(--size-56) + var(--spacer-8));
+  background: var(--bg-surface);
 }
 .quote-preview-summary {
   display: flex;
@@ -618,7 +623,7 @@
   padding: 0 var(--spacer-12);
   border: var(--stroke-hairline) solid var(--border-neutral-l2);
   border-radius: var(--radius-6);
-  background: var(--bg-surface);
+  background: var(--bg-subtle);
   color: var(--text-default);
   font-size: var(--body-md-font-size);
   line-height: var(--body-md-line-height);
@@ -627,32 +632,17 @@
   transform: rotate(180deg);
 }
 .quote-language-menu {
-  position: absolute;
-  top: calc(100% + var(--spacer-4));
-  left: 0;
-  right: 0;
+  position: fixed;
   z-index: var(--z-popover);
   max-height: calc(var(--size-96) * 3);
   overflow-y: auto;
-}
-.quote-translate-status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacer-12);
-  padding: var(--spacer-8) var(--spacer-12);
-  border-radius: var(--radius-6);
-  background: var(--bg-subtle);
-  color: var(--text-secondary);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
 }
 .quote-preview-toolbar {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: var(--spacer-8);
-  padding: var(--spacer-8);
+  padding: var(--spacer-8) var(--spacer-12) var(--spacer-12);
   background: var(--bg-surface);
 }
 .quote-preview-toolbar__row {
@@ -680,7 +670,7 @@
 }
 .quote-table {
   width: 100%;
-  min-width: calc(var(--size-96) * 8 + var(--size-64));
+  min-width: calc(var(--size-96) * 8 + var(--size-64) + var(--size-56) + var(--spacer-16) + var(--spacer-24) * 3);
   border-collapse: separate;
   border-spacing: 0;
   color: var(--text-default);
@@ -692,16 +682,16 @@
   width: calc(var(--size-96) + var(--spacer-16));
 }
 .quote-col-price {
-  width: calc(var(--size-96) + var(--size-64));
+  width: calc(var(--size-96) * 2 + var(--spacer-24));
 }
 .quote-col-spec {
   width: calc(var(--size-96) * 2 + var(--spacer-24));
 }
 .quote-col-code {
-  width: var(--size-104);
+  width: calc(var(--size-96) + var(--size-64));
 }
 .quote-col-name {
-  width: calc(var(--size-96) + var(--size-64));
+  width: calc(var(--size-96) * 2 + var(--spacer-24));
 }
 .quote-col-action {
   width: var(--size-56);
@@ -773,9 +763,9 @@
 .quote-table th .quote-price-header-title {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: fit-content;
-  margin-inline: auto;
+  margin-inline: 0;
   gap: var(--spacer-4);
 }
 .quote-table th .quote-price-header-title > span {
@@ -793,7 +783,7 @@
 }
 .quote-table td {
   position: relative;
-  vertical-align: top;
+  vertical-align: middle;
   padding: var(--spacer-8);
   border-block-end: var(--stroke-hairline) solid var(--border-neutral-l2);
   border-inline-end: var(--stroke-hairline) solid var(--border-neutral-l2);
@@ -826,7 +816,7 @@
   object-fit: cover;
 }
 .quote-table__price {
-  width: calc(var(--size-96) + var(--size-64));
+  width: calc(var(--size-96) * 2 + var(--spacer-24));
 }
 .quote-price-inputs {
   display: grid;
@@ -852,8 +842,8 @@
   width: 100%;
   max-width: none;
 }
-.quote-cell-field--short {
-  min-width: calc(var(--size-72) + var(--spacer-16));
+.quote-cell-field--code {
+  min-width: calc(var(--size-96) + var(--size-64) - var(--spacer-16));
 }
 .quote-cell-field .field-label {
   position: absolute;
@@ -863,25 +853,38 @@
   clip-path: inset(50%);
 }
 .quote-cell-field textarea {
-  min-height: calc(var(--size-40) + var(--spacer-8));
-  max-height: calc(var(--size-96) + var(--size-32));
+  height: var(--size-40);
+  min-height: var(--size-40);
+  max-height: var(--size-40);
+  overflow: hidden;
 }
 .quote-cell-textarea {
   resize: none;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .quote-cell-textarea.is-expanded {
   position: absolute;
-  inset-block-start: var(--spacer-8);
+  inset-block-start: 50%;
   inset-inline: var(--spacer-8);
   z-index: calc(var(--z-sticky) + 1);
   width: calc(100% - var(--spacer-16));
+  height: auto;
   min-height: calc(var(--size-96) + var(--size-32));
   max-height: calc(var(--size-96) * 3);
   overflow-y: auto;
   background: var(--bg-surface);
+  transform: translateY(-50%);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   box-shadow: var(--shadow-lg);
+}
+.quote-table__spec,
+.quote-table__name {
+  width: calc(var(--size-96) * 2 + var(--spacer-24));
+}
+.quote-table__code {
+  width: calc(var(--size-96) + var(--size-64));
 }
 .quote-table__action {
   width: var(--size-48);
@@ -931,6 +934,7 @@
 }
 .quote-share-button {
   flex: 0 0 auto;
+  min-height: var(--size-40);
 }
 .quote-preview-modal.is-input-focused .quote-preview-actions {
   padding-block-end: 0;
