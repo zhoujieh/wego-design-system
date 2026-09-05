@@ -158,7 +158,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (route.entry && route.entry.label) return route.entry.label;
         // 主 tab 场景从 style 路径提取场景目录名（如 ./scenes/shop/动态/scene.css → 动态）
         if (route.style) {
-          const match = route.style.match(/\/scenes\/[^/]+\/([^/]+)\//);
+          const match = route.style.match(/(?:^|\/)scenes\/[^/]+\/([^/]+)\//);
           if (match) return match[1];
         }
       }
@@ -3716,7 +3716,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _buildPrompt() {
       const route = this._route || 'default';
-      const routeLabel = getCurrentRouteLabel();
+      const routeLabel = this._routeLabel || (route === 'default' ? getCurrentRouteLabel() : getRouteLabel(route));
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const changes = this._changes || [];
       const annotations = this._annotations || [];
@@ -3782,7 +3782,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
       // 辅助：提取类名锚点
       const getClassAnchor = (g) => {
-        if (g.componentClass) return g.componentClass;
+        if (g.componentClass) return g.componentClass.replace(/^\./, '');
         if (g.elementClass) return g.elementClass.split(/\s+/)[0];
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
@@ -3808,43 +3808,49 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return v;
       };
       const metaLine = getPreviewMetaLine();
-      const lines = [
-        `## 走查变更单 #/${routeLabel}`,
-        metaLine,
-        `**Viewport:** ${viewport}`,
-        '',
-        '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
-        '> 修复后动作：AI 按本工程单修改源码完成后，调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
-        '',
-      ];
       const machine = [];
       const fullSelectors = [];
       // 样式变更组
       const styleGroups = groupList.filter(g => g.changes.length > 0);
       const noteOnlyGroups = pureAnnotations;
-      if (styleGroups.length) {
-        lines.push(`### 样式变更（${styleGroups.length} 组）`);
+      const requirementTotal = reorderInfos.length + styleGroups.length + noteOnlyGroups.length;
+      const lines = [
+        `## 走查变更单 #/${routeLabel}`,
+        metaLine,
+        `**Viewport:** ${viewport}`,
+        '',
+        `> 执行：只处理本轮工单内容，不带入历史反馈；本轮共 ${requirementTotal} 项需求，样式和备注已合并为需求账本，必须逐项销账后交付。`,
+        '> 定位：优先按需求账本中的场景、区域、语义类或 data-dom-id 修改源码；共享选择器仅限本场景当前上下文，完整定位兜底只在主定位失败时使用。',
+        '> 修复后动作：调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
+        '',
+      ];
+      let requirementIndex = 0;
+      if (requirementTotal) {
+        lines.push(`### 需求账本（${requirementTotal} 项）`);
         lines.push('');
       }
       // 元素顺序调整（功能 4 reorder 变更）
       if (reorderInfos.length) {
-        lines.push(`### 元素顺序调整（${reorderInfos.length} 处）`);
-        lines.push('');
         reorderInfos.forEach((c, ri) => {
+          const idx = ++requirementIndex;
           const anchor = (c.elementText || '').replace(/\s+/g, ' ').trim();
           const containerLabel = anchor ? `（${anchor.slice(0, 16)}）` : '';
-          lines.push(`${ri + 1}. 容器 ${c.selector}${containerLabel} 内 ${c.order.length} 个子元素顺序已调整`);
-          fullSelectors.push({ idx: '顺序' + (ri + 1), classAnchor: '', selector: c.selector });
+          lines.push(`#### ${idx}. ${routeLabel} / 元素顺序`);
+          lines.push(`- 对象：容器 ${c.selector}${containerLabel}`);
+          lines.push(`- 需求：容器内 ${c.order.length} 个子元素顺序已调整`);
+          lines.push(`- 验收：按可见顺序逐项核对`);
+          lines.push('');
+          fullSelectors.push({ idx, classAnchor: '', selector: c.selector });
         });
-        lines.push('');
       }
       styleGroups.forEach((g, i) => {
+        const requirementIdx = ++requirementIndex;
         const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
         const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
         const classAnchor = getClassAnchor(g);
         const role = shortAnchor || classAnchor || g.elementTag;
         // 标题行
-        let title = `#### ${i + 1}. ${role}`;
+        let title = `#### ${requirementIdx}. ${routeLabel} / ${role}`;
         if (classAnchor) title += ` · .${classAnchor}`;
         if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
         lines.push(title);
@@ -3910,15 +3916,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
         }
         lines.push(fixLine);
+        if (g.shared) {
+          lines.push(`- 范围：仅限 ${routeLabel} 当前上下文中这组共享元素`);
+        }
         // 组内备注
         if (g.annotation) {
           lines.push(`- 备注：${g.annotation}`);
         }
+        lines.push('- 验收：按可见结果和计算样式逐项核对');
         lines.push('');
         // 完整选择器备选
-        fullSelectors.push({ idx: i + 1, classAnchor, selector: g.selector });
+        fullSelectors.push({ idx: requirementIdx, classAnchor, selector: g.selector });
         // machine JSON（保持向后兼容）
         machine.push({
+          requirementIndex: requirementIdx,
           selector: g.selector,
           elementText: anchor,
           role,
@@ -3932,21 +3943,36 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
       // 纯备注（无样式变更）
       if (noteOnlyGroups.length) {
-        lines.push(`### 备注（${noteOnlyGroups.length} 条）`);
-        lines.push('');
         noteOnlyGroups.forEach((a, i) => {
+          const requirementIdx = ++requirementIndex;
           const anchor = (a.elementText || '').replace(/\s+/g, ' ').trim();
           const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
           const aClass = (a.elementClass || '').split(/\s+/)[0] || '';
           const role = shortAnchor || aClass || a.elementTag;
-          lines.push(`${i + 1}. ${role}：${a.text}`);
-          fullSelectors.push({ idx: '备注' + (i + 1), classAnchor: aClass, selector: a.selector });
+          let title = `#### ${requirementIdx}. ${routeLabel} / ${role}`;
+          if (aClass) title += ` · .${aClass}`;
+          lines.push(title);
+          lines.push(`- 需求：${a.text}`);
+          lines.push('- 验收：按备注描述的最终可见结果核对');
+          lines.push('');
+          fullSelectors.push({ idx: requirementIdx, classAnchor: aClass, selector: a.selector });
+          machine.push({
+            requirementIndex: requirementIdx,
+            selector: a.selector,
+            elementText: anchor,
+            role,
+            adds: [],
+            icons: [],
+            css: [],
+            annotation: a.text || '',
+            shared: false,
+            sharedCount: 0,
+          });
         });
-        lines.push('');
       }
       // 完整定位选择器备选（折叠区）
       if (fullSelectors.length) {
-        lines.push('<details><summary>完整定位选择器（备选，主定位失效时使用）</summary>');
+        lines.push('<details><summary>定位兜底（执行失败时再看）</summary>');
         lines.push('');
         fullSelectors.forEach(f => {
           lines.push(`${f.idx}. ${f.classAnchor ? '.' + f.classAnchor + ' → ' : ''}\`${f.selector}\``);
@@ -3975,7 +4001,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
             const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
             if (changes.length > 0 || annotations.length > 0) {
-              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
+              scenes.push({ routeId, routeLabel: data.routeLabel || data.sceneLabel || getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
             }
           } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
         }
@@ -4004,33 +4030,64 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const savedChanges = this._changes;
         const savedAnnotations = this._annotations;
         const savedRoute = this._route;
+        const savedRouteLabel = this._routeLabel;
         this._changes = s.changes;
         this._annotations = s.annotations;
         this._route = s.routeId;
+        this._routeLabel = s.routeLabel;
         // 临时覆盖 getCurrentRouteLabel 用场景名
         const prompt = this._buildPrompt();
         this._changes = savedChanges;
         this._annotations = savedAnnotations;
         this._route = savedRoute;
+        this._routeLabel = savedRouteLabel;
         return prompt;
       }
       // 多场景：按场景分组输出（PR 号取场景数据中的记录，优先当前场景；无记录时回退 URL 解析，均无则标本地预览）
       const scenePr = scenes.find(s => s.prNumber)?.prNumber || getCurrentPrNumber();
       const metaLine = scenePr ? `**PR:** #${scenePr}` : getPreviewMetaLine();
+      const countSceneRequirements = (scene) => {
+        const groups = {};
+        let reorderCount = 0;
+        scene.changes.forEach(c => {
+          if (c.type === 'reorder') { reorderCount++; return; }
+          const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
+          const gkey = c.sharedKey ? componentClass : c.selector;
+          if (!groups[gkey]) {
+            groups[gkey] = { selector: c.selector, componentClass };
+          }
+        });
+        let noteOnlyCount = 0;
+        scene.annotations.forEach(a => {
+          if (!a.text || !a.text.trim()) return;
+          const aComponentClass = (a.elementClass || '').split(/\s+/)[0] || '';
+          const matched = Object.values(groups).some(g => g.selector === a.selector || (g.componentClass && aComponentClass && g.componentClass === aComponentClass));
+          if (!matched) noteOnlyCount++;
+        });
+        return reorderCount + Object.keys(groups).length + noteOnlyCount;
+      };
+      const sceneRequirementCounts = new Map();
+      let requirementTotal = 0;
+      scenes.forEach(scene => {
+        const count = countSceneRequirements(scene);
+        sceneRequirementCounts.set(scene.routeId, count);
+        requirementTotal += count;
+      });
       const lines = [
-        `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景）`,
+        `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景，${requirementTotal} 项需求）`,
         metaLine,
         `**Viewport:** ${viewport}`,
         '',
-        '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
-        '> 修复后动作：AI 按本工程单修改源码完成后，调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
+        `> 执行：只处理本轮工单内容，不带入历史反馈；本轮共 ${scenes.length} 个场景、${requirementTotal} 项需求，样式和备注已合并为需求账本，必须逐项销账后交付。`,
+        '> 定位：优先按需求账本中的场景、区域、语义类或 data-dom-id 修改源码；共享选择器仅限对应场景当前上下文，完整定位兜底只在主定位失败时使用。',
+        '> 修复后动作：调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
         '',
       ];
       const allMachine = [];
       const allFullSelectors = [];
       // 辅助函数（复用 _buildPrompt 中的逻辑）
       const getClassAnchor = (g) => {
-        if (g.componentClass) return g.componentClass;
+        if (g.componentClass) return g.componentClass.replace(/^\./, '');
         if (g.elementClass) return g.elementClass.split(/\s+/)[0];
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
@@ -4052,11 +4109,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return '';
       };
       scenes.forEach((scene, sceneIdx) => {
-        lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}）`);
+        const sceneRequirementTotal = sceneRequirementCounts.get(scene.routeId) || 0;
+        let requirementIndex = 0;
+        lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}，共 ${sceneRequirementTotal} 项）`);
         lines.push('');
         // 分组逻辑（同 _buildPrompt）
+        const reorderInfos = [];
         const groups = {};
         scene.changes.forEach(c => {
+          if (c.type === 'reorder') { reorderInfos.push(c); return; }
           const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
           const gkey = c.sharedKey ? componentClass : c.selector;
           if (!groups[gkey]) {
@@ -4095,16 +4156,28 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         });
         const styleGroups = groupList.filter(g => g.changes.length > 0);
         const noteOnlyGroups = pureAnnotations;
-        if (styleGroups.length) {
-          lines.push(`#### 样式变更（${styleGroups.length} 组）`);
+        if (sceneRequirementTotal) {
+          lines.push(`#### 需求账本（${sceneRequirementTotal} 项）`);
           lines.push('');
         }
+        reorderInfos.forEach((c) => {
+          const idx = ++requirementIndex;
+          const anchor = (c.elementText || '').replace(/\s+/g, ' ').trim();
+          const containerLabel = anchor ? `（${anchor.slice(0, 16)}）` : '';
+          lines.push(`##### ${idx}. ${scene.routeLabel} / 元素顺序`);
+          lines.push(`- 对象：容器 ${c.selector}${containerLabel}`);
+          lines.push(`- 需求：容器内 ${c.order.length} 个子元素顺序已调整`);
+          lines.push(`- 验收：按可见顺序逐项核对`);
+          lines.push('');
+          allFullSelectors.push({ scene: scene.routeLabel, idx, classAnchor: '', selector: c.selector });
+        });
         styleGroups.forEach((g, i) => {
+          const requirementIdx = ++requirementIndex;
           const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
           const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
           const classAnchor = getClassAnchor(g);
           const role = shortAnchor || classAnchor || g.elementTag;
-          let title = `##### ${i + 1}. ${role}`;
+          let title = `##### ${requirementIdx}. ${scene.routeLabel} / ${role}`;
           if (classAnchor) title += ` · .${classAnchor}`;
           if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
           lines.push(title);
@@ -4161,10 +4234,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
           }
           lines.push(fixLine);
+          if (g.shared) {
+            lines.push(`- 范围：仅限 ${scene.routeLabel} 当前上下文中这组共享元素`);
+          }
           if (g.annotation) lines.push(`- 备注：${g.annotation}`);
+          lines.push('- 验收：按可见结果和计算样式逐项核对');
           lines.push('');
-          allFullSelectors.push({ scene: scene.routeLabel, idx: i + 1, classAnchor, selector: g.selector });
+          allFullSelectors.push({ scene: scene.routeLabel, idx: requirementIdx, classAnchor, selector: g.selector });
           allMachine.push({
+            sceneIndex: sceneIdx + 1,
+            requirementIndex: requirementIdx,
             routeId: scene.routeId,
             routeLabel: scene.routeLabel,
             selector: g.selector,
@@ -4179,22 +4258,40 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           });
         });
         if (noteOnlyGroups.length) {
-          lines.push(`#### 备注（${noteOnlyGroups.length} 条）`);
-          lines.push('');
           noteOnlyGroups.forEach((a, i) => {
+            const requirementIdx = ++requirementIndex;
             const anchor = (a.elementText || '').replace(/\s+/g, ' ').trim();
             const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
             const aClass = (a.elementClass || '').split(/\s+/)[0] || '';
             const role = shortAnchor || aClass || a.elementTag;
-            lines.push(`${i + 1}. ${role}：${a.text}`);
-            allFullSelectors.push({ scene: scene.routeLabel, idx: '备注' + (i + 1), classAnchor: aClass, selector: a.selector });
+            let title = `##### ${requirementIdx}. ${scene.routeLabel} / ${role}`;
+            if (aClass) title += ` · .${aClass}`;
+            lines.push(title);
+            lines.push(`- 需求：${a.text}`);
+            lines.push('- 验收：按备注描述的最终可见结果核对');
+            lines.push('');
+            allFullSelectors.push({ scene: scene.routeLabel, idx: requirementIdx, classAnchor: aClass, selector: a.selector });
+            allMachine.push({
+              sceneIndex: sceneIdx + 1,
+              requirementIndex: requirementIdx,
+              routeId: scene.routeId,
+              routeLabel: scene.routeLabel,
+              selector: a.selector,
+              elementText: anchor,
+              role,
+              adds: [],
+              icons: [],
+              css: [],
+              annotation: a.text || '',
+              shared: false,
+              sharedCount: 0,
+            });
           });
-          lines.push('');
         }
       });
       // 完整定位选择器备选（折叠区，按场景分组）
       if (allFullSelectors.length) {
-        lines.push('<details><summary>完整定位选择器（备选，主定位失效时使用）</summary>');
+        lines.push('<details><summary>定位兜底（执行失败时再看）</summary>');
         lines.push('');
         const byScene = {};
         allFullSelectors.forEach(f => {
@@ -10902,6 +10999,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         localStorage.setItem(key, JSON.stringify({
           sceneRoute: state.currentRoute,
+          routeLabel: getRouteLabel(state.currentRoute),
           lastModified: Date.now(),
           prNumber: getCurrentPrNumber(),
           changes: state.changes,
@@ -10925,7 +11023,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
             const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
             if (changes.length > 0 || annotations.length > 0) {
-              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
+              scenes.push({ routeId, routeLabel: data.routeLabel || data.sceneLabel || getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
             }
           } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
         }
