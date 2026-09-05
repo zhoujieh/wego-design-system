@@ -32,7 +32,7 @@
 7. 反例：撤销渐变后 `backgroundImage` 应回 none；防抖落盘 300ms 后读 localStorage 核对，防旧值残留假象；只看元素样式不看面板预览会漏掉控件内部同步缺陷。
 
 ## ③ 数值字段拖动调值
-1. 面板数值字段（如 paddingLeft）按住左右拖动调值，断言元素样式与 input 同步。
+1. 面板数值字段（如合并态 paddingAll，或展开后的 paddingTop / paddingRight / paddingBottom / paddingLeft）按住左右拖动调值，断言元素样式与 input 同步。
 2. Shift 拖动 = ×5 步进；Alt 拖动 = 微调。
 3. 点击字段自动全选，直接输入新值（如 88）→ 元素同步。
 4. 撤销（回 36）→ 重做（回 88）→ 撤销输入，元素与面板 input 全程同步（防 blur 写回旧值）。

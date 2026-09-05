@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "scope_revision": 1,
+  "updated_at": "2026-09-04T19:01:53.762Z",
+  "items": [
+    {
+      "dimension": "entry_points",
+      "label": "「我的」tab 内容管理区（仅产品类型可见）「批量」链接：点击拉起 actionsheet（批量分享/批量编辑/批量导出/批量上下架/批量删除·云空间清理）；点「批量导出」进入选品页；点其余项 toast 占位提示「本期暂不展开」。",
+      "anchor": "76bb635cfa61a00758fb4a666545e5c2df6a0a6ad040f5d5d336cc188b340962",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "entry_points",
+      "label": "选品页顶部「报价记录」：点击进入报价记录页；首次进入选品时该入口带引导气泡「你的报价单都在这」。",
+      "anchor": "3e00541c5c3d0b1e1231b311072009d51288fbf696363c59d60fc3f5bbf83ae4",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "entry_points",
+      "label": "预览编辑页内「继续添加产品」（表格上方）：回选品页追加模式。",
+      "anchor": "6d3734e741efae561d531bd50e6323da1de69c00f73df6b21d778efcdd5fb708",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "entry_points",
+      "label": "报价记录页卡片点击：进入该记录的预览编辑态。",
+      "anchor": "5ee878c6a319b933b9856a9023089519bc726271edda15ccac436b59e07a7bde",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "critical_paths",
+      "label": "[P1] 我的批量导出 → 选品页（按产品/按图报价、搜索、筛选、勾选）→ 下一步 → 预览编辑（标题/语言翻译/价格区间/批量改价）→ 分享 → 选格式 → 生成进度 → 完成页（下载/系统分享）→ 完成返回。",
+      "anchor": "8c8fb411515e75143f0291b8a5ce2fca0c768537f05db52fd7746fda89e11820",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "critical_paths",
+      "label": "[P2] 预览编辑退出（有改动）→ 弹「是否保存当前修改？」→ 保存 → 报价记录列表出现该记录 → 点开记录可继续编辑 → 再分享。",
+      "anchor": "1d893b409f0f7db67faad4cb7e2a51c03b31dad6d7a7f6a0ad402b40b3ad6758",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "critical_paths",
+      "label": "[P3] 报价记录管理：记录页搜索标题 → 无结果「暂无相关结果」；进入删除模式勾选 → 批量删除确认 → 列表更新；无任何记录时「暂无报价记录」。",
+      "anchor": "bff554b90f747912b5f22095e79e74eb926b2ca423575eefe9993d3fdd9c2fa2",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "critical_paths",
+      "label": "[P4] 选品追加：预览页「继续添加产品」→ 回选品（保留已选行）→ 追加勾选 → 底栏「确定」→ 只追加新选项回预览。",
+      "anchor": "c06ced252330e9a05cc2023ba4ef9810953240bd0570e2f6c2996bf4792c4607",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "critical_paths",
+      "label": "[P5] 筛选：筛选按钮 → 面板 draft 修改（时间/分类单选/来源懒加载）→ 确定 → 列表按条件过滤 + 条件条 + 徽标计数 → 逐项删除条件回退。",
+      "anchor": "f11f28bc354d5be7f128844aea016a43f95a31372b1f3690d6beb08efbf7f358",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "默认主态（选品）：进入选品页 → 展示商品列表（按产品/按图两模式）+ 顶部搜索卡与筛选/视图控件 + 底部批量栏；筛选未开、未勾选时下一步禁用。",
+      "anchor": "1d30422193ae6f5b30d6f8a004d12026001f8d757c1117bd3e10dc7795fdf525",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "加载态（选品分页/来源懒加载）：列表或来源卡滚动到底 → 加载指示，加载完显示新一批；来源卡数据到底显示到底提示。",
+      "anchor": "1ad8aa2ae979cb8f43bf4d727cc68b0403ebb79d87c70efdc1766e4e0c225974",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "失败态（翻译）：语言切换且 gtx 不可达 → 翻译条转为原文展示，不弹网络/VPN 提示。",
+      "anchor": "4faaa466e862d42095d81212944c37b182516d508a87ee92c0c606a3ee73435b",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "失败态（生成）：文件生成异常 → 进度页转「生成失败」+ 错误说明 + 重新分享/继续编辑。",
+      "anchor": "2a868cfdaec0c5baa29a1a179b8da5137e1c71e64a3125ca2de448126a4ba053",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "空状态（选品）：搜索/筛选无匹配 → 无图标 Result 显示「未搜索到相关商品」，保留搜索整栏且不显示结果区清空搜索入口；只有初始态商品数据为空时隐藏搜索整栏。",
+      "anchor": "53b191074718870523315dead7eb4751fb477ed72658a6e10d91ead8e4fc2726",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "空状态（记录）：无任何记录 → 「暂无报价记录」并隐藏搜索整栏；搜索无匹配 → 「暂无相关结果」并保留搜索整栏。",
+      "anchor": "b4c42cd205a53cd725e67c13916eed8016709b2b66b5897433238d8515a6f7c1",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "空状态（预览表格）：报价行全部删除 → 表格空态提示，可继续添加。",
+      "anchor": "50632caf7621119e941322c8ccdc887e22aba5f355a728666534f478feb0b950",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "追加模式：预览点「继续添加产品」进入选品 → 底栏按钮为「确定」，仅提交新勾选项。",
+      "anchor": "edfd285eca03ba6d4060fe6845af61069b0516fe3c5737deb0b744d309c0ddfd",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "删除模式（记录）：记录页进入删除模式 → 卡片出现勾选 + 批量删除条 + 确认弹窗；左上「取消」退出。",
+      "anchor": "6cd973e41dd68d044f787390e896b383eacd313aa776581201c1bf575c0d609d",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "引导态：首次进入选品（报价记录入口）→ 引导气泡「你的报价单都在这」，点击后不再出现。",
+      "anchor": "dd52c7f602dbfed7287d303c85d87e64fd43dc50ac7eaa2ad450003cf2255b15",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "states",
+      "label": "翻译进行中：切换语言 → 状态条「正在翻译中 X/Y」+ 取消，期间可继续编辑。",
+      "anchor": "723d8ead03a0954c548eb2cad00e66a80325ca1b4e4ed792ca6c7f248564d389",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "data_contract",
+      "label": "商品（原型库增强）",
+      "anchor": "eb4db57bd19b39e0e9eae411bb76b37a3b26bfb8ef157c7a24da663b0338ac14",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "data_contract",
+      "label": "报价行 QuoteRow",
+      "anchor": "a29bec70446604c1e2dcfb042a3d0a226000515d635f71e0f5b868c781ab0c0c",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "data_contract",
+      "label": "报价记录 QuoteRecord",
+      "anchor": "b36614e5f3279655a327daec9917cbd5cd5b985a5bc2446ed423a2fea0daf0a6",
+      "status": "unverified",
+      "evidence": ""
+    },
+    {
+      "dimension": "data_contract",
+      "label": "筛选条件（draft）",
+      "anchor": "04565d5de65b7e44977c928bf2f657e330fbcdcb09d14a6787332116afc3423d",
+      "status": "unverified",
+      "evidence": ""
+    }
+  ]
+}

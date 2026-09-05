@@ -158,7 +158,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (route.entry && route.entry.label) return route.entry.label;
         // 主 tab 场景从 style 路径提取场景目录名（如 ./scenes/shop/动态/scene.css → 动态）
         if (route.style) {
-          const match = route.style.match(/\/scenes\/[^/]+\/([^/]+)\//);
+          const match = route.style.match(/(?:^|\/)scenes\/[^/]+\/([^/]+)\//);
           if (match) return match[1];
         }
       }
@@ -181,10 +181,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   }
 
   /** 生成工单头部环境/PR 元信息：在线预览输出 PR 号；本地预览输出环境标记（便于 Agent 区分定位路径） */
-  function getPreviewMetaLine() {
-    const pr = getCurrentPrNumber();
-    if (pr) return `**PR:** #${pr}`;
-    return `**环境：本地预览（无 PR）**`;
+  function getPreviewMetaLine(viewport, pr = getCurrentPrNumber()) {
+    const viewportText = viewport ? ` · ${viewport}` : '';
+    if (pr) return `PR #${pr}${viewportText}`;
+    return `本地预览（无 PR）${viewportText}`;
   }
 
   /** 判断元素是否属于走查工具自身（包括 Shadow DOM 内部）
@@ -259,15 +259,22 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** 按记录的选择器找元素；精确匹配失败时剔除易变状态类后重试，兼容历史数据 */
   function queryTargetEl(selector) {
     if (!selector) return null;
+    const pickVisible = (list) => {
+      const items = Array.from(list || []).filter(el => el && el.isConnected && !isWalkthroughElement(el));
+      return items.find(el => {
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      }) || items[0] || null;
+    };
     let el = null;
-    try { el = document.querySelector(selector); } catch (e) { return null; }
+    try { el = pickVisible(document.querySelectorAll(selector)); } catch (e) { return null; }
     if (el) return el;
     try {
       const relaxed = selector.replace(/\.([A-Za-z0-9_-]+)/g, (m, cls) =>
         (VOLATILE_CLASS_RE.test(cls) || isRegisteredIconfontClass(cls)) ? '' : m);
       if (relaxed !== selector) {
-        const list = document.querySelectorAll(relaxed);
-        if (list.length) return list[0];
+        el = pickVisible(document.querySelectorAll(relaxed));
+        if (el) return el;
       }
     } catch (e) { /* ignore */ }
     return null;
@@ -976,6 +983,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 外观
       layerOpacity: Math.round(parseNumeric(cs.opacity) * 100),
       borderRadiusAll: parseNumeric(cs.borderTopLeftRadius),
+      borderRadiusTopLeft: parseNumeric(cs.borderTopLeftRadius),
+      borderRadiusTopRight: parseNumeric(cs.borderTopRightRadius),
+      borderRadiusBottomRight: parseNumeric(cs.borderBottomRightRadius),
+      borderRadiusBottomLeft: parseNumeric(cs.borderBottomLeftRadius),
       // 填充（背景）
       fillHex: bgColor.hex,
       fillOpacity: bgColor.opacity,
@@ -1027,7 +1038,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       el.style.color = value;
       return { property, oldValue, newValue: value };
     }
-    el.style[property] = value;
+    el.style.setProperty(property, value);
     return { property, oldValue, newValue: value };
   }
 
@@ -1060,6 +1071,48 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
   /** CSS 值归一化（与 _cssValueEqual 的 norm 对齐），用于公共样式值匹配 */
   function normalizeCssValue(v) {
     return String(v == null ? '' : v).trim().replace(/\s*,\s*/g, ',').replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  /** CSS 源码常用简写/组合声明（如 padding/font/background）控制具体长属性；
+   *  走查面板编辑的是长属性或拆分字段，公共样式判断必须把组合声明视为源码声明，否则同类同步会漏掉。 */
+  function declarationPropertiesFor(property) {
+    const p = String(property || '').trim();
+    if (!p) return [];
+    const props = [p];
+    if (/^padding-(top|right|bottom|left)$/.test(p)) props.push('padding');
+    else if (/^margin-(top|right|bottom|left)$/.test(p)) props.push('margin');
+    else if (p === 'border') {
+      props.push(
+        'border-width', 'border-style', 'border-color',
+        'border-top', 'border-right', 'border-bottom', 'border-left',
+        'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+        'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'
+      );
+    }
+    else if (/^border-(top|right|bottom|left)-width$/.test(p)) {
+      const side = p.match(/^border-(top|right|bottom|left)-width$/)[1];
+      props.push('border-width', 'border-' + side, 'border');
+    }
+    else if (p === 'border-width') props.push('border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width', 'border');
+    else if (p === 'border-style') props.push('border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style', 'border');
+    else if (/^border-(top|right|bottom|left)-color$/.test(p)) {
+      const side = p.match(/^border-(top|right|bottom|left)-color$/)[1];
+      props.push('border-color', 'border-' + side, 'border');
+    }
+    else if (p === 'border-color') props.push('border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color', 'border');
+    else if (/^border-(top-left|top-right|bottom-right|bottom-left)-radius$/.test(p)) props.push('border-radius');
+    else if (p === 'background-color' || p === 'background-image') props.push('background');
+    else if (p === 'font-size' || p === 'font-weight' || p === 'line-height') props.push('font');
+    else if (p === 'flex') props.push('flex-grow', 'flex-shrink', 'flex-basis');
+    else if (p === 'flex-direction' || p === 'flex-wrap') props.push('flex-flow');
+    else if (p === 'grid-template-columns') props.push('grid-template', 'grid');
+    else if (p === 'align-items') props.push('place-items');
+    else if (p === 'justify-content' || p === 'align-content') props.push('place-content');
+    else if (p === 'gap') props.push('row-gap', 'column-gap', 'grid-gap', 'grid-row-gap', 'grid-column-gap');
+    else if (p === 'row-gap') props.push('gap', 'grid-gap', 'grid-row-gap');
+    else if (p === 'column-gap') props.push('gap', 'grid-gap', 'grid-column-gap');
+    else if (p === 'top' || p === 'right' || p === 'bottom' || p === 'left') props.push('inset');
+    return props;
   }
 
   /** 把一组变更中的宽度/高度记录合并为一行「尺寸」，其余属性原样保留。
@@ -1265,16 +1318,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
    *  继承自祖先、浏览器默认值、@import 不可读样式表等一律视为未声明 → 不参与同步 */
   function declaresProperty(el, property) {
     if (!el || el.nodeType !== 1 || !property) return false;
+    const declaredProps = declarationPropertiesFor(property);
     // 内联样式直接声明
     try {
-      if (el.style && typeof el.style.getPropertyValue === 'function' && el.style.getPropertyValue(property)) return true;
+      if (el.style && typeof el.style.getPropertyValue === 'function') {
+        for (const prop of declaredProps) {
+          if (el.style.getPropertyValue(prop)) return true;
+        }
+      }
     } catch (e) {}
     // 命中样式规则（含 @media / @supports 嵌套规则）声明
     const ruleDeclares = (rule) => {
       try {
         if (!rule) return false;
         if (rule.type === 1) {
-          if (rule.selectorText && rule.style && rule.style.getPropertyValue(property) && el.matches(rule.selectorText)) return true;
+          if (rule.selectorText && rule.style && el.matches(rule.selectorText)) {
+            for (const prop of declaredProps) {
+              if (rule.style.getPropertyValue(prop)) return true;
+            }
+          }
         } else if (rule.cssRules) {
           for (let i = 0; i < rule.cssRules.length; i++) {
             if (ruleDeclares(rule.cssRules[i])) return true;
@@ -1298,6 +1360,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
    *  target 可选（'' 元素本体 / 'before' / 'after'）：命中伪元素选择器（.a::before）时按目标过滤。 */
   function readSourceDeclaration(el, property, target) {
     if (!el || el.nodeType !== 1 || !property) return { declared: false, sourceValue: '' };
+    const declaredProps = declarationPropertiesFor(property);
     const pseudoTarget = target === 'before' ? '::before' : (target === 'after' ? '::after' : '');
     const ruleDeclares = (rule) => {
       try {
@@ -1312,8 +1375,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const pseudo = m ? m[2] : '';
             if (pseudo !== pseudoTarget) return null;
             if (base && el.matches(base)) {
-              const v = rule.style.getPropertyValue(property);
-              if (v) return { declared: true, sourceValue: String(v).trim() };
+              for (const prop of declaredProps) {
+                const v = rule.style.getPropertyValue(prop);
+                if (v) return { declared: true, sourceValue: String(v).trim() };
+              }
             }
           }
         } else if (rule.cssRules) {
@@ -1474,6 +1539,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       'margin-right': cs.marginRight,
       'margin-top': cs.marginTop,
       'margin-bottom': cs.marginBottom,
+      'border-top-left-radius': cs.borderTopLeftRadius,
+      'border-top-right-radius': cs.borderTopRightRadius,
+      'border-bottom-right-radius': cs.borderBottomRightRadius,
+      'border-bottom-left-radius': cs.borderBottomLeftRadius,
       'width': cs.width,
       'height': cs.height,
       'font-size': cs.fontSize,
@@ -3688,13 +3757,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 复制到剪贴板
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(prompt).then(() => {
-          bus.emit('toast', { message: '已复制 Prompt' });
+          this._afterPromptCopied();
         }).catch(() => {
           this._fallbackCopy(prompt);
         });
       } else {
         this._fallbackCopy(prompt);
       }
+    }
+
+    _afterPromptCopied() {
+      bus.emit('toast', { message: '已复制 Prompt' });
+      this.close();
+      bus.emit('reset-changes');
     }
 
     _fallbackCopy(text) {
@@ -3707,7 +3782,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       textarea.select();
       try {
         document.execCommand('copy');
-        bus.emit('toast', { message: '已复制 Prompt' });
+        this._afterPromptCopied();
       } catch (e) {
         bus.emit('toast', { message: '复制失败，请手动复制' });
       }
@@ -3716,13 +3791,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
 
     _buildPrompt() {
       const route = this._route || 'default';
-      const routeLabel = getCurrentRouteLabel();
+      const routeLabel = this._routeLabel || (route === 'default' ? getCurrentRouteLabel() : getRouteLabel(route));
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const changes = this._changes || [];
       const annotations = this._annotations || [];
       if (changes.length === 0 && annotations.length === 0) {
-        const metaLine = getPreviewMetaLine();
-        return `## 走查变更单 #/${routeLabel}\n${metaLine}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const metaLine = getPreviewMetaLine(viewport, this._promptPrNumber || getCurrentPrNumber());
+        return `## 走查变更单 #/${routeLabel}\n${metaLine}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 分组逻辑：共享样式按组件类（sharedKey 去掉 ::属性名）分组，同一组件类的所有属性合并为一条；
       // 非共享样式按 selector 分组，同一元素的多个属性合并为一条。
@@ -3782,20 +3857,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
       // 辅助：提取类名锚点
       const getClassAnchor = (g) => {
-        if (g.componentClass) return g.componentClass;
+        if (g.componentClass) return g.componentClass.replace(/^\./, '');
         if (g.elementClass) return g.elementClass.split(/\s+/)[0];
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
       };
-      // 辅助：提取业务类锚点（组件类之外的业务类；从完整稳定类列表挑"非组件类且非通用组件基类"的类）
       const getBusinessClass = (g) => {
         const componentClass = g.componentClass;
         const classes = (g.elementClasses && g.elementClasses.length) ? g.elementClasses : (g.elementClass ? [g.elementClass] : []);
         if (!classes.length) return '';
-        // 业务类 = 非组件类、非通用组件基类（btn/icon/card…）的类；组件类与业务类同元素时才能区分
         const biz = classes.find(c => c !== componentClass && !isGenericComponentClass(c));
         if (biz) return biz;
-        // 全部是通用组件类或与组件类相同 → 无独立业务类，返回空避免误标
         return '';
       };
       // 辅助：格式化 flex 值为友好描述
@@ -3807,44 +3879,46 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         if (fixedMatch) return `固定 ${fixedMatch[1]}`;
         return v;
       };
-      const metaLine = getPreviewMetaLine();
-      const lines = [
-        `## 走查变更单 #/${routeLabel}`,
-        metaLine,
-        `**Viewport:** ${viewport}`,
-        '',
-        '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
-        '> 修复后动作：AI 按本工程单修改源码完成后，调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
-        '',
-      ];
+      const metaLine = getPreviewMetaLine(viewport, this._promptPrNumber || getCurrentPrNumber());
       const machine = [];
       const fullSelectors = [];
       // 样式变更组
       const styleGroups = groupList.filter(g => g.changes.length > 0);
       const noteOnlyGroups = pureAnnotations;
-      if (styleGroups.length) {
-        lines.push(`### 样式变更（${styleGroups.length} 组）`);
+      const requirementTotal = reorderInfos.length + styleGroups.length + noteOnlyGroups.length;
+      const lines = [
+        `## 走查变更单 #/${routeLabel}`,
+        metaLine,
+        '',
+        `> 只处理本轮 ${requirementTotal} 项需求，按账本逐项销账；优先语义类/data-dom-id，兜底选择器仅失败时看；业务修完后如发现走查工具导致遗漏/误报/臃肿，就在当前分支修工具并验证；经验信号写入 \`.tasks/experience-inbox.json\`。`,
+        '',
+      ];
+      let requirementIndex = 0;
+      if (requirementTotal) {
+        lines.push(`### 需求账本（${requirementTotal} 项）`);
         lines.push('');
       }
       // 元素顺序调整（功能 4 reorder 变更）
       if (reorderInfos.length) {
-        lines.push(`### 元素顺序调整（${reorderInfos.length} 处）`);
-        lines.push('');
         reorderInfos.forEach((c, ri) => {
+          const idx = ++requirementIndex;
           const anchor = (c.elementText || '').replace(/\s+/g, ' ').trim();
           const containerLabel = anchor ? `（${anchor.slice(0, 16)}）` : '';
-          lines.push(`${ri + 1}. 容器 ${c.selector}${containerLabel} 内 ${c.order.length} 个子元素顺序已调整`);
-          fullSelectors.push({ idx: '顺序' + (ri + 1), classAnchor: '', selector: c.selector });
+          lines.push(`#### ${idx}. ${routeLabel} / 元素顺序`);
+          lines.push(`- 对象：容器 ${c.selector}${containerLabel}`);
+          lines.push(`- 需求：容器内 ${c.order.length} 个子元素顺序已调整`);
+          lines.push('');
+          fullSelectors.push({ idx, classAnchor: '', selector: c.selector });
         });
-        lines.push('');
       }
       styleGroups.forEach((g, i) => {
+        const requirementIdx = ++requirementIndex;
         const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
         const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
         const classAnchor = getClassAnchor(g);
         const role = shortAnchor || classAnchor || g.elementTag;
         // 标题行
-        let title = `#### ${i + 1}. ${role}`;
+        let title = `#### ${requirementIdx}. ${routeLabel} / ${role}`;
         if (classAnchor) title += ` · .${classAnchor}`;
         if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
         lines.push(title);
@@ -3862,33 +3936,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const changeLines = [];
         // 加类
         addClassChanges.forEach(c => {
-          changeLines.push(`- 加结构类 \`${c.intentClass}\``);
+          changeLines.push(`加结构类 \`${c.intentClass}\``);
         });
         iconChanges.forEach(c => {
-          changeLines.push(`- 替换图标：\`${c.oldValue}\` → \`${c.newValue}\``);
+          changeLines.push(`替换图标 \`${c.oldValue}\` → \`${c.newValue}\``);
         });
         // 顺序移动
         orderChanges.forEach(c => {
           const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
           const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
-          changeLines.push(`- 顺序：${posTxt}${orderTxt}`);
+          changeLines.push(`顺序 ${posTxt}${orderTxt}`);
         });
         // 其他样式
         otherChanges.forEach(c => {
           const propLabel = c.property === 'flex' ? '宽度' : c.property;
           const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-          // 源码是否已声明：未声明 → 标注"新增"；已声明 → 展示源码值（优先 token 原文，其次原值）
-          const srcDeclared = !!c.sourceDeclared;
-          const srcVal = c.sourceValue || c.oldValue;
-          const curLabel = srcDeclared
-            ? (c.property === 'flex' ? formatFlexLabel(srcVal) : (srcVal || '-'))
-            : '（未声明）';
-          const tag = srcDeclared ? '' : '新增 ';
-          changeLines.push(`- ${tag}${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+          changeLines.push(`${propLabel}: ${valLabel}`);
         });
         if (changeLines.length) {
-          lines.push('- 变更：');
-          changeLines.forEach(l => lines.push('  ' + l));
+          lines.push(`- 变更：${changeLines.join('；')}`);
         }
         // 改法
         const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
@@ -3910,15 +3976,19 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
         }
         lines.push(fixLine);
+        if (g.shared) {
+          lines.push(`- 范围：仅限 ${routeLabel} 当前上下文中这组共享元素`);
+        }
         // 组内备注
         if (g.annotation) {
           lines.push(`- 备注：${g.annotation}`);
         }
         lines.push('');
         // 完整选择器备选
-        fullSelectors.push({ idx: i + 1, classAnchor, selector: g.selector });
+        fullSelectors.push({ idx: requirementIdx, classAnchor, selector: g.selector });
         // machine JSON（保持向后兼容）
         machine.push({
+          requirementIndex: requirementIdx,
           selector: g.selector,
           elementText: anchor,
           role,
@@ -3932,21 +4002,35 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       });
       // 纯备注（无样式变更）
       if (noteOnlyGroups.length) {
-        lines.push(`### 备注（${noteOnlyGroups.length} 条）`);
-        lines.push('');
         noteOnlyGroups.forEach((a, i) => {
+          const requirementIdx = ++requirementIndex;
           const anchor = (a.elementText || '').replace(/\s+/g, ' ').trim();
           const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
           const aClass = (a.elementClass || '').split(/\s+/)[0] || '';
           const role = shortAnchor || aClass || a.elementTag;
-          lines.push(`${i + 1}. ${role}：${a.text}`);
-          fullSelectors.push({ idx: '备注' + (i + 1), classAnchor: aClass, selector: a.selector });
+          let title = `#### ${requirementIdx}. ${routeLabel} / ${role}`;
+          if (aClass) title += ` · .${aClass}`;
+          lines.push(title);
+          lines.push(`- 需求：${a.text}`);
+          lines.push('');
+          fullSelectors.push({ idx: requirementIdx, classAnchor: aClass, selector: a.selector });
+          machine.push({
+            requirementIndex: requirementIdx,
+            selector: a.selector,
+            elementText: anchor,
+            role,
+            adds: [],
+            icons: [],
+            css: [],
+            annotation: a.text || '',
+            shared: false,
+            sharedCount: 0,
+          });
         });
-        lines.push('');
       }
       // 完整定位选择器备选（折叠区）
       if (fullSelectors.length) {
-        lines.push('<details><summary>完整定位选择器（备选，主定位失效时使用）</summary>');
+        lines.push('<details><summary>定位兜底（执行失败时再看）</summary>');
         lines.push('');
         fullSelectors.forEach(f => {
           lines.push(`${f.idx}. ${f.classAnchor ? '.' + f.classAnchor + ' → ' : ''}\`${f.selector}\``);
@@ -3975,7 +4059,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
             const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
             if (changes.length > 0 || annotations.length > 0) {
-              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
+              scenes.push({ routeId, routeLabel: data.routeLabel || data.sceneLabel || getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
             }
           } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
         }
@@ -3995,8 +4079,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const viewport = `${window.innerWidth}×${window.innerHeight}`;
       const scenes = this._loadAllScenesChanges();
       if (scenes.length === 0) {
-        const metaLine = getPreviewMetaLine();
-        return `## 走查变更单（跨场景汇总）\n${metaLine}\n**Viewport:** ${viewport}\n\n当前还没有记录到任何配置修改或批注。`;
+        const metaLine = getPreviewMetaLine(viewport);
+        return `## 走查变更单（跨场景汇总）\n${metaLine}\n\n当前还没有记录到任何配置修改或批注。`;
       }
       // 只有一个场景时，直接用单场景格式
       if (scenes.length === 1) {
@@ -4004,33 +4088,64 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const savedChanges = this._changes;
         const savedAnnotations = this._annotations;
         const savedRoute = this._route;
+        const savedPromptPrNumber = this._promptPrNumber;
+        const savedRouteLabel = this._routeLabel;
         this._changes = s.changes;
         this._annotations = s.annotations;
         this._route = s.routeId;
+        this._promptPrNumber = s.prNumber || null;
+        this._routeLabel = s.routeLabel;
         // 临时覆盖 getCurrentRouteLabel 用场景名
         const prompt = this._buildPrompt();
         this._changes = savedChanges;
         this._annotations = savedAnnotations;
         this._route = savedRoute;
+        this._promptPrNumber = savedPromptPrNumber;
+        this._routeLabel = savedRouteLabel;
         return prompt;
       }
       // 多场景：按场景分组输出（PR 号取场景数据中的记录，优先当前场景；无记录时回退 URL 解析，均无则标本地预览）
       const scenePr = scenes.find(s => s.prNumber)?.prNumber || getCurrentPrNumber();
-      const metaLine = scenePr ? `**PR:** #${scenePr}` : getPreviewMetaLine();
+      const metaLine = getPreviewMetaLine(viewport, scenePr);
+      const countSceneRequirements = (scene) => {
+        const groups = {};
+        let reorderCount = 0;
+        scene.changes.forEach(c => {
+          if (c.type === 'reorder') { reorderCount++; return; }
+          const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
+          const gkey = c.sharedKey ? componentClass : c.selector;
+          if (!groups[gkey]) {
+            groups[gkey] = { selector: c.selector, componentClass };
+          }
+        });
+        let noteOnlyCount = 0;
+        scene.annotations.forEach(a => {
+          if (!a.text || !a.text.trim()) return;
+          const aComponentClass = (a.elementClass || '').split(/\s+/)[0] || '';
+          const matched = Object.values(groups).some(g => g.selector === a.selector || (g.componentClass && aComponentClass && g.componentClass === aComponentClass));
+          if (!matched) noteOnlyCount++;
+        });
+        return reorderCount + Object.keys(groups).length + noteOnlyCount;
+      };
+      const sceneRequirementCounts = new Map();
+      let requirementTotal = 0;
+      scenes.forEach(scene => {
+        const count = countSceneRequirements(scene);
+        sceneRequirementCounts.set(scene.routeId, count);
+        requirementTotal += count;
+      });
       const lines = [
-        `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景）`,
+        `## 走查变更单（跨场景汇总，共 ${scenes.length} 个场景，${requirementTotal} 项需求）`,
         metaLine,
-        `**Viewport:** ${viewport}`,
         '',
-        '> 施工单：按最终效果整理，改法优先用设计系统语义类；主定位用组件类，完整选择器见文末备选。',
-        '> 修复后动作：AI 按本工程单修改源码完成后，调用业务自动化测试技能 `wego-scene-app-test` 对本次修复的问题执行自动化测试与回归验证；修改与测试过程中沉淀的经验，按仓库经验机制记录（写入 `.tasks/experience-inbox.json` 草稿，由 `wego-uxsystem-iterate` 收口沉淀）。',
+        `> 只处理本轮 ${requirementTotal} 项需求，按账本逐项销账；优先语义类/data-dom-id，兜底选择器仅失败时看；业务修完后如发现走查工具导致遗漏/误报/臃肿，就在当前分支修工具并验证；经验信号写入 \`.tasks/experience-inbox.json\`。`,
         '',
       ];
       const allMachine = [];
       const allFullSelectors = [];
       // 辅助函数（复用 _buildPrompt 中的逻辑）
       const getClassAnchor = (g) => {
-        if (g.componentClass) return g.componentClass;
+        if (g.componentClass) return g.componentClass.replace(/^\./, '');
         if (g.elementClass) return g.elementClass.split(/\s+/)[0];
         const m = g.selector.match(/\.([a-zA-Z0-9_-]+)\s*$/) || g.selector.match(/\[data-component-slug="[^"]+"\]\.([a-zA-Z0-9_-]+)/);
         return m ? m[1] : '';
@@ -4052,11 +4167,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         return '';
       };
       scenes.forEach((scene, sceneIdx) => {
-        lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}）`);
+        const sceneRequirementTotal = sceneRequirementCounts.get(scene.routeId) || 0;
+        let requirementIndex = 0;
+        lines.push(`### 场景 ${sceneIdx + 1}：${scene.routeLabel}（#/${scene.routeId}，共 ${sceneRequirementTotal} 项）`);
         lines.push('');
         // 分组逻辑（同 _buildPrompt）
+        const reorderInfos = [];
         const groups = {};
         scene.changes.forEach(c => {
+          if (c.type === 'reorder') { reorderInfos.push(c); return; }
           const componentClass = c.sharedKey ? c.sharedKey.split('::')[0] : '';
           const gkey = c.sharedKey ? componentClass : c.selector;
           if (!groups[gkey]) {
@@ -4095,16 +4214,27 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         });
         const styleGroups = groupList.filter(g => g.changes.length > 0);
         const noteOnlyGroups = pureAnnotations;
-        if (styleGroups.length) {
-          lines.push(`#### 样式变更（${styleGroups.length} 组）`);
+        if (sceneRequirementTotal) {
+          lines.push(`#### 需求账本（${sceneRequirementTotal} 项）`);
           lines.push('');
         }
+        reorderInfos.forEach((c) => {
+          const idx = ++requirementIndex;
+          const anchor = (c.elementText || '').replace(/\s+/g, ' ').trim();
+          const containerLabel = anchor ? `（${anchor.slice(0, 16)}）` : '';
+          lines.push(`##### ${idx}. ${scene.routeLabel} / 元素顺序`);
+          lines.push(`- 对象：容器 ${c.selector}${containerLabel}`);
+          lines.push(`- 需求：容器内 ${c.order.length} 个子元素顺序已调整`);
+          lines.push('');
+          allFullSelectors.push({ scene: scene.routeLabel, idx, classAnchor: '', selector: c.selector });
+        });
         styleGroups.forEach((g, i) => {
+          const requirementIdx = ++requirementIndex;
           const anchor = (g.elementText || '').replace(/\s+/g, ' ').trim();
           const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
           const classAnchor = getClassAnchor(g);
           const role = shortAnchor || classAnchor || g.elementTag;
-          let title = `##### ${i + 1}. ${role}`;
+          let title = `##### ${requirementIdx}. ${scene.routeLabel} / ${role}`;
           if (classAnchor) title += ` · .${classAnchor}`;
           if (g.shared) title += `（共享 ${g.sharedCount} 个元素）`;
           lines.push(title);
@@ -4119,28 +4249,20 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const orderChanges = cssChanges.filter(c => c.property === 'order');
           const otherChanges = cssChanges.filter(c => c.property !== 'order');
           const changeLines = [];
-          addClassChanges.forEach(c => { changeLines.push(`- 加结构类 \`${c.intentClass}\``); });
-          iconChanges.forEach(c => { changeLines.push(`- 替换图标：\`${c.oldValue}\` → \`${c.newValue}\``); });
+          addClassChanges.forEach(c => { changeLines.push(`加结构类 \`${c.intentClass}\``); });
+          iconChanges.forEach(c => { changeLines.push(`替换图标 \`${c.oldValue}\` → \`${c.newValue}\``); });
           orderChanges.forEach(c => {
             const posTxt = (c.displayOld && c.displayNew) ? `${c.displayOld} → ${c.displayNew}` : `order ${c.oldValue} → ${c.newValue}`;
             const orderTxt = (c.orderValue || c.newValue) ? `（order: ${c.oldValue || 0} → ${c.orderValue || c.newValue}）` : '';
-            changeLines.push(`- 顺序：${posTxt}${orderTxt}`);
+            changeLines.push(`顺序 ${posTxt}${orderTxt}`);
           });
           otherChanges.forEach(c => {
             const propLabel = c.property === 'flex' ? '宽度' : c.property;
             const valLabel = c.property === 'flex' ? formatFlexLabel(c.newValue) : (c.newValue || '-');
-            // 源码是否已声明：未声明 → 标注"新增"；已声明 → 展示源码值（优先 token 原文，其次原值）
-            const srcDeclared = !!c.sourceDeclared;
-            const srcVal = c.sourceValue || c.oldValue;
-            const curLabel = srcDeclared
-              ? (c.property === 'flex' ? formatFlexLabel(srcVal) : (srcVal || '-'))
-              : '（未声明）';
-            const tag = srcDeclared ? '' : '新增 ';
-            changeLines.push(`- ${tag}${propLabel}：${curLabel} → ${valLabel}（\`${c.property}: ${c.newValue || '-'}\`）`);
+            changeLines.push(`${propLabel}: ${valLabel}`);
           });
           if (changeLines.length) {
-            lines.push('- 变更：');
-            changeLines.forEach(l => lines.push('  ' + l));
+            lines.push(`- 变更：${changeLines.join('；')}`);
           }
           const cssSnippet = otherChanges.map(c => `${c.property}: ${c.newValue || '-'}`).join('; ');
           const orderSnippet = orderChanges.length ? `order: ${orderChanges[0].orderValue || orderChanges[0].newValue}` : '';
@@ -4161,10 +4283,15 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             if (iconSnippet) fixLine += `，并替换图标类 ${iconSnippet}`;
           }
           lines.push(fixLine);
+          if (g.shared) {
+            lines.push(`- 范围：仅限 ${scene.routeLabel} 当前上下文中这组共享元素`);
+          }
           if (g.annotation) lines.push(`- 备注：${g.annotation}`);
           lines.push('');
-          allFullSelectors.push({ scene: scene.routeLabel, idx: i + 1, classAnchor, selector: g.selector });
+          allFullSelectors.push({ scene: scene.routeLabel, idx: requirementIdx, classAnchor, selector: g.selector });
           allMachine.push({
+            sceneIndex: sceneIdx + 1,
+            requirementIndex: requirementIdx,
             routeId: scene.routeId,
             routeLabel: scene.routeLabel,
             selector: g.selector,
@@ -4179,22 +4306,39 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           });
         });
         if (noteOnlyGroups.length) {
-          lines.push(`#### 备注（${noteOnlyGroups.length} 条）`);
-          lines.push('');
           noteOnlyGroups.forEach((a, i) => {
+            const requirementIdx = ++requirementIndex;
             const anchor = (a.elementText || '').replace(/\s+/g, ' ').trim();
             const shortAnchor = anchor.length > 16 ? anchor.slice(0, 16) + '…' : anchor;
             const aClass = (a.elementClass || '').split(/\s+/)[0] || '';
             const role = shortAnchor || aClass || a.elementTag;
-            lines.push(`${i + 1}. ${role}：${a.text}`);
-            allFullSelectors.push({ scene: scene.routeLabel, idx: '备注' + (i + 1), classAnchor: aClass, selector: a.selector });
+            let title = `##### ${requirementIdx}. ${scene.routeLabel} / ${role}`;
+            if (aClass) title += ` · .${aClass}`;
+            lines.push(title);
+            lines.push(`- 需求：${a.text}`);
+            lines.push('');
+            allFullSelectors.push({ scene: scene.routeLabel, idx: requirementIdx, classAnchor: aClass, selector: a.selector });
+            allMachine.push({
+              sceneIndex: sceneIdx + 1,
+              requirementIndex: requirementIdx,
+              routeId: scene.routeId,
+              routeLabel: scene.routeLabel,
+              selector: a.selector,
+              elementText: anchor,
+              role,
+              adds: [],
+              icons: [],
+              css: [],
+              annotation: a.text || '',
+              shared: false,
+              sharedCount: 0,
+            });
           });
-          lines.push('');
         }
       });
       // 完整定位选择器备选（折叠区，按场景分组）
       if (allFullSelectors.length) {
-        lines.push('<details><summary>完整定位选择器（备选，主定位失效时使用）</summary>');
+        lines.push('<details><summary>定位兜底（执行失败时再看）</summary>');
         lines.push('');
         const byScene = {};
         allFullSelectors.forEach(f => {
@@ -4653,11 +4797,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         paddingTop: 'padding-top',
         paddingRight: 'padding-right',
         paddingBottom: 'padding-bottom',
+        paddingAll: 'padding',
         marginLeft: 'margin-left',
         marginTop: 'margin-top',
         marginRight: 'margin-right',
         marginBottom: 'margin-bottom',
+        marginAll: 'margin',
         borderRadiusAll: 'border-radius',
+        borderRadiusTopLeft: 'border-top-left-radius',
+        borderRadiusTopRight: 'border-top-right-radius',
+        borderRadiusBottomRight: 'border-bottom-right-radius',
+        borderRadiusBottomLeft: 'border-bottom-left-radius',
         strokeWidth: 'border-top-width',
       };
     }
@@ -4683,6 +4833,17 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
      *  具体值（hex/px）不反查 token，返回 ''（即"没有对应 token 无需选中"）。 */
     _tokenValueOf(field) {
       const d = this._data || {};
+      const groups = this._boxGroups ? this._boxGroups() : {};
+      if (groups[field]) {
+        if (isTokenValue(d[field])) return d[field];
+        if (this._sourceTokens && this._sourceTokens[field]) return this._sourceTokens[field];
+        const values = groups[field].fields.map(childField => {
+          if (isTokenValue(d[childField])) return d[childField];
+          if (this._sourceTokens && this._sourceTokens[childField]) return this._sourceTokens[childField];
+          return '';
+        });
+        return values.length && values.every(v => v && v === values[0]) ? values[0] : '';
+      }
       if (isTokenValue(d[field])) return d[field];
       if (this._sourceTokens && this._sourceTokens[field]) return this._sourceTokens[field];
       return '';
@@ -4699,6 +4860,98 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (!v) return '';
       const m = v.match(/var\((--[^)]+)\)/);
       return m ? m[1].replace(/^--/, '') : '';
+    }
+
+    _boxGroups() {
+      return {
+        paddingAll: {
+          label: '内边距 padding',
+          type: 'spacing',
+          icon: ICONS.padding,
+          fields: ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'],
+          labels: ['T', 'R', 'B', 'L'],
+          placeholders: ['上', '右', '下', '左'],
+        },
+        marginAll: {
+          label: '外边距 margin',
+          type: 'spacing',
+          icon: ICONS.margin,
+          fields: ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'],
+          labels: ['T', 'R', 'B', 'L'],
+          placeholders: ['上', '右', '下', '左'],
+        },
+        borderRadiusAll: {
+          label: '圆角',
+          type: 'radius',
+          icon: ICONS.radius,
+          fields: ['borderRadiusTopLeft', 'borderRadiusTopRight', 'borderRadiusBottomRight', 'borderRadiusBottomLeft'],
+          labels: ['TL', 'TR', 'BR', 'BL'],
+          placeholders: ['左上', '右上', '右下', '左下'],
+        },
+      };
+    }
+
+    _boxGroupOf(field) {
+      const groups = this._boxGroups();
+      if (groups[field]) return { allField: field, ...groups[field] };
+      for (const allField in groups) {
+        if (groups[allField].fields.includes(field)) return { allField, ...groups[allField] };
+      }
+      return null;
+    }
+
+    _boxAllValue(allField) {
+      const group = this._boxGroups()[allField];
+      if (!group) return '';
+      const allToken = this._tokenValueOf(allField);
+      if (allToken) return allToken;
+      const d = this._data || {};
+      const values = group.fields.map(field => {
+        const tok = this._tokenValueOf(field);
+        return String(tok || (d[field] != null ? d[field] : '')).trim();
+      });
+      return values.every(v => v === values[0]) ? values[0] : values.join(',');
+    }
+
+    _isBoxAllTokenField(allField) {
+      return !!this._tokenValueOf(allField);
+    }
+
+    _boxAllTokenName(allField) {
+      const v = this._tokenValueOf(allField);
+      if (!v) return '';
+      const m = v.match(/var\((--[^)]+)\)/);
+      return m ? m[1].replace(/^--/, '') : '';
+    }
+
+    _renderBoxControl(allField) {
+      const group = this._boxGroups()[allField];
+      if (!group) return '';
+      const expanded = !!(this._expandedBoxGroups && this._expandedBoxGroups[allField]);
+      const allValue = this._boxAllValue(allField);
+      const allIsToken = this._isBoxAllTokenField(allField);
+      const tokenLabel = allIsToken ? this._boxAllTokenName(allField) : ICONS.token;
+      const fieldHtml = (field, idx) => `<div class="field"><span class="field-icon">${group.labels[idx]}</span><input class="text-input" type="text" value="${escapeHtml(String(this._tokenValueOf(field) || (this._data[field] != null ? this._data[field] : '')))}" data-field="${field}" inputmode="numeric" placeholder="${group.placeholders[idx]}" /><button class="token-btn ${this._isTokenField(field) ? 'active' : ''}" type="button" data-token-trigger="${group.type}" data-field="${field}" title="选择设计系统${group.type === 'radius' ? '圆角' : '间距'} Token">${this._isTokenField(field) ? this._tokenNameOf(field) : ICONS.token}</button></div>`;
+      return `
+            <p class="sub-label">${group.label}</p>
+            <div class="field-row">
+              <div class="field box-field">
+                <span class="field-icon">${group.icon}</span>
+                <input class="text-input" type="text" value="${escapeHtml(allValue)}" data-field="${allField}" inputmode="numeric" placeholder="${group.label}" />
+                <button class="box-expand-btn ${expanded ? 'active' : ''}" type="button" data-box-expand="${allField}" title="${expanded ? '收起分别设置' : '展开分别设置'}">${expanded ? '合' : '分'}</button>
+                <button class="token-btn ${allIsToken ? 'active' : ''}" type="button" data-token-trigger="${group.type}" data-field="${allField}" title="选择设计系统${group.type === 'radius' ? '圆角' : '间距'} Token">${tokenLabel}</button>
+              </div>
+            </div>
+            ${expanded ? `
+            <div class="field-row two-col">
+              ${fieldHtml(group.fields[0], 0)}
+              ${fieldHtml(group.fields[1], 1)}
+            </div>
+            <div class="field-row two-col">
+              ${fieldHtml(group.fields[2], 2)}
+              ${fieldHtml(group.fields[3], 3)}
+            </div>
+            ` : ''}`;
     }
 
     close() {
@@ -5706,6 +5959,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           .field.metric-field {
             padding: 0 4px 0 0;
           }
+          .field.box-field {
+            flex: 1;
+          }
+          .box-expand-btn {
+            flex-shrink: 0;
+            min-width: 26px;
+            height: 24px;
+            padding: 0 6px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-secondary, rgba(255,255,255,0.6));
+            font-size: 11px;
+            cursor: pointer;
+          }
+          .box-expand-btn.active {
+            background: rgba(0,185,107,0.12);
+            color: var(--text-brand, #00b96b);
+          }
           .field-select-wrap {
             position: relative;
             flex: 0 0 auto;
@@ -5827,24 +6099,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
                 </div>
               </div>
             </div>
-            <p class="sub-label">内边距 padding</p>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.paddingLeft || ''}" data-field="paddingLeft" inputmode="numeric" placeholder="左" /><button class="token-btn ${this._isTokenField('paddingLeft') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingLeft" title="选择设计系统间距 Token">${this._isTokenField('paddingLeft') ? this._tokenNameOf('paddingLeft') : ICONS.token}</button></div>
-              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.paddingTop || ''}" data-field="paddingTop" inputmode="numeric" placeholder="上" /><button class="token-btn ${this._isTokenField('paddingTop') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingTop" title="选择设计系统间距 Token">${this._isTokenField('paddingTop') ? this._tokenNameOf('paddingTop') : ICONS.token}</button></div>
-            </div>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.paddingRight || ''}" data-field="paddingRight" inputmode="numeric" placeholder="右" /><button class="token-btn ${this._isTokenField('paddingRight') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingRight" title="选择设计系统间距 Token">${this._isTokenField('paddingRight') ? this._tokenNameOf('paddingRight') : ICONS.token}</button></div>
-              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.paddingBottom || ''}" data-field="paddingBottom" inputmode="numeric" placeholder="下" /><button class="token-btn ${this._isTokenField('paddingBottom') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="paddingBottom" title="选择设计系统间距 Token">${this._isTokenField('paddingBottom') ? this._tokenNameOf('paddingBottom') : ICONS.token}</button></div>
-            </div>
-            <p class="sub-label">外边距 margin</p>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">L</span><input class="text-input" type="text" value="${d.marginLeft || ''}" data-field="marginLeft" inputmode="numeric" placeholder="左" /><button class="token-btn ${this._isTokenField('marginLeft') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginLeft" title="选择设计系统间距 Token">${this._isTokenField('marginLeft') ? this._tokenNameOf('marginLeft') : ICONS.token}</button></div>
-              <div class="field"><span class="field-icon">T</span><input class="text-input" type="text" value="${d.marginTop || ''}" data-field="marginTop" inputmode="numeric" placeholder="上" /><button class="token-btn ${this._isTokenField('marginTop') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginTop" title="选择设计系统间距 Token">${this._isTokenField('marginTop') ? this._tokenNameOf('marginTop') : ICONS.token}</button></div>
-            </div>
-            <div class="field-row two-col">
-              <div class="field"><span class="field-icon">R</span><input class="text-input" type="text" value="${d.marginRight || ''}" data-field="marginRight" inputmode="numeric" placeholder="右" /><button class="token-btn ${this._isTokenField('marginRight') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginRight" title="选择设计系统间距 Token">${this._isTokenField('marginRight') ? this._tokenNameOf('marginRight') : ICONS.token}</button></div>
-              <div class="field"><span class="field-icon">B</span><input class="text-input" type="text" value="${d.marginBottom || ''}" data-field="marginBottom" inputmode="numeric" placeholder="下" /><button class="token-btn ${this._isTokenField('marginBottom') ? 'active' : ''}" type="button" data-token-trigger="spacing" data-field="marginBottom" title="选择设计系统间距 Token">${this._isTokenField('marginBottom') ? this._tokenNameOf('marginBottom') : ICONS.token}</button></div>
-            </div>
+            ${this._renderBoxControl('paddingAll')}
+            ${this._renderBoxControl('marginAll')}
             <div class="field-row two-col">
               <label class="field metric-field">
                 <span class="field-icon">${ICONS.width}</span>
@@ -5929,8 +6185,8 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             <p class="section-title">外观</p>
             <div class="field-row two-col">
               <div class="field"><span class="field-icon">${ICONS.opacity}</span><input class="text-input" type="text" value="${d.layerOpacity ?? 100}" data-field="layerOpacity" inputmode="numeric" placeholder="透明" /></div>
-              <div class="field"><span class="field-icon">${ICONS.radius}</span><input class="text-input" type="text" value="${d.borderRadiusAll || ''}" data-field="borderRadiusAll" inputmode="numeric" placeholder="圆角" /><button class="token-btn ${this._isTokenField('borderRadiusAll') ? 'active' : ''}" type="button" data-token-trigger="radius" data-field="borderRadiusAll" title="选择设计系统圆角 Token">${this._isTokenField('borderRadiusAll') ? this._tokenNameOf('borderRadiusAll') : ICONS.token}</button></div>
             </div>
+            ${this._renderBoxControl('borderRadiusAll')}
           </div>
 
           <!-- 填充 -->
@@ -6225,6 +6481,16 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 自动布局：顺序移动（上下左右，按 flex 主轴方向前后移动一位，不可移动方向置灰）
       this._shadow.querySelectorAll('[data-move]').forEach(btn => {
         btn.addEventListener('click', () => this._moveSelected(btn.dataset.move));
+      });
+      this._shadow.querySelectorAll('[data-box-expand]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const key = btn.dataset.boxExpand;
+          if (!this._expandedBoxGroups) this._expandedBoxGroups = {};
+          this._expandedBoxGroups[key] = !this._expandedBoxGroups[key];
+          this._render();
+          this._bindEvents();
+        });
       });
       // 自动布局：gap 输入框在「左右对齐」显示 auto 态下，聚焦时清空便于直接输入数值
       const gapInput = this._shadow.querySelector('input[data-field="layoutGap"]');
@@ -6570,6 +6836,71 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       if (this._suppressFieldSync) return;
       // auto 是「左右对齐」模式下的间距显示态，不作为可提交的间距值（忽略，避免误提交/误报）
       if (field === 'layoutGap' && value === 'auto') return;
+      const boxGroup = this._boxGroups()[field];
+      if (boxGroup) {
+        const raw = String(value == null ? '' : value).trim();
+        if (raw.includes(',')) return;
+        for (const childField of boxGroup.fields) {
+          const guard = this._validateFieldValue(childField, value);
+          if (!guard.ok) {
+            bus.emit('toast', { message: guard.reason });
+            return;
+          }
+        }
+        if (this._target) {
+          for (const childField of boxGroup.fields) {
+            this._data[childField] = value;
+            if (this._sourceTokens) delete this._sourceTokens[childField];
+            if (this._sourceTokens) delete this._sourceTokens[field];
+            const cssProp = this._fieldToCssProp(childField);
+            const cssVal = isTokenValue(value) ? value : (isNaN(parseFloat(value)) ? '' : parseFloat(value) + 'px');
+            applyPseudoStyle(this._selector, this._target, cssProp, cssVal);
+            bus.emit('style-change', {
+              selector: this._selector,
+              target: this._target,
+              elementTag: this._targetEl.tagName.toLowerCase(),
+              elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+              elementClass: getFirstStableClass(this._targetEl),
+              elementClasses: getStableClasses(this._targetEl),
+              property: cssProp,
+              oldValue: '',
+              newValue: cssVal,
+              el: this._targetEl,
+            });
+          }
+          this._updateActiveStates();
+          return;
+        }
+        for (const childField of boxGroup.fields) {
+          this._data[childField] = value;
+          if (this._sourceTokens) delete this._sourceTokens[childField];
+          if (this._sourceTokens) delete this._sourceTokens[field];
+          const result = this._applyField(childField, value);
+          if (!result) continue;
+          const baseOld = result.oldValue;
+          const noop = normalizeCssValue(baseOld) === normalizeCssValue(result.newValue);
+          if (noop) {
+            try { this._targetEl.style.setProperty(result.property, ''); } catch (e) {}
+            continue;
+          }
+          bus.emit('style-change', {
+            selector: this._selector,
+            elementTag: this._targetEl.tagName.toLowerCase(),
+            elementText: (this._targetEl.textContent || '').trim().substring(0, 50),
+            elementClass: getFirstStableClass(this._targetEl),
+            elementClasses: getStableClasses(this._targetEl),
+            property: result.property,
+            oldValue: baseOld,
+            newValue: result.newValue,
+            el: this._targetEl,
+            shared: false,
+            sharedKey: '',
+          });
+          this._scheduleSharedSync(result);
+        }
+        this._updateActiveStates();
+        return;
+      }
       // 输入守门：拦截负数尺寸、非 flex 容器布局方向等非法操作（伪元素与普通元素路径统一），
       // 必须在写 _data 之前拦截，避免污染面板数据
       const guard = this._validateFieldValue(field, value);
@@ -6581,6 +6912,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       this._data[field] = value;
       // 用户手动改过字段值后，源码 token 匹配失效（改完即脱离 token 语义）
       if (this._sourceTokens) delete this._sourceTokens[field];
+      const childBoxGroup = this._boxGroupOf(field);
+      if (childBoxGroup && childBoxGroup.allField !== field && this._sourceTokens) {
+        delete this._sourceTokens[childBoxGroup.allField];
+      }
       // 自动布局联动：间距输入数值 → 自动回「左对齐」布局（参考宽高输入数值自动回固定模式）
       if (!this._target && field === 'layoutGap' && String(value || '').trim() !== '' && !isNaN(parseFloat(value))) {
         if (this._data.justifyContent !== 'flex-start') this._data.justifyContent = 'flex-start';
@@ -6763,6 +7098,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 尺寸（宽度/高度）归入同一「size」共享组：配置列表合并为一条「尺寸」记录
       const sharedKey = componentClass + '::' + ((result.property === 'width' || result.property === 'height') ? 'size' : result.property);
       const sharedCount = synced.length + 1;
+      debugLog.add('STYLE', `共享样式同步: ${result.property} ${result.oldValue || '-'} -> ${result.newValue || '-'} count=${sharedCount} key=${sharedKey}`);
       synced.forEach(el => {
         let applied = false;
         try { applyStyleProperty(el, result.property, result.newValue); applied = true; } catch (e) {}
@@ -6776,6 +7112,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementClass: (el.className && typeof el.className === 'string')
             ? el.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
             : '',
+          elementClasses: getStableClasses(el),
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
@@ -6799,6 +7136,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementClass: (targetEl.className && typeof targetEl.className === 'string')
             ? targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
             : '',
+          elementClasses: getStableClasses(targetEl),
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
@@ -6890,10 +7228,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         paddingRight: 'padding-right',
         paddingTop: 'padding-top',
         paddingBottom: 'padding-bottom',
+        paddingAll: 'padding',
         marginTop: 'margin-top',
         marginRight: 'margin-right',
         marginBottom: 'margin-bottom',
         marginLeft: 'margin-left',
+        marginAll: 'margin',
         width: 'width',
         height: 'height',
         display: 'display',
@@ -6907,6 +7247,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         textAlign: 'text-align',
         layerOpacity: 'opacity',
         borderRadiusAll: 'border-radius',
+        borderRadiusTopLeft: 'border-top-left-radius',
+        borderRadiusTopRight: 'border-top-right-radius',
+        borderRadiusBottomRight: 'border-bottom-right-radius',
+        borderRadiusBottomLeft: 'border-bottom-left-radius',
         fillHex: 'background-color',
         fillOpacity: 'background-color',
         strokeHex: 'border',
@@ -6977,15 +7321,21 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           // 内描边与投影共用 box-shadow，统一组合输出，避免互相覆盖
           return this._combineBoxShadow();
         case 'fontSize':
+        case 'paddingAll':
         case 'paddingLeft':
         case 'paddingRight':
         case 'paddingTop':
         case 'paddingBottom':
+        case 'marginAll':
         case 'marginLeft':
         case 'marginRight':
         case 'marginTop':
         case 'marginBottom':
         case 'borderRadiusAll':
+        case 'borderRadiusTopLeft':
+        case 'borderRadiusTopRight':
+        case 'borderRadiusBottomRight':
+        case 'borderRadiusBottomLeft':
         case 'layoutGap':
           if (isTokenValue(d[field])) return d[field];
           return num(d[field]) ? num(d[field]) + 'px' : '';
@@ -7017,6 +7367,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom',
         'marginLeft', 'marginRight', 'marginTop', 'marginBottom',
         'fontSize', 'lineHeight', 'borderRadiusAll',
+        'borderRadiusTopLeft', 'borderRadiusTopRight', 'borderRadiusBottomRight', 'borderRadiusBottomLeft',
         'shadowX', 'shadowY', 'shadowBlur', 'shadowSpread',
         'gradientAngle',
       ]);
@@ -7025,7 +7376,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     _clampDragValue(field, v) {
       if (/Opacity$/.test(field)) return Math.max(0, Math.min(100, v));
       if (field === 'gradientAngle') return ((v % 360) + 360) % 360;
-      if (/^(width|height|fontSize|layoutGap|paddingLeft|paddingRight|paddingTop|paddingBottom|marginLeft|marginRight|marginTop|marginBottom|borderRadiusAll|shadowBlur|shadowSpread)$/.test(field)) {
+      if (/^(width|height|fontSize|layoutGap|paddingLeft|paddingRight|paddingTop|paddingBottom|marginLeft|marginRight|marginTop|marginBottom|borderRadiusAll|borderRadiusTopLeft|borderRadiusTopRight|borderRadiusBottomRight|borderRadiusBottomLeft|shadowBlur|shadowSpread)$/.test(field)) {
         return Math.max(0, v);
       }
       return v;
@@ -7125,7 +7476,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       const isFlexOrGrid = display === 'flex' || display === 'grid';
       switch (field) {
         case 'layoutGap':
+          if (String(value || '').includes(',')) break;
           if (isNaN(numVal) || numVal < 0) return { ok: false, reason: '间距（gap）不能为空或负数' };
+          break;
+        case 'paddingAll':
+        case 'marginAll':
+          if (String(value || '').includes(',')) break;
+          if (isNaN(numVal) || numVal < 0) return { ok: false, reason: '尺寸/间距不能为空或负数' };
           break;
         case 'paddingLeft':
         case 'paddingRight':
@@ -7138,7 +7495,11 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         case 'width':
         case 'height':
         case 'fontSize':
-        case 'borderRadiusAll': {
+        case 'borderRadiusAll':
+        case 'borderRadiusTopLeft':
+        case 'borderRadiusTopRight':
+        case 'borderRadiusBottomRight':
+        case 'borderRadiusBottomLeft': {
           const raw = String(value || '').trim();
           const isSemantic = /^(100%|auto|fit-content|min-content|max-content|inherit|initial|unset)$/i.test(raw);
           if (isSemantic) break;
@@ -7231,6 +7592,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           }
           return res;
         }
+        case 'paddingAll': {
+          const oldValue = cs().padding;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.padding = out;
+          return { property: 'padding', oldValue, newValue: out };
+        }
         case 'paddingLeft': {
           const oldValue = cs().paddingLeft;
           const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
@@ -7254,6 +7621,12 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
           el.style.paddingBottom = out;
           return { property: 'padding-bottom', oldValue, newValue: out };
+        }
+        case 'marginAll': {
+          const oldValue = cs().margin;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.margin = out;
+          return { property: 'margin', oldValue, newValue: out };
         }
         case 'marginLeft': {
           const oldValue = cs().marginLeft;
@@ -7469,6 +7842,30 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
           el.style.borderRadius = out;
           return { property: 'border-radius', oldValue, newValue: out };
+        }
+        case 'borderRadiusTopLeft': {
+          const oldValue = cs().borderTopLeftRadius;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderTopLeftRadius = out;
+          return { property: 'border-top-left-radius', oldValue, newValue: out };
+        }
+        case 'borderRadiusTopRight': {
+          const oldValue = cs().borderTopRightRadius;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderTopRightRadius = out;
+          return { property: 'border-top-right-radius', oldValue, newValue: out };
+        }
+        case 'borderRadiusBottomRight': {
+          const oldValue = cs().borderBottomRightRadius;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderBottomRightRadius = out;
+          return { property: 'border-bottom-right-radius', oldValue, newValue: out };
+        }
+        case 'borderRadiusBottomLeft': {
+          const oldValue = cs().borderBottomLeftRadius;
+          const out = isTokenValue(value) ? value : (isNaN(numVal) ? '' : numVal + 'px');
+          el.style.borderBottomLeftRadius = out;
+          return { property: 'border-bottom-left-radius', oldValue, newValue: out };
         }
         case 'fillHex':
         case 'fillOpacity': {
@@ -7710,8 +8107,26 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const [jc, ai] = btn.dataset.alignPreset.split('|');
         btn.classList.toggle('active', jc === d.justifyContent && ai === d.alignItems);
       });
+      ['paddingAll', 'marginAll', 'borderRadiusAll'].forEach(field => {
+        const input = this._shadow.querySelector(`input[data-field="${field}"]`);
+        if (input) {
+          const val = this._boxAllValue(field);
+          if (input.value !== String(val)) input.value = String(val);
+        }
+        const tokenBtn = this._shadow.querySelector(`[data-token-trigger][data-field="${field}"]`);
+        if (tokenBtn) {
+          const isTok = this._isBoxAllTokenField(field);
+          tokenBtn.classList.toggle('active', isTok);
+          if (isTok) {
+            const tokName = this._boxAllTokenName(field);
+            if (tokenBtn.textContent.trim() !== tokName) tokenBtn.textContent = tokName;
+          } else if (tokenBtn.innerHTML.trim() !== ICONS.token.trim()) {
+            tokenBtn.innerHTML = ICONS.token;
+          }
+        }
+      });
       // 间距/圆角/描边宽 Token 按钮状态 + 输入框回显（layoutGap 在上面单独处理）
-      const metricTokenFields = ['paddingLeft', 'paddingTop', 'paddingRight', 'paddingBottom', 'marginLeft', 'marginTop', 'marginRight', 'marginBottom', 'borderRadiusAll', 'strokeWidth'];
+      const metricTokenFields = ['paddingLeft', 'paddingTop', 'paddingRight', 'paddingBottom', 'marginLeft', 'marginTop', 'marginRight', 'marginBottom', 'borderRadiusTopLeft', 'borderRadiusTopRight', 'borderRadiusBottomRight', 'borderRadiusBottomLeft', 'strokeWidth'];
       metricTokenFields.forEach(field => {
         const tokenVal = this._tokenValueOf(field);
         const isTok = !!tokenVal;
@@ -7924,6 +8339,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       // 离开页面前把防抖窗口内未落盘的最后修改立即写入
       window.addEventListener('pagehide', this._onPageHide);
       this._loadChanges();
+      this._bindReplayDomObserver();
       // 迁移修复前遗留的 default 场景残留数据（主 tab 识别修复前的历史数据）：
       // 按选择器在 DOM 中定位元素 → 从 host-tab 面板映射 routeId → 归并到正确场景。
       // 场景为异步渲染，未命中的变更会在方法内延时重试补迁。
@@ -7945,8 +8361,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       document.removeEventListener('pointerdown', this._onDocPointerDown, true);
       document.removeEventListener('keydown', this._onDocKeyDown);
       if (this._tabObserver) { this._tabObserver.disconnect(); this._tabObserver = null; }
+      if (this._replayDomObserver) { this._replayDomObserver.disconnect(); this._replayDomObserver = null; }
       if (this._tabChangeTimer) { clearTimeout(this._tabChangeTimer); this._tabChangeTimer = null; }
       if (this._migrateTimer) { clearTimeout(this._migrateTimer); this._migrateTimer = null; }
+      if (this._inlineReplayTimer) { clearTimeout(this._inlineReplayTimer); this._inlineReplayTimer = null; }
     }
 
     // ── 渲染 ──────────────────────────────────────────────
@@ -8757,13 +9175,6 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         e.preventDefault();
         this._closeAllPanels();
         this._setWalkthroughMode(!this._walkthroughMode);
-        return;
-      }
-      // L：打开/关闭配置列表（输入框内放行）
-      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'l' || e.key === 'L') && !inInput) {
-        e.preventDefault();
-        const ov = this._components.overviewPanel;
-        if (ov && !ov.hasAttribute('hidden')) { ov.close(); } else { this._openOverview(); }
         return;
       }
       // Tab：展开/收起样式编辑面板（有选中元素时）
@@ -10274,6 +10685,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           this._revertChange(existing);
           state.changes = state.changes.filter(c => c.id !== existing.id);
           changeElRefs.delete(existing.id);
+          debugLog.add('STYLE', `移除净零样式记录: ${change.property} selector=${change.selector}`);
           this._syncAfterRecordsChanged();
         }
         return;
@@ -10309,6 +10721,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         existing.displayNew = change.displayNew || existing.displayNew || '';
         Object.assign(existing, deriveIntent(existing, change.el));
         if (change.el) changeElRefs.set(existing.id, change.el);
+        debugLog.add('STYLE', `更新样式记录: ${change.property} ${change.oldValue || '-'} -> ${change.newValue || '-'} selector=${change.selector}`);
       } else {
         const srcInfo = (change.el && !change.target && change.property !== 'text-content' && change.property !== 'icon-class')
           ? readSourceDeclaration(change.el, change.property)
@@ -10337,6 +10750,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         Object.assign(rec, deriveIntent(rec, change.el));
         state.changes.push(rec);
         if (change.el) changeElRefs.set(rec.id, change.el);
+        debugLog.add('STYLE', `新增样式记录: ${change.property} ${change.oldValue || '-'} -> ${change.newValue || '-'} selector=${change.selector}`);
       }
       this._syncAfterRecordsChanged();
     }
@@ -10432,7 +10846,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         // 像素类属性补单位：撤销/重做恢复的纯数字值（如 padding-left=26）须带 px 才被浏览器接受。
         // 排除 line-height（无单位是倍数语义）、box-shadow（复合值）等。
-        const PX_PROP_RE = /^(padding|margin|top|right|bottom|left|gap|row-gap|column-gap|font-size|border-radius|border-(top|right|bottom|left)-width|width|height|letter-spacing|text-indent)$/;
+        const PX_PROP_RE = /^(padding|margin|top|right|bottom|left|gap|row-gap|column-gap|font-size|border-radius|border-(top-left|top-right|bottom-right|bottom-left)-radius|border-(top|right|bottom|left)-width|width|height|letter-spacing|text-indent)$/;
         const vTrim = String(value == null ? '' : value).trim();
         if (PX_PROP_RE.test(property) && /^-?\d+(\.\d+)?$/.test(vTrim)) {
           value = vTrim + 'px';
@@ -10715,6 +11129,31 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
       debugLog.add('RESET', '跨场景重置完成');
     }
 
+    /** 页面弹层/折叠区等动态 DOM 重建后，按当前场景修改记录补回内联样式 */
+    _bindReplayDomObserver() {
+      if (typeof MutationObserver === 'undefined' || this._replayDomObserver || !document.body) return;
+      this._replayDomObserver = new MutationObserver((mutations) => {
+        if (!state.changes.length) return;
+        const hasPageNode = mutations.some(m => Array.from(m.addedNodes || []).some(node => {
+          if (!node || node.nodeType !== 1) return false;
+          return !isWalkthroughElement(node);
+        }));
+        if (!hasPageNode) return;
+        this._scheduleInlineReplay('dom-childlist');
+      });
+      this._replayDomObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    _scheduleInlineReplay(reason) {
+      if (this._inlineReplayTimer) clearTimeout(this._inlineReplayTimer);
+      this._inlineReplayTimer = setTimeout(() => {
+        this._inlineReplayTimer = null;
+        if (!state.changes.length) return;
+        debugLog.add('STYLE', `动态 DOM 触发样式回放: route=${state.currentRoute} changes=${state.changes.length} reason=${reason}`);
+        this._replayInlineChanges(0);
+      }, 80);
+    }
+
     /** 路由切换统一收尾：旧场景落盘与浮层清理 → 新场景数据加载 → 标记重绘 */
     _handleRouteChange() {
       const nextRoute = getCurrentRoute();
@@ -10857,6 +11296,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         }
         try { el.style.setProperty(c.property, c.newValue); } catch (e) {}
       });
+      if (pending.length || reorders.length) {
+        const missed = Math.max(0, pending.length - matched);
+        debugLog.add('STYLE', `样式回放: route=${state.currentRoute} round=${round} matched=${matched}/${pending.length} reorder=${reorderMatched}/${reorders.length}${missed ? ' missed=' + missed : ''}`);
+      }
       // 批注标记随回放重试一起重绘：场景脚本异步挂载/内部面板激活时，首次同步可能还找不到可见锚点
       let annMatched = 0;
       if (this._annotationMode) {
@@ -10902,11 +11345,13 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
         const key = `wego.walkthrough.data.${state.currentRoute}`;
         localStorage.setItem(key, JSON.stringify({
           sceneRoute: state.currentRoute,
+          routeLabel: getRouteLabel(state.currentRoute),
           lastModified: Date.now(),
           prNumber: getCurrentPrNumber(),
           changes: state.changes,
           annotations: state.annotations,
         }));
+        debugLog.add('STYLE', `样式记录落盘: key=${key} changes=${state.changes.length} annotations=${state.annotations.length}`);
       } catch (e) {}
     }
 
@@ -10925,7 +11370,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const changes = (data.changes || []).filter(c => c.newValue !== '' && c.newValue != null);
             const annotations = (data.annotations || []).filter(a => a.text && String(a.text).trim());
             if (changes.length > 0 || annotations.length > 0) {
-              scenes.push({ routeId, routeLabel: getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
+              scenes.push({ routeId, routeLabel: data.routeLabel || data.sceneLabel || getRouteLabel(routeId), prNumber: data.prNumber || null, changes, annotations });
             }
           } catch (e) { /* 单个场景解析失败不影响其他场景 */ }
         }
