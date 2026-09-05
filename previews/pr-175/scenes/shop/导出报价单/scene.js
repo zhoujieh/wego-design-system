@@ -296,10 +296,31 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     return { cny: hasRange ? '¥' + formatMoney(min) + ' ~ ¥' + formatMoney(max) : '¥' + formatMoney(min), usd: hasRange ? '$' + formatUsd(min) + ' ~ $' + formatUsd(max) : '$' + formatUsd(min) };
   }
   function quoteRowUsdText(row) {
-    if (row.priceMax && moneyNumber(row.priceMax) !== moneyNumber(row.priceMin)) {
+    if (quoteRowHasRange(row)) {
       return '$' + formatUsd(row.priceMin) + ' ~ $' + formatUsd(row.priceMax);
     }
     return '$' + formatUsd(row.priceMin);
+  }
+  function quoteRowHasRange(row) {
+    return Boolean(row.priceMax && moneyNumber(row.priceMax) !== moneyNumber(row.priceMin));
+  }
+  function quotePriceInputHtml(row, field, label) {
+    return '<div class="number-input" data-component-slug="input" data-number-input>'
+      + '<input class="number-input__field" type="text" inputmode="decimal" data-quote-field="' + escapeHtml(field) + '" value="' + escapeHtml(row[field]) + '" aria-label="' + escapeHtml(label) + '">'
+      + '<span class="number-input__suffix" aria-hidden="true"></span>'
+      + '</div>';
+  }
+  function quotePriceCellHtml(row) {
+    var hasRange = quoteRowHasRange(row);
+    return '<td class="quote-table__price">'
+      + '<div class="quote-price-cell">'
+      + '<div class="quote-price-inputs' + (hasRange ? '' : ' quote-price-inputs--single') + '">'
+      + quotePriceInputHtml(row, 'priceMin', hasRange ? '最低价格' : '价格')
+      + (hasRange ? '<span class="quote-price-separator">~</span>' + quotePriceInputHtml(row, 'priceMax', '最高价格') : '')
+      + '</div>'
+      + '<div class="quote-usd-text">' + escapeHtml(quoteRowUsdText(row)) + '</div>'
+      + '</div>'
+      + '</td>';
   }
   function quotePreviewTemplate(state) {
     var lang = getLanguage(state.language);
@@ -319,7 +340,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '<section class="quote-preview-summary">'
       + '<div class="quote-preview-summary__top"><div><div class="quote-preview-dir">' + escapeHtml(albumName) + '</div><div class="quote-preview-date">' + escapeHtml(formatDate(new Date(state.createdAt))) + '</div></div>'
       + '<div class="quote-preview-total" data-role="quote-total"><strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span></div></div>'
-      + '<div class="quote-preview-title input-group" data-component-slug="input"><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '" aria-label="报价单标题"></div></div>'
+      + '<div class="quote-preview-title input-group" data-component-slug="input"><label class="field-label" for="quote-title-input">报价单标题</label><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '" aria-label="报价单标题"></div></div>'
       + '</section>'
       + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><span data-role="quote-language-label">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>'
       + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed">' + languageMenuHtml(state.language) + '</div></div></div></section>'
@@ -328,7 +349,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '</div>'
       + '</div>'
       + '<div class="modal__actions quote-preview-actions"><div class="bottom-action-bar bottom-action-bar--primary-secondary quote-preview-bottom-bar" data-component-slug="bottom-action-bar" role="toolbar" aria-label="报价单导出操作"><div class="bottom-action-bar__inner"><div class="bottom-action-bar__leading"><div class="quote-share-format" role="group" aria-label="导出格式">' + quoteFormatStackHtml('excel', 'Excel', state.exportFormat) + quoteFormatStackHtml('pdf', 'PDF', state.exportFormat) + '</div></div><div class="bottom-action-bar__trailing"><button type="button" class="btn btn--strong btn--md quote-share-button" data-component-slug="button" data-dom-id="quote-share-main">分享报价单</button></div></div></div></div>'
-      + '<div class="loading-overlay quote-translate-loading" data-component-slug="loading" data-role="quote-translate-loading" role="status" aria-live="polite" aria-label="正在翻译中" hidden><div class="loading-overlay__indicator"><span class="loading" role="presentation"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span></div><div class="loading-overlay__text"><span class="loading-overlay__label">正在翻译中</span></div></div>'
+      + '<div class="loading loading-overlay quote-translate-loading" data-component-slug="loading" data-role="quote-translate-loading" role="status" aria-live="polite" aria-label="正在翻译中" hidden><div class="loading-overlay__indicator"><span class="loading" data-component-slug="loading" role="presentation"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span></div><div class="loading-overlay__text"><span class="loading-overlay__label">正在翻译中</span></div></div>'
       + '</div>'
       + '</div>';
   }
@@ -360,7 +381,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   function quoteHeaderRowHtml() {
     return '<thead><tr>'
       + quoteHeaderCellHtml('image', '图片', '')
-      + quoteHeaderCellHtml('price', '价格', '')
+      + quoteHeaderCellHtml('price', '价格/¥', '')
       + quoteHeaderCellHtml('spec', '规格', '')
       + quoteHeaderCellHtml('code', '货号', '')
       + quoteHeaderCellHtml('name', '商品名', '')
@@ -379,7 +400,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   function quoteTableRowHtml(row) {
     return '<tr data-quote-row-id="' + escapeHtml(row.id) + '">'
       + '<td class="quote-table__image"><div class="wg-image wg-image--rounded-sm quote-row-image" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.image) + '" alt="' + escapeHtml(row.name) + '"></div></td>'
-      + '<td class="quote-table__price"><div class="quote-price-inputs"><div class="number-input" data-component-slug="input" data-number-input><input class="number-input__field" type="text" inputmode="decimal" data-quote-field="priceMin" value="' + escapeHtml(row.priceMin) + '" aria-label="最低价格"><span class="number-input__suffix">￥</span></div><span class="quote-price-separator">~</span><div class="number-input" data-component-slug="input" data-number-input><input class="number-input__field" type="text" inputmode="decimal" data-quote-field="priceMax" value="' + escapeHtml(row.priceMax) + '" aria-label="最高价格"><span class="number-input__suffix">￥</span></div></div><div class="quote-usd-text">' + escapeHtml(quoteRowUsdText(row)) + '</div></td>'
+      + quotePriceCellHtml(row)
       + '<td class="quote-table__spec"><div class="input-group quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-spec-' + escapeHtml(row.id) + '">规格</label><textarea id="quote-spec-' + escapeHtml(row.id) + '" rows="1" class="quote-cell-textarea" data-quote-field="specification">' + escapeHtml(row.specification) + '</textarea></div></td>'
       + '<td class="quote-table__code"><div class="input-group quote-cell-field quote-cell-field--code" data-component-slug="input"><label class="field-label" for="quote-no-' + escapeHtml(row.id) + '">货号</label><textarea id="quote-no-' + escapeHtml(row.id) + '" rows="1" class="quote-cell-textarea" data-quote-field="itemNo">' + escapeHtml(row.itemNo) + '</textarea></div></td>'
       + '<td class="quote-table__name"><div class="input-group quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-name-' + escapeHtml(row.id) + '">商品名</label><textarea id="quote-name-' + escapeHtml(row.id) + '" rows="1" class="quote-cell-textarea" data-quote-field="name">' + escapeHtml(row.name) + '</textarea></div></td>'

@@ -607,6 +607,13 @@
 .quote-preview-title {
   max-width: none;
 }
+.quote-preview-title .field-label {
+  position: absolute;
+  inline-size: var(--stroke-1);
+  block-size: var(--stroke-1);
+  overflow: hidden;
+  clip-path: inset(50%);
+}
 .quote-preview-language {
   flex: 0 1 auto;
   min-width: 0;
@@ -790,7 +797,7 @@
   background: var(--bg-surface);
 }
 .quote-table tbody tr:last-child td {
-  border-block-end: none;
+  border-block-end: var(--stroke-hairline) solid var(--border-neutral-l2);
 }
 .quote-table td:last-child {
   border-inline-end: none;
@@ -818,25 +825,39 @@
 .quote-table__price {
   width: calc(var(--size-96) * 2 + var(--spacer-24));
 }
+.quote-price-cell {
+  position: relative;
+}
 .quote-price-inputs {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--size-16) minmax(0, 1fr);
   align-items: center;
   gap: var(--spacer-4);
 }
+.quote-price-inputs--single {
+  grid-template-columns: minmax(0, 1fr);
+}
 .quote-price-inputs .number-input {
   width: 100%;
   min-width: 0;
+  max-width: none;
+  min-height: var(--size-40);
+}
+.quote-price-inputs .number-input__suffix:empty {
+  display: none;
 }
 .quote-price-separator {
   color: var(--text-tertiary);
   text-align: center;
 }
 .quote-usd-text {
-  margin-block-start: var(--spacer-4);
+  position: absolute;
+  inset-block-start: calc(100% + var(--spacer-4));
+  inset-inline: 0;
   color: var(--text-secondary);
-  font-size: var(--body-xs-font-size);
-  line-height: var(--body-xs-line-height);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  pointer-events: none;
 }
 .quote-cell-field {
   width: 100%;
@@ -931,6 +952,12 @@
 }
 .quote-format-stack .stack__bg {
   width: var(--size-64);
+  border: var(--stroke-hairline) solid var(--border-neutral-l2);
+  background: var(--bg-surface);
+}
+.quote-format-stack.stack--selected .stack__bg {
+  border-color: var(--bg-brand);
+  background: var(--bg-brand-surface-l2);
 }
 .quote-share-button {
   flex: 0 0 auto;
