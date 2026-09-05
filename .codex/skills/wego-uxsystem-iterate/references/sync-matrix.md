@@ -14,7 +14,7 @@
 | 已升级经验复发 | `.codex/skills/wego-uxsystem-iterate/experience/evidence.json`、`.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` | 上次升级权威源和直接消费者 | 追加复发事实事件，更新摘要，复查上次修复 |
 | 经验过时或场景下线 | `.codex/skills/wego-uxsystem-iterate/experience/EXPERIENCE.md` 或目标场景技能 | `.codex/skills/wego-uxsystem-iterate/experience/evidence.json` | 删除对应摘要/技能；事实保留不删除（量大按年归档） |
 | 技能入口调整 | 目标 `SKILL.md` | 直接引用的 reference、`.codex/skills/README.md` | 三条业务主链技能与交付技能存在、入口唯一、链接有效 |
-| GitHub 交付规则调整 | `wego-github-delivery` 规则、`AGENTS.md` | `wego-design`、`wego-uxsystem-iterate`、迭代工作流、技能路由、`README.md`、`scripts/README.md`、工作流流程图、实际验证入口；涉及远程本地预览时同步隧道记录、校验与关闭时机 | 先核对全部 worktree、开放 PR、未冻结迭代和本地预览记录；同一交付单元复用分支/worktree |
+| GitHub 交付规则调整 | `wego-github-delivery` 规则、`AGENTS.md` | `wego-design`、`wego-uxsystem-iterate`、迭代工作流、技能路由、`README.md`、`scripts/README.md`、工作流流程图、实际验证入口 | 先核对全部 worktree、开放 PR、未冻结迭代和本地预览记录；同一交付单元复用分支/worktree |
 | 技能适配器调整 | `.trae/skills/*`、`.codebuddy/skills/*` 逐项符号链接或整目录符号链接 | `AGENTS.md`、实际验证入口 | 两个适配器以符号链接指向 `.codex/skills/*`，不保留副本 |
 | 工作流守卫调整 | 实际执行脚本 | 统一验证入口、脚本文档和 CI workflow | `--scope=system --strict` 必须运行对应回归测试并校验工作流引用；完整验证存在场景/迭代时覆盖数不得为 0 |
 | 文档漂移检查 | 按本表必改列逐项核对 | 引用的 rule-id、文件路径、命令示例、根 README、脚本说明、工作流流程图与关键结构化消费配置 | rule-id 锚点存在、文件路径存在、验证命令可执行、分类场景路径与状态语义一致 |
