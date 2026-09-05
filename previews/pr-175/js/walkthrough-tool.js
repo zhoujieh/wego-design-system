@@ -1073,6 +1073,48 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
     return String(v == null ? '' : v).trim().replace(/\s*,\s*/g, ',').replace(/\s+/g, ' ').toLowerCase();
   }
 
+  /** CSS 源码常用简写/组合声明（如 padding/font/background）控制具体长属性；
+   *  走查面板编辑的是长属性或拆分字段，公共样式判断必须把组合声明视为源码声明，否则同类同步会漏掉。 */
+  function declarationPropertiesFor(property) {
+    const p = String(property || '').trim();
+    if (!p) return [];
+    const props = [p];
+    if (/^padding-(top|right|bottom|left)$/.test(p)) props.push('padding');
+    else if (/^margin-(top|right|bottom|left)$/.test(p)) props.push('margin');
+    else if (p === 'border') {
+      props.push(
+        'border-width', 'border-style', 'border-color',
+        'border-top', 'border-right', 'border-bottom', 'border-left',
+        'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+        'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'
+      );
+    }
+    else if (/^border-(top|right|bottom|left)-width$/.test(p)) {
+      const side = p.match(/^border-(top|right|bottom|left)-width$/)[1];
+      props.push('border-width', 'border-' + side, 'border');
+    }
+    else if (p === 'border-width') props.push('border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width', 'border');
+    else if (p === 'border-style') props.push('border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style', 'border');
+    else if (/^border-(top|right|bottom|left)-color$/.test(p)) {
+      const side = p.match(/^border-(top|right|bottom|left)-color$/)[1];
+      props.push('border-color', 'border-' + side, 'border');
+    }
+    else if (p === 'border-color') props.push('border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color', 'border');
+    else if (/^border-(top-left|top-right|bottom-right|bottom-left)-radius$/.test(p)) props.push('border-radius');
+    else if (p === 'background-color' || p === 'background-image') props.push('background');
+    else if (p === 'font-size' || p === 'font-weight' || p === 'line-height') props.push('font');
+    else if (p === 'flex') props.push('flex-grow', 'flex-shrink', 'flex-basis');
+    else if (p === 'flex-direction' || p === 'flex-wrap') props.push('flex-flow');
+    else if (p === 'grid-template-columns') props.push('grid-template', 'grid');
+    else if (p === 'align-items') props.push('place-items');
+    else if (p === 'justify-content' || p === 'align-content') props.push('place-content');
+    else if (p === 'gap') props.push('row-gap', 'column-gap', 'grid-gap', 'grid-row-gap', 'grid-column-gap');
+    else if (p === 'row-gap') props.push('gap', 'grid-gap', 'grid-row-gap');
+    else if (p === 'column-gap') props.push('gap', 'grid-gap', 'grid-column-gap');
+    else if (p === 'top' || p === 'right' || p === 'bottom' || p === 'left') props.push('inset');
+    return props;
+  }
+
   /** 把一组变更中的宽度/高度记录合并为一行「尺寸」，其余属性原样保留。
    *  宽高都改：显示 "尺寸 40px × 40px → 44px × 44px"；
    *  只改宽/只改高：显示 "尺寸·宽 40px → 48px" / "尺寸·高 40px → 48px"。 */
@@ -1276,16 +1318,25 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
    *  继承自祖先、浏览器默认值、@import 不可读样式表等一律视为未声明 → 不参与同步 */
   function declaresProperty(el, property) {
     if (!el || el.nodeType !== 1 || !property) return false;
+    const declaredProps = declarationPropertiesFor(property);
     // 内联样式直接声明
     try {
-      if (el.style && typeof el.style.getPropertyValue === 'function' && el.style.getPropertyValue(property)) return true;
+      if (el.style && typeof el.style.getPropertyValue === 'function') {
+        for (const prop of declaredProps) {
+          if (el.style.getPropertyValue(prop)) return true;
+        }
+      }
     } catch (e) {}
     // 命中样式规则（含 @media / @supports 嵌套规则）声明
     const ruleDeclares = (rule) => {
       try {
         if (!rule) return false;
         if (rule.type === 1) {
-          if (rule.selectorText && rule.style && rule.style.getPropertyValue(property) && el.matches(rule.selectorText)) return true;
+          if (rule.selectorText && rule.style && el.matches(rule.selectorText)) {
+            for (const prop of declaredProps) {
+              if (rule.style.getPropertyValue(prop)) return true;
+            }
+          }
         } else if (rule.cssRules) {
           for (let i = 0; i < rule.cssRules.length; i++) {
             if (ruleDeclares(rule.cssRules[i])) return true;
@@ -1309,6 +1360,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
    *  target 可选（'' 元素本体 / 'before' / 'after'）：命中伪元素选择器（.a::before）时按目标过滤。 */
   function readSourceDeclaration(el, property, target) {
     if (!el || el.nodeType !== 1 || !property) return { declared: false, sourceValue: '' };
+    const declaredProps = declarationPropertiesFor(property);
     const pseudoTarget = target === 'before' ? '::before' : (target === 'after' ? '::after' : '');
     const ruleDeclares = (rule) => {
       try {
@@ -1323,8 +1375,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
             const pseudo = m ? m[2] : '';
             if (pseudo !== pseudoTarget) return null;
             if (base && el.matches(base)) {
-              const v = rule.style.getPropertyValue(property);
-              if (v) return { declared: true, sourceValue: String(v).trim() };
+              for (const prop of declaredProps) {
+                const v = rule.style.getPropertyValue(prop);
+                if (v) return { declared: true, sourceValue: String(v).trim() };
+              }
             }
           }
         } else if (rule.cssRules) {
@@ -6914,6 +6968,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementClass: (el.className && typeof el.className === 'string')
             ? el.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
             : '',
+          elementClasses: getStableClasses(el),
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
@@ -6937,6 +6992,7 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
           elementClass: (targetEl.className && typeof targetEl.className === 'string')
             ? targetEl.className.trim().split(/\s+/).filter(c => isStableSelectorClass(c))[0] || ''
             : '',
+          elementClasses: getStableClasses(targetEl),
           property: result.property,
           oldValue: result.oldValue,
           newValue: result.newValue,
