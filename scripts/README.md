@@ -14,7 +14,7 @@
 | `validate-component-contract-parity.mjs` | 验证组件契约、Preview、索引与生成 CSS 一致性 |
 | `sync-wego-app-lib.mjs` | 设计系统源变化后同步部署副本 |
 | `build-routes.mjs` | 由各场景 `route.json` 汇总生成 `wego-app/js/routes.js`；`--check` 校验一致性 |
-| `build-pages-artifact.mjs` | 构建 GitHub Pages 发布产物；在本地迭代和合并阶段使用 PR 在线预览 |
+| `build-pages-artifact.mjs` | 构建 GitHub Pages 发布产物；仅在用户明确要求 PR/在线预览或合并阶段使用 PR 在线预览 |
 | `refine-experience.mjs` | 经验只读查询与守门；`--related` 查相关因果事实，`--check` 从 `qualityGateSince` 起强制校验 observation/mechanism/rule/scope/verification/novelty，`--self-test-quality` 验证质量门能放行合格结构并拒绝需求记录/缺失机制记录 |
 
 场景源码变化后直接运行静态守卫，无需生成中间证据文件。本地迭代阶段只运行与改动相称的检查；用户验收通过后的合并阶段运行完整静态验证。
