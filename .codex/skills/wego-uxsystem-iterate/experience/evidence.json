@@ -995,6 +995,36 @@
         "wego-design 与 README 同步去除本地和在线双链接交付口径"
       ],
       "novelty": "ev-055 只规定本地迭代完成后不自动推送 PR，仍把本地预览理解为本机地址，没有解决远程查看入口、单链接验收和隧道生命周期。"
+    },
+    {
+      "id": "ev-057",
+      "date": "2026-09-05",
+      "summary": "远程本地预览默认方案验证失败后恢复本地链接和 PR 在线链接分阶段交付",
+      "source": "user-correction",
+      "scene": "github-delivery-remote-local-preview-rollback",
+      "tags": [
+        "本地预览",
+        "在线预览",
+        "回滚",
+        "wego-github-delivery"
+      ],
+      "kind": "experience",
+      "observation": "用户反馈默认使用临时 HTTPS 隧道远程查看本地预览的方案连续两次任务未跑通，要求相关联内容全部改回：默认仍给本地链接，用户要求时再推送并返回在线 PR 链接。",
+      "mechanism": "把临时隧道作为默认交付入口增加了外部服务可用性、隧道生命周期和链接稳定性的失败点；一旦隧道失败，反而阻断本地迭代交付。",
+      "rule": "本地迭代默认交付 127.0.0.1 本地预览链接；临时远程隧道不得作为默认交付规则。只有用户明确要求推送 PR、更新 PR 或在线预览时，才推送并等待 Pages 部署后返回在线 PR 链接。",
+      "scope": [
+        "wego-github-delivery",
+        "wego-design",
+        "wego-uxsystem-iterate",
+        "README 用户流程",
+        "本地预览服务生命周期"
+      ],
+      "verification": [
+        "AGENTS.md 恢复为本地迭代返回本地链接、推送后返回在线预览链接",
+        "wego-github-delivery 规则移除默认隧道记录、校验与关闭时机",
+        "README 和技能入口恢复本地链接与在线 PR 链接的分阶段说明"
+      ],
+      "novelty": "ev-056 记录的是隧道默认化方案，本事件记录该方案经实际任务失败后被撤回，形成默认交付不得依赖临时隧道的反向规则。"
     }
   ]
 }
