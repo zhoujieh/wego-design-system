@@ -1026,8 +1026,10 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function deleteQuoteRow(previewRoot, button) {
         var id = button ? button.getAttribute('data-quote-delete-row') : '';
         var rowEl = button ? button.closest('[data-quote-row-id]') : null;
-        if (!id || !findQuoteRow(id)) return;
-        state.quoteRows = state.quoteRows.filter(function (row) { return row.id !== id; });
+        var row = findQuoteRow(id);
+        if (!id || !row) return;
+        state.quoteRows = state.quoteRows.filter(function (r) { return r.id !== id; });
+        if (row.sourceKey && state.selected[row.sourceKey]) delete state.selected[row.sourceKey];
         state.dirty = true;
         if (!state.quoteRows.length) {
           refreshPreviewTable(previewRoot);
@@ -1265,9 +1267,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var canRestore = Boolean(state.batchPriceRestoreSnapshot && state.batchPriceRestoreSnapshot.rows && state.batchPriceRestoreSnapshot.rows.length);
         return '<div class="modal modal--frame-x modal--has-actions quote-batch-price-modal" data-component-slug="modal" role="dialog" aria-modal="true" data-state="open" aria-label="批量改价">'
           + '<div class="modal__panel">'
-          + '<div class="modal__title modal__title--default"><nav class="navbar" data-component-slug="navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-batch-price-close" aria-label="关闭批量改价"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">批量改价</span></div><div class="navbar__right"><button type="button" class="btn btn--weak btn--sm quote-batch-price-restore" data-component-slug="button" data-dom-id="quote-batch-price-restore"' + (canRestore ? '' : ' disabled') + '>恢复改价前</button></div></div></nav></div>'
+          + '<div class="modal__title modal__title--default"><nav class="navbar" data-component-slug="navbar"><div class="navbar__body navbar__body--spaced"><div class="navbar__left"><button type="button" class="navbar__left-text" data-dom-id="quote-batch-price-cancel" aria-label="取消">取消</button></div><div class="navbar__center"><span class="navbar__title">批量改价</span></div><div class="navbar__right navbar__right--button"><button type="button" class="btn btn--strong btn--sm" data-component-slug="button" data-dom-id="quote-batch-price-confirm">确定</button></div></div></nav></div>'
           + '<div class="modal__body quote-batch-price-body" data-role="quote-batch-price-body">' + batchPriceEditorHtml() + '</div>'
-          + '<div class="modal__actions"><div class="modal__action-gradient"></div><div class="modal__buttons"><button type="button" class="btn btn--weak btn--lg" data-component-slug="button" data-dom-id="quote-batch-price-cancel">取消</button><button type="button" class="btn btn--strong btn--lg" data-component-slug="button" data-dom-id="quote-batch-price-confirm">确定</button></div></div>'
+          + '<div class="modal__actions"><div class="modal__links"><button type="button" class="link quote-batch-price-restore' + (canRestore ? '' : ' link--disabled') + '" data-component-slug="link" data-dom-id="quote-batch-price-restore"' + (canRestore ? '' : ' disabled') + '>恢复改价前</button></div></div>'
           + '</div></div>';
       }
       function refreshBatchPriceSheetBody(sheetRoot) {
@@ -1383,11 +1385,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           label: '批量改价',
           init: function (sheetCtx) {
             var sheetRoot = sheetCtx.root;
-            var close = sheetRoot.querySelector('[data-dom-id="quote-batch-price-close"]');
-            var cancel = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-cancel"]');
-            var confirm = sheetCtx.root.querySelector('[data-dom-id="quote-batch-price-confirm"]');
+            var cancel = sheetRoot.querySelector('[data-dom-id="quote-batch-price-cancel"]');
+            var confirm = sheetRoot.querySelector('[data-dom-id="quote-batch-price-confirm"]');
             var restore = sheetRoot.querySelector('[data-dom-id="quote-batch-price-restore"]');
-            close.addEventListener('click', function () { sheetCtx.close(); });
             cancel.addEventListener('click', function () { sheetCtx.close(); });
             confirm.addEventListener('click', function () { applyBatchPriceChanges(previewRoot, sheetCtx); });
             restore.addEventListener('click', function () { restoreBatchPrices(previewRoot, sheetCtx); });
@@ -1718,11 +1718,13 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           setAppendMode(false);
           cleanupPreview();
           previewCtx.close();
+          syncVisibleSelectionStates();
         });
         previewRoot.querySelector('[data-dom-id="quote-add-more"]').addEventListener('click', function () {
           setAppendMode(true);
           cleanupPreview();
           previewCtx.close();
+          syncVisibleSelectionStates();
           ctx.toast('继续选择要追加的产品');
         });
         previewRoot.querySelector('[data-dom-id="quote-share-main"]').addEventListener('click', function () {

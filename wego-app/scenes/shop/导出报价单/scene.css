@@ -975,10 +975,6 @@
 .quote-batch-price-body .input-group {
   max-width: none;
 }
-.quote-batch-price-restore {
-  max-width: none;
-  white-space: nowrap;
-}
 .quote-batch-mode-grid,
 .quote-batch-unit-row,
 .quote-batch-tail-grid {
@@ -993,8 +989,12 @@
   border: none;
   background: transparent;
 }
-.quote-batch-price-mode .stack__bg {
-  width: calc(var(--size-72) + var(--spacer-16) + var(--spacer-2));
+.quote-batch-mode-grid .quote-batch-price-mode {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.quote-batch-mode-grid .quote-batch-price-mode .stack__bg {
+  width: 100%;
 }
 .quote-batch-price-unit .stack__bg,
 .quote-batch-price-tail .stack__bg {
@@ -1012,9 +1012,9 @@
 }
 .quote-batch-section-title {
   margin-block-end: var(--spacer-8);
-  color: var(--text-secondary);
-  font-size: var(--body-sm-font-size);
-  line-height: var(--body-sm-line-height);
+  color: var(--text-default);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
   font-weight: var(--font-weight-medium);
 }
 .quote-batch-tail-block {
