@@ -305,7 +305,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     var lang = getLanguage(state.language);
     var totals = quoteTotals(state.quoteRows);
     var albumName = quoteAlbumName();
-    return '<div class="modal modal--fullscreen modal--has-actions quote-preview-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="报价单预览" style="--modal-panel-bg: var(--bg-page)">'
+    return '<div class="modal modal--fullscreen modal--has-actions quote-preview-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="报价单预览" style="--modal-panel-bg: var(--bg-surface)">'
       + '<div class="modal__panel">'
       + '<div class="modal__title modal__title--default">'
       + '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body">'
@@ -319,15 +319,16 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '<section class="quote-preview-summary">'
       + '<div class="quote-preview-summary__top"><div><div class="quote-preview-dir">' + escapeHtml(albumName) + '</div><div class="quote-preview-date">' + escapeHtml(formatDate(new Date(state.createdAt))) + '</div></div>'
       + '<div class="quote-preview-total" data-role="quote-total"><strong>' + escapeHtml(totals.cny) + '</strong><span>' + escapeHtml(totals.usd) + '</span></div></div>'
-      + '<div class="quote-preview-title input-group" data-component-slug="input"><label class="field-label" for="quote-title-input">标题</label><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '"></div></div>'
+      + '<div class="quote-preview-title input-group" data-component-slug="input"><div class="input-wrapper"><input id="quote-title-input" data-dom-id="quote-title-input" type="text" value="' + escapeHtml(state.title) + '" aria-label="报价单标题"></div></div>'
       + '</section>'
       + '<section class="quote-preview-toolbar"><div class="quote-preview-toolbar__row"><button type="button" class="btn btn--medium btn--md quote-add-more" data-component-slug="button" data-dom-id="quote-add-more"><i class="btn__icon wego-iconfont-s icon-jia16" aria-hidden="true"></i>继续添加产品</button><div class="quote-preview-language"><button type="button" class="quote-language-button" data-dom-id="quote-language-button" aria-haspopup="listbox" aria-expanded="false"><span data-role="quote-language-label">' + escapeHtml(lang.short + ' · ' + lang.label) + '</span><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button>'
-      + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed" hidden>' + languageMenuHtml(state.language) + '</div></div></div><div class="quote-translate-status" data-role="quote-translate-status" hidden><span data-role="quote-translate-text">正在翻译中 0/0</span><button type="button" class="link link--14" data-component-slug="link" data-dom-id="quote-translate-cancel">取消</button></div></section>'
+      + '<div class="popmenu popmenu--select quote-language-menu" data-component-slug="popmenu" data-role="quote-language-menu" role="listbox" data-state="closed">' + languageMenuHtml(state.language) + '</div></div></div></section>'
       + '<div class="quote-sticky-head-slot" data-role="quote-sticky-head-slot"' + (state.quoteRows.length ? '' : ' hidden') + '>' + quoteStickyHeaderHtml() + '</div>'
       + '<section class="quote-table-shell" data-role="quote-table-shell">' + quoteTableHtml(state.quoteRows) + '</section>'
       + '</div>'
       + '</div>'
-      + '<div class="modal__actions quote-preview-actions"><div class="bottom-action-bar bottom-action-bar--primary-secondary quote-preview-bottom-bar" data-component-slug="bottom-action-bar" role="toolbar" aria-label="报价单导出操作"><div class="bottom-action-bar__inner"><div class="bottom-action-bar__leading"><div class="quote-share-format" role="group" aria-label="导出格式">' + quoteFormatStackHtml('excel', 'Excel', state.exportFormat) + quoteFormatStackHtml('pdf', 'PDF', state.exportFormat) + '</div></div><div class="bottom-action-bar__trailing"><button type="button" class="btn btn--strong btn--lg quote-share-button" data-component-slug="button" data-dom-id="quote-share-main">分享报价单</button></div></div></div></div>'
+      + '<div class="modal__actions quote-preview-actions"><div class="bottom-action-bar bottom-action-bar--primary-secondary quote-preview-bottom-bar" data-component-slug="bottom-action-bar" role="toolbar" aria-label="报价单导出操作"><div class="bottom-action-bar__inner"><div class="bottom-action-bar__leading"><div class="quote-share-format" role="group" aria-label="导出格式">' + quoteFormatStackHtml('excel', 'Excel', state.exportFormat) + quoteFormatStackHtml('pdf', 'PDF', state.exportFormat) + '</div></div><div class="bottom-action-bar__trailing"><button type="button" class="btn btn--strong btn--md quote-share-button" data-component-slug="button" data-dom-id="quote-share-main">分享报价单</button></div></div></div></div>'
+      + '<div class="loading-overlay quote-translate-loading" data-component-slug="loading" data-role="quote-translate-loading" role="status" aria-live="polite" aria-label="正在翻译中" hidden><div class="loading-overlay__indicator"><span class="loading" role="presentation"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></span></div><div class="loading-overlay__text"><span class="loading-overlay__label">正在翻译中</span></div></div>'
       + '</div>'
       + '</div>';
   }
@@ -379,9 +380,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     return '<tr data-quote-row-id="' + escapeHtml(row.id) + '">'
       + '<td class="quote-table__image"><div class="wg-image wg-image--rounded-sm quote-row-image" data-component-slug="image"><img class="wg-image__src" src="' + escapeHtml(row.image) + '" alt="' + escapeHtml(row.name) + '"></div></td>'
       + '<td class="quote-table__price"><div class="quote-price-inputs"><div class="number-input" data-component-slug="input" data-number-input><input class="number-input__field" type="text" inputmode="decimal" data-quote-field="priceMin" value="' + escapeHtml(row.priceMin) + '" aria-label="最低价格"><span class="number-input__suffix">￥</span></div><span class="quote-price-separator">~</span><div class="number-input" data-component-slug="input" data-number-input><input class="number-input__field" type="text" inputmode="decimal" data-quote-field="priceMax" value="' + escapeHtml(row.priceMax) + '" aria-label="最高价格"><span class="number-input__suffix">￥</span></div></div><div class="quote-usd-text">' + escapeHtml(quoteRowUsdText(row)) + '</div></td>'
-      + '<td><div class="input-group quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-spec-' + escapeHtml(row.id) + '">规格</label><textarea id="quote-spec-' + escapeHtml(row.id) + '" rows="2" class="quote-cell-textarea" data-quote-field="specification">' + escapeHtml(row.specification) + '</textarea></div></td>'
-      + '<td><div class="input-group quote-cell-field quote-cell-field--short" data-component-slug="input"><label class="field-label" for="quote-no-' + escapeHtml(row.id) + '">货号</label><div class="input-wrapper"><input id="quote-no-' + escapeHtml(row.id) + '" type="text" data-quote-field="itemNo" value="' + escapeHtml(row.itemNo) + '"></div></div></td>'
-      + '<td><div class="input-group quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-name-' + escapeHtml(row.id) + '">商品名</label><textarea id="quote-name-' + escapeHtml(row.id) + '" rows="2" class="quote-cell-textarea" data-quote-field="name">' + escapeHtml(row.name) + '</textarea></div></td>'
+      + '<td class="quote-table__spec"><div class="input-group quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-spec-' + escapeHtml(row.id) + '">规格</label><textarea id="quote-spec-' + escapeHtml(row.id) + '" rows="1" class="quote-cell-textarea" data-quote-field="specification">' + escapeHtml(row.specification) + '</textarea></div></td>'
+      + '<td class="quote-table__code"><div class="input-group quote-cell-field quote-cell-field--code" data-component-slug="input"><label class="field-label" for="quote-no-' + escapeHtml(row.id) + '">货号</label><textarea id="quote-no-' + escapeHtml(row.id) + '" rows="1" class="quote-cell-textarea" data-quote-field="itemNo">' + escapeHtml(row.itemNo) + '</textarea></div></td>'
+      + '<td class="quote-table__name"><div class="input-group quote-cell-field" data-component-slug="input"><label class="field-label" for="quote-name-' + escapeHtml(row.id) + '">商品名</label><textarea id="quote-name-' + escapeHtml(row.id) + '" rows="1" class="quote-cell-textarea" data-quote-field="name">' + escapeHtml(row.name) + '</textarea></div></td>'
       + '<td class="quote-table__action"><button type="button" class="btn btn--danger btn--sm btn--icon-only" data-component-slug="button" data-quote-delete-row="' + escapeHtml(row.id) + '" aria-label="删除报价行"><i class="btn__icon wego-iconfont-s icon-shanchu" aria-hidden="true"></i></button></td>'
       + '</tr>';
   }
@@ -418,6 +419,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         sourceVisibleCount: SOURCE_PAGE_SIZE,
         dirty: false,
         translateRunId: 0,
+        translateScrollLock: null,
         selected: {}          /* 按产品模式：{ product_id: true }；按图模式：{ product_id + ':' + idx: true } */
       };
       var listEl = root.querySelector('[data-role="quote-list"]');
@@ -1000,6 +1002,22 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         bindPreviewTableControls(previewRoot);
         syncQuoteStickyHeadX(previewRoot);
       }
+      function deleteQuoteRow(previewRoot, button) {
+        var id = button ? button.getAttribute('data-quote-delete-row') : '';
+        var rowEl = button ? button.closest('[data-quote-row-id]') : null;
+        if (!id || !findQuoteRow(id)) return;
+        state.quoteRows = state.quoteRows.filter(function (row) { return row.id !== id; });
+        state.dirty = true;
+        if (!state.quoteRows.length) {
+          refreshPreviewTable(previewRoot);
+          return;
+        }
+        if (rowEl) rowEl.remove();
+        updatePreviewTotals(previewRoot);
+        var stickySlot = previewRoot.querySelector('[data-role="quote-sticky-head-slot"]');
+        if (stickySlot) stickySlot.hidden = false;
+        syncQuoteStickyHeadX(previewRoot);
+      }
       function bindPreviewTableControls(previewRoot) {
         var batch = previewRoot.querySelector('[data-dom-id="quote-batch-price"]');
         if (batch && !batch.dataset.quoteBatchBound) {
@@ -1010,17 +1028,21 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           });
         }
         Array.prototype.forEach.call(previewRoot.querySelectorAll('[data-quote-delete-row]'), function (btn) {
+          if (btn.dataset.quoteDeleteBound) return;
+          btn.dataset.quoteDeleteBound = 'true';
           btn.addEventListener('click', function (e) {
             e.stopPropagation();
-            var id = btn.getAttribute('data-quote-delete-row');
-            state.quoteRows = state.quoteRows.filter(function (row) { return row.id !== id; });
-            state.dirty = true;
-            refreshPreviewTable(previewRoot);
+            deleteQuoteRow(previewRoot, btn);
           });
         });
         var tableScroll = previewRoot.querySelector('[data-role="quote-table-scroll"]');
-        if (tableScroll) tableScroll.addEventListener('scroll', function () { syncQuoteStickyHeadX(previewRoot); });
+        if (tableScroll && !tableScroll.dataset.quoteScrollBound) {
+          tableScroll.dataset.quoteScrollBound = 'true';
+          tableScroll.addEventListener('scroll', function () { syncQuoteStickyHeadX(previewRoot); });
+        }
         Array.prototype.forEach.call(previewRoot.querySelectorAll('.quote-cell-textarea'), function (field) {
+          if (field.dataset.quoteTextareaBound) return;
+          field.dataset.quoteTextareaBound = 'true';
           field.addEventListener('focus', function () {
             previewRoot.classList.add('is-input-focused');
             field.classList.add('is-expanded');
@@ -1032,6 +1054,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           });
         });
         Array.prototype.forEach.call(previewRoot.querySelectorAll('input[data-quote-field]'), function (field) {
+          if (field.dataset.quoteInputBound) return;
+          field.dataset.quoteInputBound = 'true';
           field.addEventListener('focus', function () {
             previewRoot.classList.add('is-input-focused');
             window.setTimeout(function () { field.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }, 0);
@@ -1053,12 +1077,40 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var scroll = previewRoot.querySelector('[data-role="quote-preview-scroll"]');
         if (scroll) scroll.setAttribute('dir', lang.rtl ? 'rtl' : 'ltr');
       }
-      function setTranslateStatus(previewRoot, visible, text) {
-        var status = previewRoot.querySelector('[data-role="quote-translate-status"]');
-        var label = previewRoot.querySelector('[data-role="quote-translate-text"]');
-        if (!status || !label) return;
-        status.hidden = !visible;
-        if (text) label.textContent = text;
+      function setPreviewScrollLocked(locked) {
+        if (locked && !state.translateScrollLock) {
+          state.translateScrollLock = {
+            html: document.documentElement.style.overflow,
+            body: document.body.style.overflow
+          };
+          document.documentElement.style.overflow = 'hidden';
+          document.body.style.overflow = 'hidden';
+          return;
+        }
+        if (!locked && state.translateScrollLock) {
+          document.documentElement.style.overflow = state.translateScrollLock.html;
+          document.body.style.overflow = state.translateScrollLock.body;
+          state.translateScrollLock = null;
+        }
+      }
+      function setTranslateLoading(previewRoot, visible) {
+        var overlay = previewRoot.querySelector('[data-role="quote-translate-loading"]');
+        if (!overlay) return;
+        if (visible) {
+          overlay.hidden = false;
+          previewRoot.setAttribute('data-quote-translating', 'true');
+          setPreviewScrollLocked(true);
+          requestAnimationFrame(function () {
+            overlay.classList.add('is-visible');
+          });
+          return;
+        }
+        overlay.classList.remove('is-visible');
+        previewRoot.removeAttribute('data-quote-translating');
+        setPreviewScrollLocked(false);
+        window.setTimeout(function () {
+          if (!overlay.classList.contains('is-visible')) overlay.hidden = true;
+        }, 250);
       }
       function translateText(text, targetLang) {
         var source = String(text || '');
@@ -1086,7 +1138,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             row.specification = row.originalSpec;
           });
           refreshPreviewTable(previewRoot);
-          setTranslateStatus(previewRoot, false, '');
+          setTranslateLoading(previewRoot, false);
           return;
         }
         var work = [];
@@ -1095,21 +1147,20 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           work.push({ row: row, field: 'specification', text: row.originalSpec });
         });
         if (!work.length) return;
-        setTranslateStatus(previewRoot, true, '正在翻译中 0/' + work.length);
-        var done = 0;
+        setTranslateLoading(previewRoot, true);
         work.reduce(function (chain, item) {
           return chain.then(function () {
             if (runId !== state.translateRunId) return null;
             return translateText(item.text, code).then(function (translated) {
               if (runId !== state.translateRunId) return;
               item.row[item.field] = translated;
-              done += 1;
-              setTranslateStatus(previewRoot, true, '正在翻译中 ' + done + '/' + work.length);
-              refreshPreviewTable(previewRoot);
             });
           });
         }, Promise.resolve()).then(function () {
-          if (runId === state.translateRunId) setTranslateStatus(previewRoot, false, '');
+          if (runId === state.translateRunId) {
+            refreshPreviewTable(previewRoot);
+            setTranslateLoading(previewRoot, false);
+          }
         });
       }
       function createBatchPriceDraft() {
@@ -1615,6 +1666,25 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         var languageButton = previewRoot.querySelector('[data-dom-id="quote-language-button"]');
         var languageMenu = previewRoot.querySelector('[data-role="quote-language-menu"]');
         var titleInput = previewRoot.querySelector('[data-dom-id="quote-title-input"]');
+        var languageMenuHandle = null;
+        var languageMenuObserver = null;
+        function syncLanguageButtonOpenState() {
+          var open = languageMenu && languageMenu.getAttribute('data-state') === 'open';
+          if (!languageButton) return;
+          languageButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+          languageButton.classList.toggle('is-open', open);
+        }
+        function hideLanguageMenu() {
+          if (!languageMenu) return;
+          if (languageMenuHandle) languageMenuHandle.hide();
+          else languageMenu.setAttribute('data-state', 'closed');
+          syncLanguageButtonOpenState();
+        }
+        function cleanupPreview() {
+          if (languageMenuHandle) languageMenuHandle.destroy();
+          if (languageMenuObserver) languageMenuObserver.disconnect();
+          setTranslateLoading(previewRoot, false);
+        }
         activateImages(previewRoot);
         syncLanguageMenu(previewRoot);
         bindPreviewTableControls(previewRoot);
@@ -1625,30 +1695,40 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         previewRoot.querySelector('[data-dom-id="quote-preview-back"]').addEventListener('click', function () {
           state.appendMode = false;
           setAppendMode(false);
+          cleanupPreview();
           previewCtx.close();
         });
         previewRoot.querySelector('[data-dom-id="quote-add-more"]').addEventListener('click', function () {
           setAppendMode(true);
+          cleanupPreview();
           previewCtx.close();
           ctx.toast('继续选择要追加的产品');
         });
         previewRoot.querySelector('[data-dom-id="quote-share-main"]').addEventListener('click', function () {
           ctx.toast('分享导出将在后续阶段接入');
         });
-        languageButton.addEventListener('click', function () {
-          var open = languageMenu.hidden;
-          languageMenu.hidden = !open;
-          languageMenu.setAttribute('data-state', open ? 'open' : 'closed');
-          languageButton.setAttribute('aria-expanded', open ? 'true' : 'false');
-          languageButton.classList.toggle('is-open', open);
-        });
+        if (window.WegoPopmenu && languageButton && languageMenu) {
+          languageMenu.style.position = 'fixed';
+          languageMenuHandle = window.WegoPopmenu.bind(languageButton, languageMenu, {
+            beforeShow: function () { closeAllMenus(); },
+            onItemClick: function (item) {
+              applyLanguage(previewRoot, item.getAttribute('data-lang'));
+            }
+          });
+          languageMenuObserver = new MutationObserver(syncLanguageButtonOpenState);
+          languageMenuObserver.observe(languageMenu, { attributes: true, attributeFilter: ['data-state'] });
+          syncLanguageButtonOpenState();
+        } else if (languageButton && languageMenu) {
+          languageButton.addEventListener('click', function () {
+            var open = languageMenu.getAttribute('data-state') !== 'open';
+            languageMenu.setAttribute('data-state', open ? 'open' : 'closed');
+            syncLanguageButtonOpenState();
+          });
+        }
         previewRoot.addEventListener('click', function (e) {
           var langOpt = e.target.closest('[data-role="quote-language-option"]');
           if (langOpt) {
-            languageMenu.hidden = true;
-            languageMenu.setAttribute('data-state', 'closed');
-            languageButton.setAttribute('aria-expanded', 'false');
-            languageButton.classList.remove('is-open');
+            hideLanguageMenu();
             applyLanguage(previewRoot, langOpt.getAttribute('data-lang'));
             return;
           }
@@ -1669,17 +1749,11 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           }
           var del = e.target.closest('[data-quote-delete-row]');
           if (del) {
-            var id = del.getAttribute('data-quote-delete-row');
-            state.quoteRows = state.quoteRows.filter(function (row) { return row.id !== id; });
-            state.dirty = true;
-            refreshPreviewTable(previewRoot);
+            deleteQuoteRow(previewRoot, del);
             return;
           }
           if (!e.target.closest('[data-role="quote-language-menu"]') && !e.target.closest('[data-dom-id="quote-language-button"]')) {
-            languageMenu.hidden = true;
-            languageMenu.setAttribute('data-state', 'closed');
-            languageButton.setAttribute('aria-expanded', 'false');
-            languageButton.classList.remove('is-open');
+            hideLanguageMenu();
           }
         });
         previewRoot.addEventListener('input', function (e) {
@@ -1698,11 +1772,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
             row[field] = e.target.value;
           }
           state.dirty = true;
-        });
-        var cancel = previewRoot.querySelector('[data-dom-id="quote-translate-cancel"]');
-        if (cancel) cancel.addEventListener('click', function () {
-          state.translateRunId += 1;
-          setTranslateStatus(previewRoot, false, '');
         });
       }
       function openQuotePreview() {
