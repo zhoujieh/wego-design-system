@@ -964,6 +964,37 @@
         "wego-design 与 README 改为用户明确要求 PR/在线预览才推送"
       ],
       "novelty": "ev-043 只解决推送频率，没有取消首次可验收版本和一组反馈完成这两个自动推送触发条件，也没有建立推送 PR 的明确请求门槛。"
+    },
+    {
+      "id": "ev-056",
+      "date": "2026-09-05",
+      "summary": "未推送阶段默认交付可远程查看的本地预览，推送后切换为单一在线预览并关闭本地通道",
+      "source": "user-preference",
+      "scene": "github-delivery-remote-local-preview",
+      "tags": [
+        "本地预览",
+        "远程预览",
+        "在线预览",
+        "单链接",
+        "wego-github-delivery"
+      ],
+      "kind": "experience",
+      "observation": "用户确认本地迭代不推送 PR 的节奏后，进一步要求把临时远程查看本地预览的方案融合进默认交付：没推送前给可远程查看的本地链接，推送后给在线链接并关闭本地预览。",
+      "mechanism": "仅返回 127.0.0.1 本地地址无法让远程用户或同事查看，而同时保留本地与在线两个入口会造成验收链接分叉和服务生命周期不清。",
+      "rule": "本地迭代未推送阶段通过临时 HTTPS 隧道只交付一个远程本地预览链接；用户明确要求 PR/在线预览并部署核实后，只交付 PR 在线预览链接并关闭对应本地预览与隧道，后续新改动重新进入本地预览循环。",
+      "scope": [
+        "wego-github-delivery",
+        "wego-design",
+        "wego-uxsystem-iterate",
+        "README 用户流程",
+        "本地预览服务生命周期"
+      ],
+      "verification": [
+        "AGENTS.md 的本地迭代规则写明临时 HTTPS 隧道和单链接切换",
+        "wego-github-delivery 规则写明远程本地预览 URL 与隧道 PID 记录、复用、校验和关闭时机",
+        "wego-design 与 README 同步去除本地和在线双链接交付口径"
+      ],
+      "novelty": "ev-055 只规定本地迭代完成后不自动推送 PR，仍把本地预览理解为本机地址，没有解决远程查看入口、单链接验收和隧道生命周期。"
     }
   ]
 }
