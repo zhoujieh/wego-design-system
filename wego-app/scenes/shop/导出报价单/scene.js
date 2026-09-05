@@ -123,7 +123,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
   var PAGE_SIZE = 6;
   var DEFAULT_BATCH_SELECT_VALUE = '100';
   var BATCH_SELECT_VALUES = ['50', '100', '200'];
-  var SOURCE_PAGE_SIZE = 9;
+  var CATEGORY_PREVIEW_COUNT = 9;
+  var SOURCE_PAGE_SIZE = 4;
   var DATE_PRESETS = [
     { key: 'today', label: '今天' },
     { key: 'yesterday', label: '昨天' },
@@ -487,6 +488,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (btn) {
           btn.classList.toggle('is-active', active);
           btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+          btn.setAttribute('aria-label', active ? '筛选，已选' + badges.length + '项条件' : '筛选');
+          if (active) btn.setAttribute('data-filter-count', String(badges.length));
+          else btn.removeAttribute('data-filter-count');
         }
         if (!strip) return;
         strip.hidden = !active;
@@ -1398,9 +1402,9 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       function filterCategoryGridHtml(draft) {
         var query = state.filterSearch.category || '';
         var options = filterOptions('category').filter(function (item) { return filterOptionMatches(item, query); });
-        var preview = query ? options : options.slice(0, 8);
+        var preview = query ? options : options.slice(0, CATEGORY_PREVIEW_COUNT);
         var html = preview.map(function (item) { return filterChipHtml('category', item, item, draft.category, query, ''); }).join('');
-        if (!query && options.length) {
+        if (!query && options.length > CATEGORY_PREVIEW_COUNT) {
           html += '<button type="button" class="quote-filter-chip quote-filter-chip--more" data-role="quote-filter-more-category">查看更多 <i class="wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></button>';
         }
         return html || filterEmptyHtml();

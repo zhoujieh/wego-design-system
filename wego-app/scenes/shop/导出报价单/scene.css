@@ -118,6 +118,24 @@
 .quote-filter-btn {
   position: relative;
 }
+.quote-filter-btn[data-filter-count]::after {
+  content: attr(data-filter-count);
+  position: absolute;
+  top: var(--spacer-2);
+  right: var(--spacer-6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-16);
+  height: var(--size-16);
+  padding: 0 var(--spacer-4);
+  border-radius: var(--radius-full);
+  background: var(--bg-brand);
+  color: var(--text-inverse);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  font-weight: var(--font-weight-medium);
+}
 .quote-filter-btn.is-active {
   color: var(--text-brand);
 }
@@ -1185,7 +1203,7 @@
   font-weight: var(--font-weight-medium);
 }
 .quote-filter-source-grid {
-  max-height: calc(var(--size-40) * 4);
+  max-height: calc(var(--size-72) + var(--spacer-8));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
