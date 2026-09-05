@@ -922,7 +922,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.quote-cell-textarea.is-expanded {
+.quote-cell-field .quote-cell-textarea.is-expanded {
   position: absolute;
   /* 顶对齐原单行输入框位置，宽度与单元格（原输入框）一致 */
   inset-block-start: 0;
@@ -930,18 +930,21 @@
   z-index: calc(var(--z-sticky) + 1);
   width: 100%;
   height: auto;
-  min-height: calc(var(--size-96) + var(--spacer-8));
+  min-height: 96px;
   max-height: calc(var(--size-96) * 3);
   overflow-y: auto;
-  background: var(--bg-surface);
-  border: var(--stroke-hairline) solid var(--border-neutral-l2);
+  /* 组件基础输入框样式：灰底 + 可见描边 + 右下角拖拽手柄（覆盖组件默认 focus 边框色） */
+  background: var(--bg-subtle);
+  border: var(--stroke-hairline) solid var(--border-control);
   border-radius: var(--radius-6);
   padding: var(--spacer-8) var(--spacer-12);
   transform: none;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  resize: none;
-  box-shadow: none;
+  resize: vertical;
+}
+.quote-cell-field .quote-cell-textarea.is-expanded:focus {
+  border-color: var(--border-control);
 }
 .quote-table__spec,
 .quote-table__name {
