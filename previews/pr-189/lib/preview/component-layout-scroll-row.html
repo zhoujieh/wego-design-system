@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout Scroll Row - 横向滚动区</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../components.css">
+<style>
+/* @component-css-start */
+
+/* Layout Scroll Row 是横向滚动信息区：overflow-x:auto，保持纵向主滚动所有权，
+   支持 Scroll Snap 与 peek，gap 接收正式 Spacer Token。 */
+.layout-scroll-row {
+  --layout-scroll-row-gap: var(--spacer-0);
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  gap: var(--layout-scroll-row-gap);
+  box-sizing: border-box;
+}
+
+.layout-scroll-row[data-snap="start"] { scroll-snap-type: x mandatory; }
+.layout-scroll-row[data-snap="start"] > * { scroll-snap-align: start; }
+
+.layout-scroll-row[data-peek="next"] { padding-inline-end: var(--spacer-12); }
+
+.layout-scroll-row[data-item-size="compact"] > * { flex: 0 0 25%; }
+.layout-scroll-row[data-item-size="medium"] > * { flex: 0 0 40%; }
+.layout-scroll-row[data-item-size="wide"] > * { flex: 0 0 60%; }
+
+.layout-scroll-row::-webkit-scrollbar { display: none; }
+
+/* @component-css-end */
+
+body { margin: 0; background: var(--bg-page); }
+.lsr-demo { max-width: 393px; margin-inline: auto; padding: var(--spacer-8); background: var(--bg-surface); }
+.lsr-demo__label { color: var(--text-secondary); margin-bottom: var(--spacer-8); }
+.lsr-demo__item { flex: 0 0 40%; padding: var(--spacer-8); background: var(--bg-page); border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-8); color: var(--text-default); }
+</style>
+</head>
+<body>
+<div class="lsr-demo">
+  <div class="lsr-demo__label">横向滚动（snap=start, peek=next, gap=8）</div>
+  <div class="layout-scroll-row" data-component-slug="layout-scroll-row" data-item-size="medium" data-snap="start" data-peek="next" style="--layout-scroll-row-gap:var(--spacer-8)">
+    <div class="lsr-demo__item">条目 1</div>
+    <div class="lsr-demo__item">条目 2</div>
+    <div class="lsr-demo__item">条目 3</div>
+    <div class="lsr-demo__item">条目 4</div>
+    <div class="lsr-demo__item">条目 5</div>
+  </div>
+</div>
+</body>
+</html>

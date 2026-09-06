@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,132px),1fr));gap:var(--spacer-8);width:100%;box-sizing:border-box;margin-bottom:var(--spacer-16)}
+.preview-item{display:flex;align-items:center;justify-content:space-between;gap:var(--spacer-12);min-width:0;min-height:52px;padding:var(--spacer-12);box-sizing:border-box;border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
+.preview-item .label{width:auto;min-width:0;overflow-wrap:anywhere;color:var(--text-secondary)}
+.preview-item--with-text{justify-content:flex-start}
+.preview-item--interactive{cursor:pointer}
+.dark-strip .preview-grid{margin-bottom:0}
+.dark-strip .preview-item{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.dark-strip .preview-item .label{color:rgba(255,255,255,.7)}
+.selection-note{margin:-4px 0 var(--spacer-12);font-size:var(--body-sm-font-size);line-height:var(--body-sm-line-height);color:var(--text-tertiary)}
+.selection-stack{display:flex;flex-direction:column;gap:var(--spacer-8);align-items:flex-start;min-width:0}
+.selection-children{display:flex;flex-direction:column;gap:var(--spacer-8);min-width:0;padding-left:clamp(var(--spacer-16),8vw,36px)}
+@media (max-width: 420px){
+  .preview-item{align-items:flex-start;flex-direction:column}
+}
+
+/* @component-css-start */
+.checkbox{--checkbox-size:24px;--checkbox-surface:transparent;--checkbox-border:var(--border-control);--checkbox-disabled-surface:var(--bg-control-disabled);--checkbox-disabled-border:var(--border-disabled);position:relative;display:inline-flex;align-items:center;justify-content:center;width:var(--checkbox-size);height:var(--checkbox-size);flex:0 0 var(--checkbox-size);box-sizing:border-box;border-radius:var(--radius-full);cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.checkbox::before{content:"";position:absolute;top:calc((var(--checkbox-size) - var(--touch-min)) / 2);right:calc((var(--checkbox-size) - var(--touch-min)) / 2);bottom:calc((var(--checkbox-size) - var(--touch-min)) / 2);left:calc((var(--checkbox-size) - var(--touch-min)) / 2)}
+.checkbox-field-group{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--spacer-12);min-width:0}
+.checkbox-field{display:inline-flex;align-items:center;gap:var(--spacer-2);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.checkbox-field__text{min-width:0;font-size:var(--body-md-font-size);line-height:var(--body-md-line-height);color:var(--text-default);overflow-wrap:anywhere}
+.checkbox__inner{position:absolute;inset:2px;box-sizing:border-box;border:1.5px solid var(--checkbox-border);border-radius:var(--radius-full);background:var(--checkbox-surface);transition:background var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
+.checkbox__icon,
+.checkbox__minus,
+.checkbox__count{position:relative;z-index:1;display:none;align-items:center;justify-content:center;color:var(--text-inverse);pointer-events:none}
+.checkbox__asset{display:block;width:13px;height:10px}
+.checkbox__minus::before{content:"";display:block;width:8px;height:1.5px;border-radius:var(--radius-full);background:currentColor}
+.checkbox__minus .checkbox__asset{display:none}
+.checkbox--checked .checkbox__inner,
+.checkbox--indeterminate .checkbox__inner,
+.checkbox--count .checkbox__inner{background:var(--bg-brand);border-color:var(--text-brand)}
+.checkbox--checked .checkbox__icon{display:flex;transform:translateX(.5px)}
+.checkbox--indeterminate .checkbox__minus{display:flex}
+.checkbox--count .checkbox__count{display:flex;width:19.5px;height:19.5px;border-radius:var(--radius-full);background:var(--bg-brand);font-family:var(--number-md-font-family);font-size:var(--body-sm-font-size);font-weight:var(--font-weight-medium);line-height:1;color:var(--text-inverse);font-feature-settings:"zero"}
+.checkbox--sm{--checkbox-size:20px}
+.checkbox--sm .checkbox__inner{inset:2px}
+.checkbox--sm .checkbox__asset{width:11px;height:8px}
+.checkbox--sm .checkbox__minus::before{width:8px;height:1.5px}
+.checkbox--sm.checkbox--count .checkbox__count{width:16px;height:16px;font-size:var(--body-sm-font-size)}
+.checkbox--disabled{pointer-events:none;cursor:not-allowed}
+.checkbox--disabled:not(.checkbox--checked):not(.checkbox--indeterminate):not(.checkbox--count) .checkbox__inner{border-color:var(--checkbox-disabled-border);background:var(--checkbox-disabled-surface)}
+.checkbox--checked.checkbox--disabled .checkbox__inner,
+.checkbox--indeterminate.checkbox--disabled .checkbox__inner,
+.checkbox--count.checkbox--disabled .checkbox__inner,
+.checkbox--count.checkbox--disabled .checkbox__count{border-color:transparent;background:var(--checkbox-disabled-surface)}
+.checkbox--checked.checkbox--disabled .checkbox__icon,
+.checkbox--indeterminate.checkbox--disabled .checkbox__minus,
+.checkbox--count.checkbox--disabled .checkbox__count{opacity:.45}
+.dark .checkbox{--checkbox-surface:var(--bg-inverse-surface-l1);--checkbox-border:var(--border-inverse);--checkbox-disabled-surface:var(--bg-inverse-surface-disabled);--checkbox-disabled-border:var(--border-inverse-weak)}
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>复选框</h1><p>24 / 20px，支持未选、已选、半选、计数和禁用。</p></div>
+<div class="pv-section__title">默认状态 — 24px</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">未选中</span>
+  <div class="checkbox"><div class="checkbox__inner"></div></div>
+  </div>
+  <div class="preview-item"><span class="label">选中</span>
+  <div class="checkbox checkbox--checked">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__icon">
+      <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+    </div>
+  </div>
+  </div>
+  <div class="preview-item"><span class="label">部分选中</span>
+  <div class="checkbox checkbox--indeterminate">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__minus"></div>
+  </div>
+  </div>
+  <div class="preview-item"><span class="label">标记数量</span>
+  <div class="checkbox checkbox--count">
+    <div class="checkbox__count"><span>2</span></div>
+  </div>
+  </div>
+  <div class="preview-item"><span class="label">超量 (99+)</span>
+  <div class="checkbox checkbox--count">
+    <div class="checkbox__count"><span>999</span></div>
+  </div>
+  </div>
+</div>
+
+<div class="pv-section__title">默认状态 — 20px</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">未选中</span>
+  <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+  </div>
+  <div class="preview-item"><span class="label">选中</span>
+  <div class="checkbox checkbox--checked checkbox--sm">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__icon">
+      <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+    </div>
+  </div>
+  </div>
+  <div class="preview-item"><span class="label">部分选中</span>
+  <div class="checkbox checkbox--indeterminate checkbox--sm">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__minus"></div>
+  </div>
+  </div>
+  <div class="preview-item"><span class="label">标记数量</span>
+  <div class="checkbox checkbox--count checkbox--sm">
+    <div class="checkbox__count"><span>2</span></div>
+  </div>
+  </div>
+  <div class="preview-item"><span class="label">超量 (99+)</span>
+  <div class="checkbox checkbox--count checkbox--sm">
+    <div class="checkbox__count"><span>999</span></div>
+  </div>
+  </div>
+</div>
+
+<div class="pv-section__title">带文字场景 — 默认 20px</div>
+<p class="selection-note">直接在原场景里验证点击切换，避免另起独立交互演示模块。</p>
+<div class="preview-grid">
+  <div class="preview-item preview-item--with-text">
+    <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="false">
+      <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+      <span class="checkbox-field__text">到店自提</span>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="true">
+      <div class="checkbox checkbox--checked checkbox--sm">
+        <div class="checkbox__inner"></div>
+        <div class="checkbox__icon">
+          <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+        </div>
+      </div>
+      <span class="checkbox-field__text">同意协议</span>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="checkbox-field">
+      <div class="checkbox checkbox--indeterminate checkbox--sm">
+        <div class="checkbox__inner"></div>
+        <div class="checkbox__minus"></div>
+      </div>
+      <span class="checkbox-field__text">部分选择</span>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">带文字成组 — 组内间距 12px</div>
+<p class="selection-note">组内多选与父子联动都并回原组件示例区，规则直接跟随分组结构阅读。</p>
+<div class="preview-grid">
+  <div class="preview-item preview-item--with-text">
+    <div class="checkbox-field-group" role="group" aria-label="附加服务">
+      <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="true">
+        <div class="checkbox checkbox--checked checkbox--sm">
+          <div class="checkbox__inner"></div>
+          <div class="checkbox__icon">
+            <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+          </div>
+        </div>
+        <span class="checkbox-field__text">到店自提</span>
+      </div>
+      <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="false">
+        <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+        <span class="checkbox-field__text">电子发票</span>
+      </div>
+      <div class="checkbox-field preview-item--interactive" data-checkbox-toggle tabindex="0" role="checkbox" aria-checked="false">
+        <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+        <span class="checkbox-field__text">联系配送</span>
+      </div>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="selection-stack" role="group" aria-label="成员权限">
+      <div class="checkbox-field checkbox-field--parent preview-item--interactive" data-checkbox-parent="permission-group" tabindex="0" role="checkbox" aria-checked="mixed">
+        <div class="checkbox checkbox--indeterminate checkbox--sm">
+          <div class="checkbox__inner"></div>
+          <div class="checkbox__minus"></div>
+        </div>
+        <span class="checkbox-field__text">全选权限</span>
+      </div>
+      <div class="selection-children">
+        <div class="checkbox-field checkbox-field--child preview-item--interactive" data-checkbox-child="permission-group" tabindex="0" role="checkbox" aria-checked="true">
+          <div class="checkbox checkbox--checked checkbox--sm">
+            <div class="checkbox__inner"></div>
+            <div class="checkbox__icon">
+              <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+            </div>
+          </div>
+          <span class="checkbox-field__text">查看订单</span>
+        </div>
+        <div class="checkbox-field checkbox-field--child preview-item--interactive" data-checkbox-child="permission-group" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+          <span class="checkbox-field__text">编辑价格</span>
+        </div>
+        <div class="checkbox-field checkbox-field--child preview-item--interactive" data-checkbox-child="permission-group" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+          <span class="checkbox-field__text">导出报表</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="pv-section__title">禁用状态 — 24px</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用未选中</span>
+  <div class="checkbox checkbox--disabled"><div class="checkbox__inner"></div></div>
+  </div>
+  <div class="preview-item"><span class="label">禁用选中</span>
+  <div class="checkbox checkbox--checked checkbox--disabled">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__icon">
+      <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+    </div>
+  </div>
+  </div>
+  <div class="preview-item"><span class="label">禁用部分选中</span>
+  <div class="checkbox checkbox--indeterminate checkbox--disabled">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__minus"></div>
+  </div>
+  </div>
+</div>
+
+<div class="pv-section__title">禁用状态 — 20px</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用未选中</span>
+  <div class="checkbox checkbox--disabled checkbox--sm"><div class="checkbox__inner"></div></div>
+  </div>
+  <div class="preview-item"><span class="label">禁用选中</span>
+  <div class="checkbox checkbox--checked checkbox--disabled checkbox--sm">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__icon">
+      <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+    </div>
+  </div>
+  </div>
+  <div class="preview-item"><span class="label">禁用部分选中</span>
+  <div class="checkbox checkbox--indeterminate checkbox--disabled checkbox--sm">
+    <div class="checkbox__inner"></div>
+    <div class="checkbox__minus"></div>
+  </div>
+  </div>
+</div>
+
+
+<div class="pv-section__title">暗色模式 — 24px</div>
+<div class="dark-strip dark dark-mode">
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色未选中</span>
+    <div class="checkbox"><div class="checkbox__inner"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色选中</span>
+    <div class="checkbox checkbox--checked">
+      <div class="checkbox__inner"></div>
+      <div class="checkbox__icon">
+        <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+      </div>
+    </div>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用未选中</span>
+    <div class="checkbox checkbox--disabled"><div class="checkbox__inner"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用选中</span>
+    <div class="checkbox checkbox--checked checkbox--disabled">
+      <div class="checkbox__inner"></div>
+      <div class="checkbox__icon">
+        <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">暗色模式 — 20px</div>
+<div class="dark-strip dark dark-mode">
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色未选中</span>
+    <div class="checkbox checkbox--sm"><div class="checkbox__inner"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色选中</span>
+    <div class="checkbox checkbox--checked checkbox--sm">
+      <div class="checkbox__inner"></div>
+      <div class="checkbox__icon">
+        <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+      </div>
+    </div>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用未选中</span>
+    <div class="checkbox checkbox--disabled checkbox--sm"><div class="checkbox__inner"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用选中</span>
+    <div class="checkbox checkbox--checked checkbox--disabled checkbox--sm">
+      <div class="checkbox__inner"></div>
+      <div class="checkbox__icon">
+        <img class="checkbox__asset" src="../assets/icons/checkbox-check.svg" alt="">
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="../runtime/checkbox.js"></script>
+<script>
+// 演示用：初始化复选框切换、父子联动与无障碍同步；交互逻辑由 runtime/checkbox.js 承担。
+window.WegoCheckbox.bind();
+</script>
+</body>
+</html>

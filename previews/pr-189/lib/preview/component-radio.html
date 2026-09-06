@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,132px),1fr));gap:var(--spacer-8);width:100%;box-sizing:border-box;margin-bottom:var(--spacer-16)}
+.preview-item{display:flex;align-items:center;justify-content:space-between;gap:var(--spacer-12);min-width:0;min-height:52px;padding:var(--spacer-12);box-sizing:border-box;border:1px solid var(--border-neutral-l2);border-radius:var(--radius-8);background:var(--bg-surface)}
+.preview-item .label{width:auto;min-width:0;overflow-wrap:anywhere;color:var(--text-secondary)}
+.preview-item--with-text{justify-content:flex-start}
+.preview-item--interactive{cursor:pointer}
+.dark-strip .preview-grid{margin-bottom:0}
+.dark-strip .preview-item{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.dark-strip .preview-item .label{color:rgba(255,255,255,.7)}
+.selection-note{margin:-4px 0 var(--spacer-12);font-size:var(--body-sm-font-size);line-height:var(--body-sm-line-height);color:var(--text-tertiary)}
+@media (max-width: 420px){
+  .preview-item{align-items:flex-start;flex-direction:column}
+}
+
+/* @component-css-start */
+.radio { --radio-size:24px; --radio-surface:transparent; --radio-border:var(--border-control); --radio-disabled-surface:var(--bg-control-disabled); --radio-disabled-border:var(--border-disabled); --radio-disabled-dot:var(--border-disabled); width:var(--radio-size); height:var(--radio-size); display:flex; align-items:center; justify-content:center; flex:0 0 var(--radio-size); box-sizing:border-box; position:relative; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; }
+.radio::before{content:"";position:absolute;top:calc((var(--radio-size) - var(--touch-min)) / 2);right:calc((var(--radio-size) - var(--touch-min)) / 2);bottom:calc((var(--radio-size) - var(--touch-min)) / 2);left:calc((var(--radio-size) - var(--touch-min)) / 2)}
+.radio-field-group{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--spacer-12);min-width:0}
+.radio-field{display:inline-flex;align-items:center;gap:var(--spacer-2);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.radio-field__text{min-width:0;font-size:var(--body-md-font-size);line-height:var(--body-md-line-height);color:var(--text-default);overflow-wrap:anywhere}
+.radio__inner { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--radio-border); background:var(--radio-surface); box-sizing:border-box; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+.radio__dot { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:var(--bg-brand); display:none; }
+
+.radio--checked .radio__inner { border-color:var(--text-brand); }
+.radio--checked .radio__dot { display:block; }
+
+.radio--sm { --radio-size:20px; }
+.radio--sm .radio__inner { width:16px; height:16px; }
+.radio--sm .radio__dot { width:8px; height:8px; }
+
+/* Disabled — unchecked: subtle border + disabled surface */
+.radio--disabled:not(.radio--checked) { pointer-events:none; cursor:not-allowed; }
+.radio--disabled:not(.radio--checked) .radio__inner { border-color:var(--radio-disabled-border); background:var(--radio-disabled-surface); }
+/* Disabled — checked: subtle border + bg; dot matches border */
+.radio--checked.radio--disabled { pointer-events:none; cursor:not-allowed; }
+.radio--checked.radio--disabled .radio__inner { border-color:var(--radio-disabled-border); background:var(--radio-disabled-surface); }
+.radio--checked.radio--disabled .radio__dot { background:var(--radio-disabled-dot); }
+
+/* Dark mode overrides for .dark context */
+.dark .radio { --radio-surface:var(--bg-inverse-surface-l1); --radio-border:var(--border-inverse); --radio-disabled-surface:var(--bg-inverse-surface-disabled); --radio-disabled-border:var(--border-inverse-weak); --radio-disabled-dot:var(--icon-inverse-disabled); }
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>单选</h1><p>24 / 20px，品牌绿圆点选中态。</p></div>
+<div class="pv-section__title">默认状态 — 24px</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">未选中</span>
+  <div class="radio radio--static" data-sample="default-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+  <div class="preview-item"><span class="label">选中</span>
+  <div class="radio radio--checked radio--static" data-sample="default-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+</div>
+
+<div class="pv-section__title">默认状态 — 20px</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">未选中</span>
+  <div class="radio radio--sm radio--static" data-sample="sm-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+  <div class="preview-item"><span class="label">选中</span>
+  <div class="radio radio--sm radio--checked radio--static" data-sample="sm-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+</div>
+
+<div class="pv-section__title">带文字场景 — 默认 20px</div>
+<div class="preview-grid">
+  <div class="preview-item preview-item--with-text">
+    <div class="radio-field">
+      <div class="radio radio--sm radio--checked" data-sample="with-text-checked">
+        <div class="radio__inner"></div><div class="radio__dot"></div>
+      </div>
+      <span class="radio-field__text">到店</span>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="radio-field">
+      <div class="radio radio--sm" data-sample="with-text-unchecked">
+        <div class="radio__inner"></div><div class="radio__dot"></div>
+      </div>
+      <span class="radio-field__text">快递</span>
+    </div>
+  </div>
+  <div class="preview-item preview-item--with-text">
+    <div class="radio-field">
+      <div class="radio radio--sm radio--disabled" data-sample="with-text-disabled">
+        <div class="radio__inner"></div><div class="radio__dot"></div>
+      </div>
+      <span class="radio-field__text">暂不支持</span>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">带文字成组 — 组内间距 12px</div>
+<p class="selection-note">互斥选择直接附着在原成组示例里，点击已选项不会回退为空。</p>
+<div class="preview-grid">
+  <div class="preview-item preview-item--with-text">
+    <div class="radio-field-group" role="radiogroup" aria-label="配送方式" data-radio-group="delivery">
+      <div class="radio-field preview-item--interactive" tabindex="0" role="radio" aria-checked="true">
+        <div class="radio radio--sm radio--checked" data-group="delivery" data-sample="group-with-text-checked">
+          <div class="radio__inner"></div><div class="radio__dot"></div>
+        </div>
+        <span class="radio-field__text">到店</span>
+      </div>
+      <div class="radio-field preview-item--interactive" tabindex="0" role="radio" aria-checked="false">
+        <div class="radio radio--sm" data-group="delivery" data-sample="group-with-text-unchecked">
+          <div class="radio__inner"></div><div class="radio__dot"></div>
+        </div>
+        <span class="radio-field__text">快递</span>
+      </div>
+      <div class="radio-field preview-item--interactive" tabindex="0" role="radio" aria-checked="false">
+        <div class="radio radio--sm" data-group="delivery">
+          <div class="radio__inner"></div><div class="radio__dot"></div>
+        </div>
+        <span class="radio-field__text">同城</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="pv-section__title">禁用状态 — 24px</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用未选中</span>
+  <div class="radio radio--disabled radio--static" data-sample="disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+  <div class="preview-item"><span class="label">禁用选中</span>
+  <div class="radio radio--checked radio--disabled radio--static" data-sample="disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+</div>
+
+<div class="pv-section__title">禁用状态 — 20px</div>
+<div class="preview-grid">
+  <div class="preview-item"><span class="label">禁用未选中</span>
+  <div class="radio radio--sm radio--disabled radio--static" data-sample="sm-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+  <div class="preview-item"><span class="label">禁用选中</span>
+  <div class="radio radio--sm radio--checked radio--disabled radio--static" data-sample="sm-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+  </div>
+</div>
+
+
+<div class="pv-section__title">暗色模式 — 24px</div>
+<div class="dark-strip dark dark-mode">
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色未选中</span>
+    <div class="radio radio--static" data-sample="dark-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色选中</span>
+    <div class="radio radio--checked radio--static" data-sample="dark-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用未选中</span>
+    <div class="radio radio--disabled radio--static" data-sample="dark-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用选中</span>
+    <div class="radio radio--checked radio--disabled radio--static" data-sample="dark-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section__title">暗色模式 — 20px</div>
+<div class="dark-strip dark dark-mode">
+  <div class="preview-grid">
+    <div class="preview-item"><span class="label">暗色未选中</span>
+    <div class="radio radio--sm radio--static" data-sample="dark-sm-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色选中</span>
+    <div class="radio radio--sm radio--checked radio--static" data-sample="dark-sm-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用未选中</span>
+    <div class="radio radio--sm radio--disabled radio--static" data-sample="dark-sm-disabled-unchecked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+    <div class="preview-item"><span class="label">暗色禁用选中</span>
+    <div class="radio radio--sm radio--checked radio--disabled radio--static" data-sample="dark-sm-disabled-checked"><div class="radio__inner"></div><div class="radio__dot"></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="../runtime/radio.js"></script>
+<script>
+// 演示用：初始化 radio 互斥与无障碍同步；交互逻辑由 runtime/radio.js 承担。
+window.WegoRadio.bind();
+</script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>标签 — 微购设计系统</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../iconfont.css">
+<style>
+/* @component-css-start */
+.tag { display:inline-flex; align-items:center; justify-content:center; gap:var(--spacer-4); box-sizing:border-box; border:0.5px solid transparent; font-family:var(--body-md-font-family); font-weight:var(--font-weight-regular); line-height:1; white-space:nowrap; vertical-align:middle; flex-shrink:0; font-feature-settings:"zero"; }
+
+.tag--20 { height:20px; min-height:20px; font-size:var(--body-sm-font-size); border-radius:var(--radius-4); padding:0 6px; }
+.tag--20.tag--gray { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--20.tag--white { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--20.tag--brand-stroke { background:var(--bg-surface); color:var(--text-brand); border:0.5px solid var(--border-brand); }
+
+.tag--24 { height:var(--size-24); min-height:var(--size-24); font-size:var(--body-sm-font-size); border-radius:var(--radius-16); padding:0 var(--spacer-12); }
+.tag--24.tag--gray.tag--normal { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--24.tag--white.tag--normal { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--24.tag--gray.tag--pressed { background:var(--bg-state-selected); color:var(--text-secondary); }
+.tag--24.tag--white.tag--pressed { background:var(--bg-state-hover); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+
+.tag--28 { height:var(--size-28); min-height:var(--size-28); font-size:var(--body-sm-font-size); border-radius:var(--radius-16); padding:0 var(--spacer-12); }
+.tag--28.tag--gray.tag--normal { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--28.tag--white.tag--normal { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--28.tag--gray.tag--pressed { background:var(--bg-state-selected); color:var(--text-secondary); }
+.tag--28.tag--white.tag--pressed { background:var(--bg-state-hover); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--28.tag--gray.tag--disabled { background:var(--bg-subtle); color:var(--text-disabled); }
+.tag--28.tag--white.tag--disabled { background:var(--bg-surface); color:var(--text-disabled); border:0.5px solid var(--border-neutral-l2); }
+.tag--28.tag--brand.tag--selected { background:var(--bg-brand-surface-l1); color:var(--text-brand); font-weight:var(--font-weight-medium); }
+.tag--28.tag--brand.tag--selected-pressed { background:var(--bg-brand-surface-l2); color:var(--text-brand); font-weight:var(--font-weight-medium); }
+.tag--28.tag--closable { padding:0 var(--spacer-8) 0 var(--spacer-12); }
+
+.tag--32 { height:var(--size-32); min-height:var(--size-32); font-size:var(--body-md-font-size); border-radius:var(--radius-16); padding:0 var(--spacer-12); }
+.tag--32.tag--gray.tag--normal { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--32.tag--white.tag--normal { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--32.tag--gray.tag--pressed { background:var(--bg-state-selected); color:var(--text-secondary); }
+.tag--32.tag--white.tag--pressed { background:var(--bg-state-hover); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--32.tag--gray.tag--disabled { background:var(--bg-subtle); color:var(--text-disabled); }
+.tag--32.tag--white.tag--disabled { background:var(--bg-surface); color:var(--text-disabled); border:0.5px solid var(--border-neutral-l2); }
+.tag--32.tag--brand.tag--selected { background:var(--bg-brand-surface-l1); color:var(--text-brand); font-weight:var(--font-weight-medium); }
+.tag--32.tag--brand.tag--selected-pressed { background:var(--bg-brand-surface-l2); color:var(--text-brand); font-weight:var(--font-weight-medium); }
+.tag--32.tag--closable { padding:0 var(--spacer-8) 0 var(--spacer-12); }
+
+.tag--32-add { height:var(--size-32); min-height:var(--size-32); font-size:var(--body-md-font-size); border-radius:var(--radius-16); padding:0 var(--spacer-12) 0 var(--spacer-8); }
+.tag--32-add.tag--gray.tag--normal { background:var(--bg-subtle); color:var(--text-secondary); }
+.tag--32-add.tag--white.tag--normal { background:var(--bg-surface); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--32-add.tag--gray.tag--pressed { background:var(--bg-state-selected); color:var(--text-secondary); }
+.tag--32-add.tag--white.tag--pressed { background:var(--bg-state-hover); color:var(--text-secondary); border:0.5px solid var(--border-neutral-l2); }
+.tag--32-add.tag--gray.tag--disabled { background:var(--bg-subtle); color:var(--text-disabled); }
+.tag--32-add.tag--white.tag--disabled { background:var(--bg-surface); color:var(--text-disabled); border:0.5px solid var(--border-neutral-l2); }
+
+.tag__label { flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; text-align:center; }
+.tag__close,
+.tag__icon-left { display:flex; align-items:center; justify-content:center; width:var(--size-16); height:var(--size-16); flex-shrink:0; color:inherit; }
+.tag__close .wego-iconfont-s,
+.tag__icon-left .wego-iconfont-s { font-size:var(--size-16); line-height:1; color:inherit; }
+
+.tag--coupon { height:16px; border-radius:2px; padding:0 4px; background:var(--bg-inverse-surface-l1); border:0.5px solid var(--border-promotion-strong); color:var(--text-promotion-strong); font-size:var(--body-xs-font-size); line-height:normal; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-family:var(--body-md-font-family); white-space:nowrap; font-feature-settings:"zero"; }
+/* @component-css-end */
+
+.tag-overview { display:grid; gap:var(--spacer-16); }
+.tag-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 248px), 1fr)); gap:var(--spacer-12); }
+.tag-card { background:var(--bg-surface); border:0.5px solid var(--border-neutral-l2); border-radius:var(--radius-12); padding:var(--spacer-12); min-width:0; }
+.tag-card--inverse { background:var(--bg-inverse); border-color:transparent; }
+.tag-card__title { margin:0; font-size:var(--body-sm-font-size); font-weight:var(--font-weight-medium); color:var(--text-default); }
+.tag-card__desc { margin:4px 0 0; font-size:var(--body-xs-font-size); color:var(--text-tertiary); }
+.tag-card--inverse .tag-card__title { color:var(--text-inverse-secondary); }
+.tag-card--inverse .tag-card__desc { color:var(--text-inverse-secondary); opacity:0.72; }
+.tag-samples { display:flex; flex-wrap:wrap; gap:var(--spacer-8); margin-top:var(--spacer-12); min-width:0; }
+.tag-scene { display:flex; align-items:center; flex-wrap:wrap; gap:var(--spacer-8); }
+.tag-scene__label { font-size:var(--body-xs-font-size); color:var(--text-tertiary); min-width:56px; }
+.tag-card--inverse .tag-scene__label { color:var(--text-inverse-secondary); opacity:0.72; }
+.tag-card--inverse .label { color:var(--text-inverse-secondary); }
+.tag-samples--gray-host { background:var(--bg-subtle); padding:var(--spacer-12); border-radius:var(--radius-8); }
+</style>
+</head>
+<body>
+<div class="pv-header"><h1>标签</h1><p>状态标识、筛选标签、添加标签和优惠券业务标签。</p></div>
+
+<div class="pv-section">
+  <p class="pv-section__title">Tag_20 · 纯展示</p>
+  <p class="pv-section__sub">适合放在 Cell 辅助信息一行，保持轻量、不承载交互。</p>
+  <div class="row">
+    <span class="label">基础结构</span>
+    <div class="tag tag--20 tag--gray"><span class="tag__label">待审核</span></div>
+  </div>
+  <div class="tag-grid">
+    <div class="tag-card">
+      <p class="tag-card__title">轻信息</p>
+      <div class="tag-samples">
+        <div class="tag tag--20 tag--gray"><span class="tag__label">待审核</span></div>
+        <div class="tag tag--20 tag--white"><span class="tag__label">次日达</span></div>
+        <div class="tag tag--20 tag--brand-stroke"><span class="tag__label">新品</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <p class="pv-section__title">Tag_24 · 纯入口（无选中态）</p>
+  <p class="pv-section__sub">用于跳转入口或快捷筛选，保留按压反馈，不出现已选态。</p>
+  <div class="tag-grid">
+    <div class="tag-card">
+      <p class="tag-card__title">普通态</p>
+      <div class="tag-samples">
+        <div class="tag tag--24 tag--gray tag--normal"><span class="tag__label">门店自提</span></div>
+        <div class="tag tag--24 tag--white tag--normal"><span class="tag__label">配送范围</span></div>
+      </div>
+    </div>
+    <div class="tag-card">
+      <p class="tag-card__title">按压态</p>
+      <div class="tag-samples">
+        <div class="tag tag--24 tag--gray tag--pressed"><span class="tag__label">门店自提</span></div>
+        <div class="tag tag--24 tag--white tag--pressed"><span class="tag__label">配送范围</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <p class="pv-section__title">Tag_28 · 标准标签</p>
+  <p class="pv-section__sub">推荐作为移动端筛选主力规格，同一状态把是否可关闭放在一起看，复制更直接。</p>
+  <div class="tag-grid">
+    <div class="tag-card">
+      <p class="tag-card__title">普通态</p>
+      <div class="tag-overview">
+        <div class="tag-scene">
+          <span class="tag-scene__label">灰色底</span>
+          <div class="tag tag--28 tag--gray tag--normal"><span class="tag__label">全部门店</span></div>
+          <div class="tag tag--28 tag--gray tag--normal tag--closable"><span class="tag__label">同城急送</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+        <div class="tag-scene">
+          <span class="tag-scene__label">白色底</span>
+          <div class="tag tag--28 tag--white tag--normal"><span class="tag__label">库存优先</span></div>
+          <div class="tag tag--28 tag--white tag--normal tag--closable"><span class="tag__label">到店核销</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tag-card">
+      <p class="tag-card__title">按压态</p>
+      <div class="tag-overview">
+        <div class="tag-scene">
+          <span class="tag-scene__label">灰色底</span>
+          <div class="tag tag--28 tag--gray tag--pressed"><span class="tag__label">全部门店</span></div>
+          <div class="tag tag--28 tag--gray tag--pressed tag--closable"><span class="tag__label">同城急送</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+        <div class="tag-scene">
+          <span class="tag-scene__label">白色底</span>
+          <div class="tag tag--28 tag--white tag--pressed"><span class="tag__label">库存优先</span></div>
+          <div class="tag tag--28 tag--white tag--pressed tag--closable"><span class="tag__label">到店核销</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tag-card">
+      <p class="tag-card__title">禁用态</p>
+      <div class="tag-samples">
+        <div class="tag tag--28 tag--gray tag--disabled"><span class="tag__label">全部门店</span></div>
+        <div class="tag tag--28 tag--white tag--disabled"><span class="tag__label">库存优先</span></div>
+      </div>
+    </div>
+    <div class="tag-card">
+      <p class="tag-card__title">已选态</p>
+      <div class="tag-overview">
+        <div class="tag-scene">
+          <span class="tag-scene__label">静态</span>
+          <div class="tag tag--28 tag--brand tag--selected"><span class="tag__label">已选条件</span></div>
+          <div class="tag tag--28 tag--brand tag--selected tag--closable"><span class="tag__label">满 99 包邮</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+        <div class="tag-scene">
+          <span class="tag-scene__label">按压</span>
+          <div class="tag tag--28 tag--brand tag--selected-pressed"><span class="tag__label">已选条件</span></div>
+          <div class="tag tag--28 tag--brand tag--selected-pressed tag--closable"><span class="tag__label">满 99 包邮</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <p class="pv-section__title">Tag_32 · 大标签</p>
+  <p class="pv-section__sub">更适合单行筛选或信息层级更高的条件区，保留更充足的点击感。</p>
+  <div class="tag-grid">
+    <div class="tag-card">
+      <p class="tag-card__title">普通与按压</p>
+      <div class="tag-overview">
+        <div class="tag-scene">
+          <span class="tag-scene__label">普通</span>
+          <div class="tag tag--32 tag--gray tag--normal"><span class="tag__label">可开发票</span></div>
+          <div class="tag tag--32 tag--white tag--normal tag--closable"><span class="tag__label">官方补贴</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+        <div class="tag-scene">
+          <span class="tag-scene__label">按压</span>
+          <div class="tag tag--32 tag--gray tag--pressed"><span class="tag__label">可开发票</span></div>
+          <div class="tag tag--32 tag--white tag--pressed tag--closable"><span class="tag__label">官方补贴</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tag-card">
+      <p class="tag-card__title">禁用与已选</p>
+      <div class="tag-overview">
+        <div class="tag-scene">
+          <span class="tag-scene__label">禁用</span>
+          <div class="tag tag--32 tag--gray tag--disabled"><span class="tag__label">仅工作日</span></div>
+          <div class="tag tag--32 tag--white tag--disabled"><span class="tag__label">到店取货</span></div>
+        </div>
+        <div class="tag-scene">
+          <span class="tag-scene__label">已选</span>
+          <div class="tag tag--32 tag--brand tag--selected"><span class="tag__label">满减已选</span></div>
+          <div class="tag tag--32 tag--brand tag--selected-pressed tag--closable"><span class="tag__label">会员专享</span><span class="tag__close"><i class="wego-iconfont-s icon-cha16"></i></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <p class="pv-section__title">Tag_32_Add · 添加场景（无选中态）</p>
+  <p class="pv-section__sub">只表达“添加一个条件/兴趣/地址”，不复用到已选标签。</p>
+  <div class="tag-grid">
+    <div class="tag-card">
+      <p class="tag-card__title">普通与按压</p>
+      <div class="tag-overview">
+        <div class="tag-scene">
+          <span class="tag-scene__label">普通</span>
+          <div class="tag tag--32-add tag--gray tag--normal"><span class="tag__icon-left"><i class="wego-iconfont-s icon-jia16"></i></span><span class="tag__label">添加地址</span></div>
+          <div class="tag tag--32-add tag--white tag--normal"><span class="tag__icon-left"><i class="wego-iconfont-s icon-jia16"></i></span><span class="tag__label">添加兴趣</span></div>
+        </div>
+        <div class="tag-scene">
+          <span class="tag-scene__label">按压</span>
+          <div class="tag tag--32-add tag--gray tag--pressed"><span class="tag__icon-left"><i class="wego-iconfont-s icon-jia16"></i></span><span class="tag__label">添加地址</span></div>
+          <div class="tag tag--32-add tag--white tag--pressed"><span class="tag__icon-left"><i class="wego-iconfont-s icon-jia16"></i></span><span class="tag__label">添加兴趣</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tag-card">
+      <p class="tag-card__title">禁用态</p>
+      <div class="tag-samples">
+        <div class="tag tag--32-add tag--gray tag--disabled"><span class="tag__icon-left"><i class="wego-iconfont-s icon-jia16"></i></span><span class="tag__label">添加地址</span></div>
+        <div class="tag tag--32-add tag--white tag--disabled"><span class="tag__icon-left"><i class="wego-iconfont-s icon-jia16"></i></span><span class="tag__label">添加兴趣</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <p class="pv-section__title">业务标签 · 固定语义</p>
+  <p class="pv-section__sub">这类标签只在明确业务场景下使用，不和通用筛选标签混排成一组复杂组件。</p>
+  <div class="tag-grid">
+    <div class="tag-card">
+      <p class="tag-card__title">促销角标</p>
+      <div class="tag-overview">
+        <div class="tag-scene">
+          <span class="tag-scene__label">14px</span>
+          <img src="../assets/icons/tag-seckill-14.svg" width="24" height="14" alt="">
+          <img src="../assets/icons/tag-group-14.svg" width="24" height="14" alt="">
+        </div>
+        <div class="tag-scene">
+          <span class="tag-scene__label">16px</span>
+          <img src="../assets/icons/tag-seckill-16.svg" width="16" height="16" alt="">
+          <img src="../assets/icons/tag-group-16.svg" width="16" height="16" alt="">
+        </div>
+      </div>
+    </div>
+    <div class="tag-card tag-card--inverse">
+      <p class="tag-card__title">优惠券</p>
+      <p class="tag-card__desc">仅用于优惠券信息展示，建议放在深色或促销信息区。</p>
+      <div class="tag-samples">
+        <div class="tag tag--coupon"><span class="tag__label">活动</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pv-section">
+  <p class="pv-section__title">宿主场景 · 灰色容器</p>
+  <p class="pv-section__sub">当宿主容器背景为灰色（如 --bg-subtle、--bg-page）时，使用 tag--white 保证视觉对比，避免 tag--gray 与灰色背景融合不可见。</p>
+  <div class="tag-grid">
+    <div class="tag-card">
+      <p class="tag-card__title">不推荐 · tag--gray 融底</p>
+      <div class="tag-samples tag-samples--gray-host">
+        <div class="tag tag--28 tag--gray tag--normal"><span class="tag__label">全部门店</span></div>
+        <div class="tag tag--28 tag--gray tag--normal"><span class="tag__label">同城急送</span></div>
+      </div>
+    </div>
+    <div class="tag-card">
+      <p class="tag-card__title">推荐 · tag--white 对比清晰</p>
+      <div class="tag-samples tag-samples--gray-host">
+        <div class="tag tag--28 tag--white tag--normal"><span class="tag__label">全部门店</span></div>
+        <div class="tag tag--28 tag--white tag--normal"><span class="tag__label">同城急送</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

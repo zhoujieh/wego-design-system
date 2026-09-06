@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout Grid - 多栏网格</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../components.css">
+<style>
+/* @component-css-start */
+
+/* Layout Grid 是多栏等宽网格：通过 data-columns 生成 2/3/4 等宽列，
+   行列间距通过局部变量接收正式 Spacer Token。不开放任意列模板。 */
+.layout-grid {
+  --layout-grid-column-gap: var(--spacer-0);
+  --layout-grid-row-gap: var(--spacer-0);
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.layout-grid[data-columns="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--layout-grid-column-gap); row-gap: var(--layout-grid-row-gap); }
+.layout-grid[data-columns="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--layout-grid-column-gap); row-gap: var(--layout-grid-row-gap); }
+.layout-grid[data-columns="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--layout-grid-column-gap); row-gap: var(--layout-grid-row-gap); }
+
+.layout-grid[data-align="start"] { align-items: start; }
+.layout-grid[data-align="center"] { align-items: center; }
+.layout-grid[data-align="stretch"] { align-items: stretch; }
+
+/* @component-css-end */
+
+body { margin: 0; background: var(--bg-page); }
+.lg-demo { max-width: 393px; margin-inline: auto; padding: var(--spacer-12); background: var(--bg-surface); }
+.lg-demo__section + .lg-demo__section { margin-top: var(--spacer-12); }
+.lg-demo__label { color: var(--text-secondary); margin-bottom: var(--spacer-8); }
+.lg-demo__item { padding: var(--spacer-8); background: var(--bg-page); border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-8); color: var(--text-default); text-align: center; }
+</style>
+</head>
+<body>
+<div class="lg-demo">
+  <div class="lg-demo__section">
+    <div class="lg-demo__label">3 栏（column-gap=8, row-gap=8）</div>
+    <div class="layout-grid" data-component-slug="layout-grid" data-columns="3" data-align="stretch" style="--layout-grid-column-gap:var(--spacer-8);--layout-grid-row-gap:var(--spacer-8)">
+      <div class="lg-demo__item">A</div>
+      <div class="lg-demo__item">B</div>
+      <div class="lg-demo__item">C</div>
+      <div class="lg-demo__item">D</div>
+      <div class="lg-demo__item">E</div>
+      <div class="lg-demo__item">F</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

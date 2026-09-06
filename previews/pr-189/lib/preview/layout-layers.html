@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>页面层级与滚动架构</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<style>
+body { padding: var(--spacer-24); background: var(--bg-page); color: var(--text-default); }
+.layer-map { display: grid; gap: var(--spacer-16); max-width: 960px; margin-inline: auto; }
+.layer-map__scope { padding: var(--spacer-16); background: var(--bg-surface); border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-12); }
+.layer-map__scope h2 { margin: 0 0 var(--spacer-12); font-size: var(--heading-sm-font-size); }
+.layer-map__stack { display: grid; gap: var(--spacer-8); }
+.layer-map__item { display: flex; justify-content: space-between; gap: var(--spacer-16); padding: var(--spacer-12); background: var(--bg-subtle); border-radius: var(--radius-8); }
+.layer-map__token { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<main class="layer-map">
+  <section class="layer-map__scope"><h2>页面内 page-local</h2><div class="layer-map__stack">
+    <div class="layer-map__item"><span>anchored-popout</span><span class="layer-map__token">--z-popover</span></div>
+    <div class="layer-map__item"><span>navigation</span><span class="layer-map__token">--z-sticky</span></div>
+    <div class="layer-map__item"><span>raised</span><span class="layer-map__token">--z-raised</span></div>
+    <div class="layer-map__item"><span>content</span><span class="layer-map__token">--z-base</span></div>
+  </div></section>
+  <section class="layer-map__scope"><h2>应用全局 app-global</h2><div class="layer-map__stack">
+    <div class="layer-map__item"><span>critical / feedback / dialog</span><span class="layer-map__token">--z-critical / --z-toast / --z-modal</span></div>
+    <div class="layer-map__item"><span>overlay</span><span class="layer-map__token">--z-overlay</span></div>
+    <div class="layer-map__item"><span>scene</span><span class="layer-map__token">--z-scene</span></div>
+    <div class="layer-map__item"><span>host</span><span class="layer-map__token">--z-base</span></div>
+  </div></section>
+  <section class="layer-map__scope"><h2>浮层内部 overlay-local</h2><div class="layer-map__stack">
+    <div class="layer-map__item"><span>nested-popout</span><span class="layer-map__token">--z-popover</span></div>
+    <div class="layer-map__item"><span>surface</span><span class="layer-map__token">--z-raised</span></div>
+    <div class="layer-map__item"><span>mask</span><span class="layer-map__token">--z-base</span></div>
+  </div></section>
+</main>
+</body>
+</html>
