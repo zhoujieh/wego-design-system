@@ -1632,6 +1632,24 @@
 }
 
 /* ===== 阶段F：报价记录 ===== */
+/* 记录页为内容二级页：面板从右侧推入、返回向右滑出（覆盖 fullscreen 默认的纵向进出） */
+.quote-records-modal .modal__panel {
+  transform: translateX(100%);
+  transition: transform var(--duration-normal) var(--ease-enter);
+}
+.quote-records-modal[data-state="open"] .modal__panel {
+  transform: translateX(0);
+}
+.quote-records-modal[data-state="closed"] .modal__panel {
+  transform: translateX(100%);
+  transition: transform var(--duration-normal) var(--ease-exit);
+}
+@media (prefers-reduced-motion: reduce) {
+  .quote-records-modal .modal__panel {
+    transition: none;
+    transform: none;
+  }
+}
 .quote-records-modal [hidden] {
   display: none;
 }
@@ -1643,15 +1661,16 @@
 }
 .quote-records-toolbar {
   flex: 0 0 auto;
-  padding: var(--spacer-8) var(--spacer-12) var(--spacer-4);
+  padding: var(--spacer-8) var(--spacer-12) var(--spacer-8);
 }
 .quote-records-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  padding-top: var(--spacer-8);
 }
 .quote-records-list {
   gap: var(--spacer-8);
-  padding: var(--spacer-8) var(--spacer-12) var(--spacer-16);
+  padding: var(--spacer-0);
 }
 .quote-records-empty {
   padding: calc(var(--spacer-48) * 2) var(--spacer-16);
@@ -1663,24 +1682,10 @@
   margin-left: var(--spacer-8);
   min-width: var(--size-24);
 }
-.quote-record-thumbs {
-  display: flex;
-  gap: var(--spacer-4);
-  flex: 0 0 auto;
-}
-.quote-record-thumbs__item {
-  display: block;
-  width: var(--size-48);
-  height: var(--size-48);
-  border-radius: var(--radius-8);
-  overflow: hidden;
-  background: var(--bg-subtle);
-}
-.quote-record-thumbs__item .wg-image__src {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* 记录卡缩略图：产品四宫格组件固定 88px */
+.quote-record-card .wg-image-grid--product {
+  --wg-image-product-grid-min-width: 88px;
+  --wg-image-product-grid-max-width: 88px;
 }
 .quote-record-card__info {
   min-width: 0;
@@ -1704,6 +1709,11 @@
   color: var(--text-secondary);
   font-size: var(--body-md-font-size);
 }
-.quote-records-manage {
-  min-height: var(--size-32);
+/* 删除模式底栏：贴底、左内边距与面板底色按走查定稿 */
+.quote-records-modal .modal__actions {
+  padding-bottom: var(--spacer-0);
+}
+.quote-records-modal .bottom-action-bar__inner {
+  padding-left: var(--spacer-16);
+  background-color: var(--bg-panel);
 }

@@ -987,24 +987,26 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     if (index >= 0) records[index] = record; else records.unshift(record);
     quoteWriteRecords(records);
     state.recordId = record.id;
-    state.dirty = false;
     return record;
   }
   function quoteRecordCardHtml(record, deleteMode, checked) {
-    var thumbs = (record.rows || []).slice(0, 3).map(function (row) {
-      return '<span class="quote-record-thumbs__item"><img class="wg-image__src" src="' + escapeHtml(row.image) + '" alt="" loading="lazy"></span>';
+    /* 缩略图用设计系统产品四宫格（1 图撑满 / 2 图两列 / 3 图左大右小 / 4 图 2×2） */
+    var thumbs = (record.rows || []).slice(0, 4).map(function (row) {
+      return '<div class="wg-image wg-image-grid__item"><img class="wg-image__src" src="' + escapeHtml(row.image) + '" alt="" loading="lazy"></div>';
     }).join('');
+    if (!thumbs) thumbs = '<div class="wg-image wg-image-grid__item"><img class="wg-image__src" src="./lib/assets/icons/default-diagram.svg" alt=""></div>';
     return '<div class="cell cell--double cell--bg-white quote-record-card" data-component-slug="cell"'
       + (deleteMode ? '' : ' data-quote-record-open="' + escapeHtml(record.id) + '"')
       + ' data-quote-record-card="' + escapeHtml(record.id) + '">'
       + (deleteMode ? '<div class="cell__select quote-record-card__select">' + checkboxHtml(checked, ' data-role="quote-record-check"') + '</div>' : '')
       + '<div class="cell__body">'
-      + '<div class="quote-record-thumbs">' + thumbs + '</div>'
+      + '<div class="wg-image-grid wg-image-grid--product" data-component-slug="image">' + thumbs + '</div>'
       + '<div class="cell__content quote-record-card__info">'
       + '<div class="cell__title-row"><span class="cell__title quote-record-card__title">' + escapeHtml(record.title) + '</span></div>'
       + '<div class="cell__subtitle quote-record-card__meta">' + escapeHtml(String(record.rowCount || 0)) + ' 项 · ' + escapeHtml(record.total || '') + '</div>'
       + '<div class="quote-record-card__time">更新时间 ' + escapeHtml(formatDateTimeSlash(new Date(record.updatedAt || record.createdAt))) + '</div>'
       + '</div>'
+      + (deleteMode ? '' : '<div class="cell__action"><i class="cell__arrow wego-iconfont-s icon-youjiantou16" aria-hidden="true"></i></div>')
       + '</div>'
       + '</div>';
   }
@@ -1016,7 +1018,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '<div class="navbar__left"><button type="button" class="navbar__left-btn" data-dom-id="quote-records-back" aria-label="返回"><i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i></button>'
       + '<button type="button" class="navbar__left-text" data-dom-id="quote-records-cancel" aria-label="取消删除" hidden>取消</button></div>'
       + '<div class="navbar__center"><span class="navbar__title">报价记录</span></div>'
-      + '<div class="navbar__right navbar__right--button"><button type="button" class="navbar__left-text quote-records-manage" data-dom-id="quote-records-delete-toggle">删除</button></div>'
+      + '<div class="navbar__right navbar__right--icon"><button type="button" class="navbar__action" data-dom-id="quote-records-delete-toggle" aria-label="批量管理记录"><span class="navbar__action-icon"><i class="wego-iconfont-s icon-piliang1" aria-hidden="true"></i></span><span class="navbar__action-label">批量</span></button></div>'
       + '</div></nav>'
       + '</div>'
       + '<div class="modal__body quote-records-body">'
@@ -1060,7 +1062,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         filterSearch: { category: '', source: '' },
         filterSearchOpen: '',
         sourceVisibleCount: SOURCE_PAGE_SIZE,
-        dirty: false,
         recordId: null,
         recordRestore: null,
         translateRunId: 0,
@@ -1652,7 +1653,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (!id || !row) return;
         state.quoteRows = state.quoteRows.filter(function (r) { return r.id !== id; });
         if (row.sourceKey && state.selected[row.sourceKey]) delete state.selected[row.sourceKey];
-        state.dirty = true;
         if (!state.quoteRows.length) {
           refreshPreviewTable(previewRoot);
           return;
@@ -1774,7 +1774,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       }
       function applyLanguage(previewRoot, code) {
         state.language = code;
-        state.dirty = true;
         state.translateRunId += 1;
         var runId = state.translateRunId;
         syncLanguageMenu(previewRoot);
@@ -1922,7 +1921,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           row.priceMax = byId[row.id].priceMax;
         });
         state.batchPriceRestoreSnapshot = null;
-        state.dirty = true;
         refreshPreviewTable(previewRoot);
         sheetCtx.close();
         sheetCtx.toast('已恢复改价前价格');
@@ -1997,7 +1995,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           item.row.priceMin = item.priceMin;
           item.row.priceMax = item.priceMax;
         });
-        state.dirty = true;
         refreshPreviewTable(previewRoot);
         sheetCtx.close();
         sheetCtx.toast('已批量调整' + nextRows.length + '款商品');
@@ -2492,7 +2489,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         state.language = record.language || 'zh-CN';
         state.quoteRows = JSON.parse(JSON.stringify(record.rows || []));
         state.batchPriceRestoreSnapshot = null;
-        state.dirty = false;
         state.appendMode = false;
         setAppendMode(false);
         window.scrollTo(0, 0);
@@ -2505,7 +2501,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         state.recordId = null;
         state.appendMode = false;
         setAppendMode(false);
-        state.dirty = false;
         var restore = state.recordRestore || null;
         state.recordRestore = null;
         if (restore) {
@@ -2521,19 +2516,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (cleanupPreviewFn) cleanupPreviewFn();
         previewCtx.close();
         finalizePreviewSession();
-      }
-      function promptSaveBeforeExit(previewCtx, cleanupPreviewFn) {
-        ctx.dialog({
-          title: '是否保存当前修改？',
-          buttons: [
-            { label: '不保存', tone: 'dismiss', onClick: function () { closePreviewSession(previewCtx, cleanupPreviewFn); } },
-            { label: '保存', tone: 'confirm', onClick: function () {
-                quoteSaveRecordFromState(state);
-                ctx.toast('已保存到报价记录');
-                closePreviewSession(previewCtx, cleanupPreviewFn);
-              } }
-          ]
-        });
       }
       function bindPreview(previewCtx) {
         var previewRoot = previewCtx.root;
@@ -2566,13 +2548,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         bindPreviewTableControls(previewRoot);
         titleInput.addEventListener('input', function () {
           state.title = titleInput.value;
-          state.dirty = true;
         });
         previewRoot.querySelector('[data-dom-id="quote-preview-back"]').addEventListener('click', function () {
-          if (state.dirty) {
-            promptSaveBeforeExit(previewCtx, cleanupPreview);
-            return;
-          }
           closePreviewSession(previewCtx, cleanupPreview);
         });
         previewRoot.querySelector('[data-dom-id="quote-add-more"]').addEventListener('click', function () {
@@ -2658,7 +2635,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           } else {
             row[field] = e.target.value;
           }
-          state.dirty = true;
         });
       }
       function openQuotePreview() {
@@ -2732,6 +2708,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               if (wrap) wrap.setAttribute('aria-valuenow', String(Math.round(percent)));
             }
             function showDone() {
+              /* 报价记录只在真正分享导出成功后写入/更新（记录=导出历史） */
+              quoteSaveRecordFromState(state);
               bodyEl().innerHTML = quoteExportBodyHtml('done', format, 100, fileName, '');
               var again = exportRoot.querySelector('[data-dom-id="quote-export-again"]');
               var done = exportRoot.querySelector('[data-dom-id="quote-export-done"]');
