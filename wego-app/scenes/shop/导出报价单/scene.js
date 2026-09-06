@@ -3,7 +3,8 @@
  * 阶段B/C：入口分流、选品页与报价单预览编辑。入口来自「我的」内容管理-批量-批量导出（见 我的/scene.js）。
  * 选品页支持：按产品报价 / 按图报价 两种模式切换、商品搜索（名称/货号/搜索码）、
  * 列表/宫格视图、商品勾选、底部批量栏（全选/已选计数下拉/查看已选/下一步）、分页滚动加载。
- * 筛选面板、分享导出、报价记录在后续阶段接入。
+ * 筛选面板、预览编辑、分享导出（Excel/PDF 浏览器端真实生成，Web 端直接下载不走系统分享）已在
+ * 阶段 C/D/E 接入；报价记录在后续阶段接入。
  */
 const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id="quote-export" data-route-id="quote-export" data-layout-mode="composed" data-bg="page" data-component-slug="layout-page">
   <div class="layout-page__top">
@@ -322,6 +323,296 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '<div class="quote-usd-text">' + escapeHtml(quoteRowUsdText(row)) + '</div>'
       + '</div>'
       + '</td>';
+  }
+  /* ===== 阶段E：分享导出（Excel/PDF 浏览器端真实生成，Web 端直接下载） ===== */
+  var QUOTE_EXPORT_FORMAT_LABELS = { excel: 'Excel', pdf: 'PDF' };
+  function quoteExportSafeName(name) {
+    var safe = String(name || '报价单').replace(/[\\\/:*?\x22<>|]/g, ' ').replace(/\s+/g, ' ').trim();
+    return safe || '报价单';
+  }
+  function quoteExportXmlEscape(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\x22/g, '&quot;').replace(/\x27/g, '&apos;')
+      .replace(/[\r\n\t]+/g, ' ');
+  }
+  function quoteExportData(state) {
+    var lang = getLanguage(state.language);
+    var rows = state.quoteRows.map(function (row, idx) {
+      var hasRange = quoteRowHasRange(row);
+      var min = moneyNumber(row.priceMin);
+      var max = moneyNumber(row.priceMax);
+      return {
+        index: idx + 1,
+        name: String(row.name || row.originalName || ''),
+        itemNo: String(row.itemNo || ''),
+        specification: String(row.specification || row.originalSpec || ''),
+        priceCny: hasRange ? formatMoney(min) + ' ~ ' + formatMoney(max) : formatMoney(min),
+        priceUsd: hasRange ? formatUsd(min) + ' ~ ' + formatUsd(max) : formatUsd(min),
+        image: String(row.image || '')
+      };
+    });
+    return {
+      title: String(state.title || defaultQuoteTitle()),
+      date: formatDate(new Date(state.createdAt)),
+      album: quoteAlbumName(),
+      languageLabel: lang.cn || lang.label,
+      rows: rows,
+      totals: quoteTotals(state.quoteRows)
+    };
+  }
+  function quoteExportExcelBlob(data) {
+    function cell(value) {
+      return '<Cell><Data ss:Type="String">' + quoteExportXmlEscape(value) + '</Data></Cell>';
+    }
+    function row(cells) {
+      return '<Row>' + cells.map(cell).join('') + '</Row>';
+    }
+    var lines = [];
+    lines.push(row(['报价单', data.title]));
+    lines.push(row(['相册', data.album]));
+    lines.push(row(['日期', data.date]));
+    lines.push(row(['语言', data.languageLabel]));
+    lines.push('');
+    lines.push(row(['序号', '商品名', '货号', '规格', '价格（¥）', '价格（$）']));
+    data.rows.forEach(function (item) {
+      lines.push(row([item.index, item.name, item.itemNo, item.specification, item.priceCny, item.priceUsd]));
+    });
+    lines.push(row(['', '合计', '', '', data.totals.cny.replace(/[¥~]/g, ''), data.totals.usd.replace(/[$~]/g, '')]));
+    var xml = '<?xml version="1.0" encoding="UTF-8"?>'
+      + '<?mso-application progid="Excel.Sheet"?>'
+      + '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+      + '<Worksheet ss:Name="报价单"><Table>' + lines.join('') + '</Table></Worksheet>'
+      + '</Workbook>';
+    return new Blob(['\ufeff' + xml], { type: 'application/vnd.ms-excel' });
+  }
+  function quoteLoadImage(src) {
+    return new Promise(function (resolve) {
+      if (!src) { resolve(null); return; }
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { resolve(null); };
+      img.src = src;
+    });
+  }
+  function quoteCanvasWrapText(g, text, maxWidth, maxLines) {
+    var source = String(text == null ? '' : text).trim();
+    var lines = [];
+    var line = '';
+    var truncated = false;
+    for (var i = 0; i < source.length; i++) {
+      var ch = source.charAt(i);
+      if (ch === '\n') {
+        lines.push(line);
+        line = '';
+        if (lines.length >= maxLines) { truncated = true; break; }
+        continue;
+      }
+      if (line && g.measureText(line + ch).width > maxWidth) {
+        lines.push(line);
+        line = ch;
+        if (lines.length >= maxLines) { truncated = true; break; }
+      } else {
+        line += ch;
+      }
+    }
+    if (!truncated && line) lines.push(line);
+    if (lines.length > maxLines) lines = lines.slice(0, maxLines);
+    if (truncated && lines.length) {
+      var last = lines[lines.length - 1];
+      lines[lines.length - 1] = last.slice(0, Math.max(0, last.length - 1)) + '…';
+    }
+    return lines.length ? lines : [''];
+  }
+  function quoteCanvasPalette() {
+    function token(name) {
+      var value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return value || 'transparent';
+    }
+    return {
+      paper: token('--palette-neutral-100'),
+      title: token('--text-default'),
+      body: token('--text-secondary'),
+      meta: token('--text-tertiary'),
+      headBg: token('--bg-subtle'),
+      divider: token('--border-neutral-l2'),
+      placeholder: token('--palette-neutral-300')
+    };
+  }
+  function quoteRenderQuoteCanvas(data, onProgress) {
+    var W = 794;
+    var margin = 36;
+    var rowH = 112;
+    var headH = 168;
+    var tableHeadH = 52;
+    var footH = 108;
+    var H = headH + tableHeadH + data.rows.length * rowH + footH + 24;
+    var scale = 2;
+    var cols = [
+      { key: 'image', label: '图片', width: 96 },
+      { key: 'price', label: '价格（¥）', width: 150 },
+      { key: 'spec', label: '规格', width: 160 },
+      { key: 'code', label: '货号', width: 110 },
+      { key: 'name', label: '商品名', width: W - margin * 2 - 96 - 150 - 160 - 110 }
+    ];
+    var fontBody = '400 14px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+    var fontBodyBold = '600 15px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+    var fontMeta = '400 12px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+    var canvas = document.createElement('canvas');
+    canvas.width = W * scale;
+    canvas.height = H * scale;
+    var g = canvas.getContext('2d');
+    if (!g) return Promise.reject(new Error('当前浏览器不支持画布渲染'));
+    g.scale(scale, scale);
+    var pal = quoteCanvasPalette();
+    g.fillStyle = pal.paper;
+    g.fillRect(0, 0, W, H);
+    g.fillStyle = pal.title;
+    g.font = '600 26px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+    g.fillText(data.title, margin, 64);
+    g.fillStyle = pal.meta;
+    g.font = fontMeta;
+    g.fillText(data.album + ' · ' + data.date + ' · ' + data.languageLabel, margin, 94);
+    g.strokeStyle = pal.divider;
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(margin, 124);
+    g.lineTo(W - margin, 124);
+    g.stroke();
+    var y = headH;
+    g.fillStyle = pal.headBg;
+    g.fillRect(margin, y, W - margin * 2, tableHeadH);
+    g.fillStyle = pal.body;
+    g.font = '500 14px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+    var cx = margin;
+    cols.forEach(function (col) {
+      g.fillText(col.label, cx + 10, y + 33);
+      cx += col.width;
+    });
+    function drawCover(img, x, top, size) {
+      if (!img) {
+        g.fillStyle = pal.placeholder;
+        g.fillRect(x, top, size, size);
+        return;
+      }
+      var iw = img.width || size;
+      var ih = img.height || size;
+      var s = Math.max(size / iw, size / ih);
+      var sw = size / s;
+      var sh = size / s;
+      g.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, x, top, size, size);
+    }
+    function drawRow(item, img, rowTop) {
+      drawCover(img, margin + 10, rowTop + 16, 80);
+      var colX = margin;
+      g.fillStyle = pal.title;
+      g.font = fontBodyBold;
+      colX += cols[0].width;
+      g.fillText('¥' + item.priceCny, colX + 10, rowTop + 52);
+      g.fillStyle = pal.meta;
+      g.font = fontMeta;
+      g.fillText('$' + item.priceUsd, colX + 10, rowTop + 74);
+      g.fillStyle = pal.body;
+      g.font = fontBody;
+      colX += cols[1].width;
+      quoteCanvasWrapText(g, item.specification, cols[2].width - 20, 3).forEach(function (text, idx) {
+        g.fillText(text, colX + 10, rowTop + 36 + idx * 20);
+      });
+      colX += cols[2].width;
+      quoteCanvasWrapText(g, item.itemNo, cols[3].width - 20, 3).forEach(function (text, idx) {
+        g.fillText(text, colX + 10, rowTop + 36 + idx * 20);
+      });
+      g.fillStyle = pal.title;
+      g.font = fontBody;
+      colX += cols[3].width;
+      quoteCanvasWrapText(g, item.name, cols[4].width - 20, 3).forEach(function (text, idx) {
+        g.fillText(text, colX + 10, rowTop + 36 + idx * 20);
+      });
+      g.strokeStyle = pal.divider;
+      g.beginPath();
+      g.moveTo(margin, rowTop + rowH);
+      g.lineTo(W - margin, rowTop + rowH);
+      g.stroke();
+    }
+    var rowTop = y + tableHeadH;
+    var done = 0;
+    var total = Math.max(1, data.rows.length);
+    var chain = Promise.resolve();
+    data.rows.forEach(function (item) {
+      chain = chain.then(function () {
+        return quoteLoadImage(item.image).then(function (img) {
+          drawRow(item, img, rowTop);
+          rowTop += rowH;
+          done += 1;
+          if (onProgress) onProgress(done / total);
+        });
+      });
+    });
+    return chain.then(function () {
+      var fy = rowTop + 40;
+      g.fillStyle = pal.title;
+      g.font = '600 16px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+      g.fillText('合计', margin + 10, fy);
+      g.font = fontBodyBold;
+      g.fillText(data.totals.cny + '（' + data.totals.usd + '）', margin + cols[0].width + cols[1].width + 10, fy);
+      g.fillStyle = pal.meta;
+      g.font = fontMeta;
+      g.fillText('本报价单由微购生成，价格以实际询单为准', margin, H - 30);
+      if (onProgress) onProgress(1);
+      return canvas;
+    });
+  }
+  function quotePdfFromCanvas(canvas) {
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    var base64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+    var raw = atob(base64);
+    var imgBytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) imgBytes[i] = raw.charCodeAt(i);
+    var encoder = new TextEncoder();
+    var chunks = [];
+    var offsets = {};
+    var length = 0;
+    function push(part) {
+      var bytes = typeof part === 'string' ? encoder.encode(part) : part;
+      chunks.push(bytes);
+      length += bytes.length;
+    }
+    function beginObj(num) {
+      offsets[num] = length;
+      push(num + ' 0 obj\n');
+    }
+    var w = canvas.width;
+    var h = canvas.height;
+    var pw = Math.round(w * 72 / 96);
+    var ph = Math.round(h * 72 / 96);
+    push('%PDF-1.4\n');
+    beginObj(1); push('<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+    beginObj(2); push('<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
+    beginObj(3); push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw + ' ' + ph + '] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>\nendobj\n');
+    beginObj(4); push('<< /Type /XObject /Subtype /Image /Width ' + w + ' /Height ' + h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + imgBytes.length + ' >>\nstream\n');
+    push(imgBytes);
+    push('\nendstream\nendobj\n');
+    var content = 'q\n' + pw + ' 0 0 ' + ph + ' 0 0 cm\n/Im0 Do\nQ\n';
+    beginObj(5); push('<< /Length ' + content.length + ' >>\nstream\n' + content + 'endstream\nendobj\n');
+    var xrefPos = length;
+    var xref = 'xref\n0 6\n0000000000 65535 f \n';
+    for (var n = 1; n <= 5; n++) xref += ('0000000000' + offsets[n]).slice(-10) + ' 00000 n \n';
+    xref += 'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xrefPos + '\n%%EOF';
+    push(xref);
+    var out = new Uint8Array(length);
+    var pos = 0;
+    chunks.forEach(function (chunk) { out.set(chunk, pos); pos += chunk.length; });
+    return new Blob([out], { type: 'application/pdf' });
+  }
+  function quoteExportDownload(blob, fileName) {
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
   function quotePreviewTemplate(state) {
     var lang = getLanguage(state.language);
@@ -1783,7 +2074,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           ctx.toast('继续选择要追加的产品');
         });
         previewRoot.querySelector('[data-dom-id="quote-share-main"]').addEventListener('click', function () {
-          ctx.toast('分享导出将在后续阶段接入');
+          openQuoteShareSheet(previewCtx, cleanupPreview);
         });
         if (window.WegoPopmenu && languageButton && languageMenu) {
           /* app 浮层基座（app-overlay-layer）带 transform，会改变 fixed 定位坐标基准
@@ -1873,6 +2164,176 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         ctx.openFullScreenModal(quotePreviewTemplate(state), {
           label: '报价单预览',
           init: bindPreview
+        });
+      }
+
+      /* ===== 阶段E：分享导出流程（选格式 → 生成进度 → 完成/失败态） ===== */
+      function quoteExportBodyHtml(view, format, percent, fileName, errorMessage) {
+        var label = QUOTE_EXPORT_FORMAT_LABELS[format] || 'Excel';
+        if (view === 'progress') {
+          return '<div class="quote-export-state">'
+            + '<div class="loading" data-component-slug="loading" role="presentation"><span class="loading__icon"><span class="loading__dot loading__dot--1"></span><span class="loading__dot loading__dot--2"></span><span class="loading__dot loading__dot--3"></span></span></div>'
+            + '<h2 class="quote-export-state__title">正在生成' + escapeHtml(label) + '报价单</h2>'
+            + '<div class="quote-export-progress" data-role="quote-export-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(percent) + '"><div class="quote-export-progress__bar" data-role="quote-export-progress-bar" style="width:' + Math.max(4, Math.min(100, percent)) + '%"></div></div>'
+            + '<p class="quote-export-state__meta" data-role="quote-export-progress-num">' + Math.round(percent) + '%</p>'
+            + '</div>';
+        }
+        if (view === 'done') {
+          return '<div class="quote-export-state">'
+            + '<span class="quote-export-state__icon quote-export-state__icon--success"><i class="wego-iconfont-s icon-gou-jiacu" aria-hidden="true"></i></span>'
+            + '<h2 class="quote-export-state__title">已生成' + escapeHtml(label) + '报价单</h2>'
+            + '<p class="quote-export-state__meta">' + escapeHtml(fileName) + '<br>文件已下载到本机</p>'
+            + '<div class="quote-export-actions">'
+            + '<button type="button" class="btn btn--medium btn--md" data-component-slug="button" data-dom-id="quote-export-again">再次下载</button>'
+            + '<button type="button" class="btn btn--strong btn--md" data-component-slug="button" data-dom-id="quote-export-done">完成</button>'
+            + '</div>'
+            + '<button type="button" class="link link--14 quote-export-continue" data-component-slug="link" data-dom-id="quote-export-continue">继续编辑</button>'
+            + '</div>';
+        }
+        return '<div class="quote-export-state">'
+          + '<span class="quote-export-state__icon quote-export-state__icon--fail"><i class="wego-iconfont-s icon-yuancha-mian" aria-hidden="true"></i></span>'
+          + '<h2 class="quote-export-state__title">生成失败</h2>'
+          + '<p class="quote-export-state__meta">' + escapeHtml(errorMessage || '文件生成出现异常，请重试') + '</p>'
+          + '<div class="quote-export-actions">'
+          + '<button type="button" class="btn btn--strong btn--md" data-component-slug="button" data-dom-id="quote-export-retry">重新分享</button>'
+          + '</div>'
+          + '<button type="button" class="link link--14 quote-export-continue" data-component-slug="link" data-dom-id="quote-export-continue">继续编辑</button>'
+          + '</div>';
+      }
+      function openQuoteShareSheet(previewCtxRef, cleanupPreviewFn) {
+        var optionsHtml = quoteChoiceStackHtml('quote-export-option', 'data-quote-export-format', 'excel', 'Excel', state.exportFormat !== 'pdf')
+          + quoteChoiceStackHtml('quote-export-option', 'data-quote-export-format', 'pdf', 'PDF', state.exportFormat === 'pdf');
+        var html = '<div class="modal modal--frame-x quote-export-sheet" data-component-slug="modal" role="dialog" aria-modal="true" aria-label="选择导出格式" data-state="open">'
+          + '<div class="modal__panel">'
+          + '<div class="modal__title modal__title--default">'
+          + '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-export-sheet-close" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">选择导出格式</span></div><div class="navbar__right"></div></div></nav>'
+          + '</div>'
+          + '<div class="modal__body modal__body--safe-bottom quote-export-sheet__body">'
+          + '<div class="quote-export-sheet__options">' + optionsHtml + '</div>'
+          + '<p class="quote-export-sheet__hint">生成后文件将直接下载到本机</p>'
+          + '</div>'
+          + '</div>'
+          + '</div>';
+        ctx.openSheet(html, {
+          label: '选择导出格式',
+          init: function (sheetCtx) {
+            var sheetRoot = sheetCtx.root;
+            var close = sheetRoot.querySelector('[data-dom-id="quote-export-sheet-close"]');
+            if (close) close.addEventListener('click', function () { ctx.closeOverlay(); });
+            Array.prototype.forEach.call(sheetRoot.querySelectorAll('[data-quote-export-format]'), function (option) {
+              option.addEventListener('click', function () {
+                var format = option.getAttribute('data-quote-export-format') === 'pdf' ? 'pdf' : 'excel';
+                state.exportFormat = format;
+                Array.prototype.forEach.call(previewCtxRef.root.querySelectorAll('.quote-format-stack'), function (tab) {
+                  var selected = (tab.getAttribute('data-format') === format);
+                  tab.classList.toggle('stack--selected', selected);
+                  tab.setAttribute('aria-pressed', selected ? 'true' : 'false');
+                });
+                ctx.closeOverlay();
+                window.setTimeout(function () { openQuoteExportModal(format, previewCtxRef, cleanupPreviewFn); }, 80);
+              });
+            });
+          }
+        });
+      }
+      function openQuoteExportModal(format, previewCtxRef, cleanupPreviewFn) {
+        var label = QUOTE_EXPORT_FORMAT_LABELS[format] || 'Excel';
+        var fileName = quoteExportSafeName(state.title) + (format === 'pdf' ? '.pdf' : '.xls');
+        var lastBlob = null;
+        function tick(ms) {
+          return new Promise(function (resolve) { window.setTimeout(resolve, ms || 120); });
+        }
+        ctx.openFullScreenModal('<div class="modal modal--fullscreen quote-export-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="' + escapeHtml(label) + '报价单导出" style="--modal-panel-bg: var(--bg-surface)"><div class="modal__panel"><div class="modal__body quote-export-modal__body">' + quoteExportBodyHtml('progress', format, 0, fileName, '') + '</div></div></div>', {
+          label: '生成' + label + '报价单',
+          init: function (exportCtx) {
+            var exportRoot = exportCtx.root;
+            function bodyEl() {
+              return exportRoot.querySelector('.quote-export-modal__body');
+            }
+            function setProgress(percent) {
+              var bar = exportRoot.querySelector('[data-role="quote-export-progress-bar"]');
+              var num = exportRoot.querySelector('[data-role="quote-export-progress-num"]');
+              var wrap = exportRoot.querySelector('[data-role="quote-export-progress"]');
+              if (bar) bar.style.width = Math.max(4, Math.min(100, percent)) + '%';
+              if (num) num.textContent = Math.round(percent) + '%';
+              if (wrap) wrap.setAttribute('aria-valuenow', String(Math.round(percent)));
+            }
+            function showDone() {
+              bodyEl().innerHTML = quoteExportBodyHtml('done', format, 100, fileName, '');
+              var again = exportRoot.querySelector('[data-dom-id="quote-export-again"]');
+              var done = exportRoot.querySelector('[data-dom-id="quote-export-done"]');
+              var cont = exportRoot.querySelector('[data-dom-id="quote-export-continue"]');
+              if (again) again.addEventListener('click', function () {
+                if (lastBlob) quoteExportDownload(lastBlob, fileName);
+              });
+              if (done) done.addEventListener('click', function () {
+                exportCtx.close();
+                if (previewCtxRef) {
+                  if (cleanupPreviewFn) cleanupPreviewFn();
+                  previewCtxRef.close();
+                  syncVisibleSelectionStates();
+                }
+              });
+              if (cont) cont.addEventListener('click', function () { exportCtx.close(); });
+            }
+            function showFail(errorMessage) {
+              bodyEl().innerHTML = quoteExportBodyHtml('fail', format, 100, fileName, errorMessage);
+              var retry = exportRoot.querySelector('[data-dom-id="quote-export-retry"]');
+              var cont = exportRoot.querySelector('[data-dom-id="quote-export-continue"]');
+              if (retry) retry.addEventListener('click', function () { start(); });
+              if (cont) cont.addEventListener('click', function () { exportCtx.close(); });
+            }
+            function start() {
+              bodyEl().innerHTML = quoteExportBodyHtml('progress', format, 0, fileName, '');
+              run();
+            }
+            function run() {
+              var data;
+              try {
+                data = quoteExportData(state);
+              } catch (err) {
+                showFail('报价数据整理失败，请重试');
+                return;
+              }
+              setProgress(10);
+              tick(160).then(function () {
+                setProgress(18);
+                return tick(140);
+              }).then(function () {
+                if (format === 'pdf') {
+                  return quoteRenderQuoteCanvas(data, function (ratio) {
+                    setProgress(20 + ratio * 60);
+                  }).then(function (canvas) {
+                    setProgress(85);
+                    return tick(160).then(function () {
+                      var blob = quotePdfFromCanvas(canvas);
+                      setProgress(95);
+                      return tick(160).then(function () {
+                        quoteExportDownload(blob, fileName);
+                        lastBlob = blob;
+                        setProgress(100);
+                      });
+                    });
+                  });
+                }
+                return tick(220).then(function () {
+                  var blob = quoteExportExcelBlob(data);
+                  setProgress(80);
+                  return tick(220).then(function () {
+                    quoteExportDownload(blob, fileName);
+                    lastBlob = blob;
+                    setProgress(100);
+                  });
+                });
+              }).then(function () {
+                window.setTimeout(showDone, 480);
+              }).catch(function (err) {
+                var message = (err && err.name === 'SecurityError') ? '商品图片跨域导致无法生成文件' : '文件生成出现异常，请重试';
+                showFail(message);
+              });
+            }
+            start();
+          }
         });
       }
 
