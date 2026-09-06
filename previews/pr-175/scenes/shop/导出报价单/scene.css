@@ -1630,3 +1630,80 @@
     transition: none;
   }
 }
+
+/* ===== 阶段F：报价记录 ===== */
+.quote-records-modal [hidden] {
+  display: none;
+}
+.quote-records-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-bottom: var(--spacer-0);
+}
+.quote-records-toolbar {
+  flex: 0 0 auto;
+  padding: var(--spacer-8) var(--spacer-12) var(--spacer-4);
+}
+.quote-records-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.quote-records-list {
+  gap: var(--spacer-8);
+  padding: var(--spacer-8) var(--spacer-12) var(--spacer-16);
+}
+.quote-records-empty {
+  padding: calc(var(--spacer-48) * 2) var(--spacer-16);
+}
+.quote-record-card .cell__body {
+  align-items: center;
+}
+.quote-record-card__select {
+  margin-left: var(--spacer-8);
+  min-width: var(--size-24);
+}
+.quote-record-thumbs {
+  display: flex;
+  gap: var(--spacer-4);
+  flex: 0 0 auto;
+}
+.quote-record-thumbs__item {
+  display: block;
+  width: var(--size-48);
+  height: var(--size-48);
+  border-radius: var(--radius-8);
+  overflow: hidden;
+  background: var(--bg-subtle);
+}
+.quote-record-thumbs__item .wg-image__src {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.quote-record-card__info {
+  min-width: 0;
+}
+.quote-record-card__title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quote-record-card__meta {
+  color: var(--text-secondary);
+}
+.quote-record-card__time {
+  margin-top: var(--spacer-2);
+  color: var(--text-tertiary);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+}
+.quote-records-delete-count {
+  color: var(--text-secondary);
+  font-size: var(--body-md-font-size);
+}
+.quote-records-manage {
+  min-height: var(--size-32);
+}
