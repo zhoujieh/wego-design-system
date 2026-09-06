@@ -139,7 +139,7 @@ function checkSkillFlow() {
 
 function checkSkillAdapters() {
   const sourceRoot = path.join(root, '.codex/skills');
-  const adapters = ['.trae/skills', '.codebuddy/skills'];
+  const adapters = ['.trae/skills', '.workbuddy/skills'];
   if (!fs.existsSync(sourceRoot)) {
     add('error', 'skills.source_missing', '缺少技能权威源目录：.codex/skills', sourceRoot);
     return;
