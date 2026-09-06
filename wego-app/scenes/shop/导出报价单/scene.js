@@ -355,36 +355,294 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     return {
       title: String(state.title || defaultQuoteTitle()),
       date: formatDate(new Date(state.createdAt)),
+      datetime: formatDateTimeSlash(new Date(state.createdAt)),
       album: quoteAlbumName(),
       languageLabel: lang.cn || lang.label,
       rows: rows,
       totals: quoteTotals(state.quoteRows)
     };
   }
-  function quoteExportExcelBlob(data) {
-    function cell(value) {
-      return '<Cell><Data ss:Type="String">' + quoteExportXmlEscape(value) + '</Data></Cell>';
+  /* —— 真实 .xlsx（Open XML + ZIP 容器）生成，纯浏览器端无外部依赖 —— */
+  var quoteXlsxCrcTable = null;
+  function quoteXlsxCrc32(bytes) {
+    if (!quoteXlsxCrcTable) {
+      quoteXlsxCrcTable = new Uint32Array(256);
+      for (var n = 0; n < 256; n++) {
+        var c = n;
+        for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        quoteXlsxCrcTable[n] = c >>> 0;
+      }
     }
-    function row(cells) {
-      return '<Row>' + cells.map(cell).join('') + '</Row>';
-    }
-    var lines = [];
-    lines.push(row(['报价单', data.title]));
-    lines.push(row(['相册', data.album]));
-    lines.push(row(['日期', data.date]));
-    lines.push(row(['语言', data.languageLabel]));
-    lines.push('');
-    lines.push(row(['序号', '商品名', '货号', '规格', '价格（¥）', '价格（$）']));
-    data.rows.forEach(function (item) {
-      lines.push(row([item.index, item.name, item.itemNo, item.specification, item.priceCny, item.priceUsd]));
+    var crc = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) crc = quoteXlsxCrcTable[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  function quoteXlsxZip(files) {
+    var encoder = new TextEncoder();
+    var chunks = [];
+    var central = [];
+    var centralSize = 0;
+    var offset = 0;
+    var now = new Date();
+    var dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+    var dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+    files.forEach(function (file) {
+      var nameBytes = encoder.encode(file.name);
+      var data = file.data;
+      var crc = quoteXlsxCrc32(data);
+      var local = new Uint8Array(30 + nameBytes.length);
+      var lv = new DataView(local.buffer);
+      lv.setUint32(0, 0x04034b50, true);
+      lv.setUint16(4, 20, true);
+      lv.setUint16(6, 0x0800, true);
+      lv.setUint16(8, 0, true);
+      lv.setUint16(10, dosTime, true);
+      lv.setUint16(12, dosDate, true);
+      lv.setUint32(14, crc, true);
+      lv.setUint32(18, data.length, true);
+      lv.setUint32(22, data.length, true);
+      lv.setUint16(26, nameBytes.length, true);
+      lv.setUint16(28, 0, true);
+      local.set(nameBytes, 30);
+      var entry = new Uint8Array(46 + nameBytes.length);
+      var ev = new DataView(entry.buffer);
+      ev.setUint32(0, 0x02014b50, true);
+      ev.setUint16(4, 20, true);
+      ev.setUint16(6, 20, true);
+      ev.setUint16(8, 0x0800, true);
+      ev.setUint16(10, 0, true);
+      ev.setUint16(12, dosTime, true);
+      ev.setUint16(14, dosDate, true);
+      ev.setUint32(16, crc, true);
+      ev.setUint32(20, data.length, true);
+      ev.setUint32(24, data.length, true);
+      ev.setUint16(28, nameBytes.length, true);
+      ev.setUint32(42, offset, true);
+      entry.set(nameBytes, 46);
+      chunks.push(local, data);
+      central.push(entry);
+      centralSize += entry.length;
+      offset += local.length + data.length;
     });
-    lines.push(row(['', '合计', '', '', data.totals.cny.replace(/[¥~]/g, ''), data.totals.usd.replace(/[$~]/g, '')]));
-    var xml = '<?xml version="1.0" encoding="UTF-8"?>'
-      + '<?mso-application progid="Excel.Sheet"?>'
-      + '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
-      + '<Worksheet ss:Name="报价单"><Table>' + lines.join('') + '</Table></Worksheet>'
-      + '</Workbook>';
-    return new Blob(['\ufeff' + xml], { type: 'application/vnd.ms-excel' });
+    var eocd = new Uint8Array(22);
+    var eocdView = new DataView(eocd.buffer);
+    eocdView.setUint32(0, 0x06054b50, true);
+    eocdView.setUint16(8, files.length, true);
+    eocdView.setUint16(10, files.length, true);
+    eocdView.setUint32(12, centralSize, true);
+    eocdView.setUint32(16, offset, true);
+    var all = chunks.concat(central, [eocd]);
+    var total = 0;
+    all.forEach(function (part) { total += part.length; });
+    var out = new Uint8Array(total);
+    var pos = 0;
+    all.forEach(function (part) { out.set(part, pos); pos += part.length; });
+    return out;
+  }
+  function quoteXlsxXmlText(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\x22/g, '&quot;').replace(/\x27/g, '&apos;');
+  }
+  function quoteXlsxStrCell(ref, styleId, text) {
+    return '<c r="' + ref + '" s="' + styleId + '" t="inlineStr"><is><t xml:space="preserve">' + quoteXlsxXmlText(text) + '</t></is></c>';
+  }
+  function quoteXlsxNumCell(ref, styleId, num) {
+    return '<c r="' + ref + '" s="' + styleId + '"><v>' + num + '</v></c>';
+  }
+  function quoteXlsxEmptyCell(ref, styleId) {
+    return '<c r="' + ref + '" s="' + styleId + '"/>';
+  }
+  function quoteXlsxRowXml(rowNo, height, cellsXml) {
+    return '<row r="' + rowNo + '"' + (height ? ' ht="' + height + '" customHeight="1"' : '') + '>' + cellsXml + '</row>';
+  }
+  function quoteXlsxBase64Bytes(dataUrl) {
+    var base64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+    var raw = atob(base64);
+    var bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  }
+  function quoteXlsxImageBytes(src) {
+    return quoteLoadImage(src).then(function (img) {
+      if (!img) return null;
+      var tw = 414;
+      var th = 552;
+      var canvas = document.createElement('canvas');
+      canvas.width = tw;
+      canvas.height = th;
+      var g = canvas.getContext('2d');
+      if (!g) return null;
+      var iw = img.width || tw;
+      var ih = img.height || th;
+      var s = Math.max(tw / iw, th / ih);
+      var sw = tw / s;
+      var sh = th / s;
+      g.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, 0, 0, tw, th);
+      return quoteXlsxBase64Bytes(canvas.toDataURL('image/jpeg', 0.85));
+    });
+  }
+  function quoteXlsxBuild(data, imageBytes) {
+    var XML_DECL = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    var styles = XML_DECL
+      + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+      + '<fonts count="4">'
+      + '<font><sz val="11"/><color rgb="FF1E2028"/><name val="PingFang SC"/><family val="2"/></font>'
+      + '<font><b/><sz val="20"/><color rgb="FF1E2028"/><name val="PingFang SC"/><family val="2"/></font>'
+      + '<font><sz val="11"/><color rgb="FF6E7382"/><name val="PingFang SC"/><family val="2"/></font>'
+      + '<font><b/><sz val="12"/><color rgb="FF1E2028"/><name val="PingFang SC"/><family val="2"/></font>'
+      + '</fonts>'
+      + '<fills count="3">'
+      + '<fill><patternFill patternType="none"/></fill>'
+      + '<fill><patternFill patternType="gray125"/></fill>'
+      + '<fill><patternFill patternType="solid"><fgColor rgb="FFF6F7F8"/><bgColor indexed="64"/></patternFill></fill>'
+      + '</fills>'
+      + '<borders count="2">'
+      + '<border><left/><right/><top/><bottom/><diagonal/></border>'
+      + '<border><left style="thin"><color rgb="FFEDEFF3"/></left><right style="thin"><color rgb="FFEDEFF3"/></right><top style="thin"><color rgb="FFEDEFF3"/></top><bottom style="thin"><color rgb="FFEDEFF3"/></bottom><diagonal/></border>'
+      + '</borders>'
+      + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+      + '<cellXfs count="6">'
+      + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+      + '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>'
+      + '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>'
+      + '<xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" horizontal="center" wrapText="1"/></xf>'
+      + '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" horizontal="center" wrapText="1"/></xf>'
+      + '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center" horizontal="center"/></xf>'
+      + '</cellXfs>'
+      + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
+      + '</styleSheet>';
+    var lastRow = 3 + data.rows.length;
+    var rowsXml = [];
+    rowsXml.push(quoteXlsxRowXml(1, 34,
+      quoteXlsxStrCell('A1', 1, data.title)
+      + quoteXlsxStrCell('B1', 1, '') + quoteXlsxStrCell('C1', 1, '') + quoteXlsxStrCell('D1', 1, '')
+      + quoteXlsxStrCell('E1', 5, '合计: ' + data.totals.cny)));
+    rowsXml.push(quoteXlsxRowXml(2, 26, quoteXlsxStrCell('A2', 2, '日期: ' + data.datetime)));
+    rowsXml.push(quoteXlsxRowXml(3, 40,
+      quoteXlsxStrCell('A3', 3, '序号') + quoteXlsxStrCell('B3', 3, '商品图') + quoteXlsxStrCell('C3', 3, '价格')
+      + quoteXlsxStrCell('D3', 3, '规格') + quoteXlsxStrCell('E3', 3, '货号') + quoteXlsxStrCell('F3', 3, '商品名')));
+    data.rows.forEach(function (item, idx) {
+      var r = 4 + idx;
+      rowsXml.push(quoteXlsxRowXml(r, 140.25,
+        quoteXlsxNumCell('A' + r, 4, item.index)
+        + quoteXlsxEmptyCell('B' + r, 4)
+        + quoteXlsxStrCell('C' + r, 4, '¥' + item.priceCny + '\n$' + item.priceUsd)
+        + quoteXlsxStrCell('D' + r, 4, item.specification)
+        + quoteXlsxStrCell('E' + r, 4, item.itemNo)
+        + quoteXlsxStrCell('F' + r, 4, item.name)));
+    });
+    var sheet = XML_DECL
+      + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      + '<dimension ref="A1:F' + lastRow + '"/>'
+      + '<sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews>'
+      + '<cols>'
+      + '<col min="1" max="1" width="7.83203125" customWidth="1"/>'
+      + '<col min="2" max="2" width="27.5234375" customWidth="1"/>'
+      + '<col min="3" max="3" width="18.83203125" customWidth="1"/>'
+      + '<col min="4" max="4" width="25.45703125" customWidth="1"/>'
+      + '<col min="5" max="5" width="18.33203125" customWidth="1"/>'
+      + '<col min="6" max="6" width="30.83203125" customWidth="1"/>'
+      + '</cols>'
+      + '<sheetData>' + rowsXml.join('') + '</sheetData>'
+      + '<mergeCells count="3"><mergeCell ref="A1:D1"/><mergeCell ref="A2:D2"/><mergeCell ref="E1:F2"/></mergeCells>'
+      + (imageBytes.some(function (bytes) { return bytes; }) ? '<drawing r:id="rId1"/>' : '')
+      + '</worksheet>';
+    var files = [
+      { name: '\x5BContent_Types\x5D.xml', data: null },
+      { name: '_rels/.rels', data: null },
+      { name: 'xl/workbook.xml', data: null },
+      { name: 'xl/_rels/workbook.xml.rels', data: null },
+      { name: 'xl/styles.xml', data: quoteXlsxBytes(styles) },
+      { name: 'xl/worksheets/sheet1.xml', data: quoteXlsxBytes(sheet) }
+    ];
+    var hasDrawing = imageBytes.some(function (bytes) { return bytes; });
+    if (hasDrawing) {
+      var anchors = [];
+      var drawingRels = [];
+      var imageFiles = [];
+      var imageIndex = 0;
+      imageBytes.forEach(function (bytes, idx) {
+        if (!bytes) return;
+        imageIndex += 1;
+        var r = 3 + idx;
+        var yEmu = 1270000 + 9525 + idx * 1781175;
+        anchors.push('<xdr:twoCellAnchor editAs="oneCell">'
+          + '<xdr:from><xdr:col>1</xdr:col><xdr:colOff>253442</xdr:colOff><xdr:row>' + r + '</xdr:row><xdr:rowOff>9525</xdr:rowOff></xdr:from>'
+          + '<xdr:to><xdr:col>1</xdr:col><xdr:colOff>1575358</xdr:colOff><xdr:row>' + r + '</xdr:row><xdr:rowOff>1771650</xdr:rowOff></xdr:to>'
+          + '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="' + imageIndex + '" name="Product Image ' + imageIndex + '"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>'
+          + '<xdr:blipFill><a:blip r:embed="rId' + imageIndex + '"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>'
+          + '<xdr:spPr><a:xfrm><a:off x="824942" y="' + yEmu + '"/><a:ext cx="1321916" cy="1762125"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr>'
+          + '</xdr:pic><xdr:clientData/></xdr:twoCellAnchor>');
+        drawingRels.push('<Relationship Id="rId' + imageIndex + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image' + imageIndex + '.jpg"/>');
+        imageFiles.push({ name: 'xl/media/image' + imageIndex + '.jpg', data: bytes });
+      });
+      var drawing = XML_DECL
+        + '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        + anchors.join('') + '</xdr:wsDr>';
+      var sheetRels = XML_DECL
+        + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>'
+        + '</Relationships>';
+      var drawingRelsXml = XML_DECL
+        + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        + drawingRels.join('') + '</Relationships>';
+      files.push({ name: 'xl/worksheets/_rels/sheet1.xml.rels', data: quoteXlsxBytes(sheetRels) });
+      files.push({ name: 'xl/drawings/drawing1.xml', data: quoteXlsxBytes(drawing) });
+      files.push({ name: 'xl/drawings/_rels/drawing1.xml.rels', data: quoteXlsxBytes(drawingRelsXml) });
+      imageFiles.forEach(function (file) { files.push(file); });
+    }
+    var contentTypes = XML_DECL
+      + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+      + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+      + '<Default Extension="xml" ContentType="application/xml"/>'
+      + (hasDrawing ? '<Default Extension="jpg" ContentType="image/jpeg"/>' : '')
+      + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+      + '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+      + (hasDrawing ? '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>' : '')
+      + '</Types>';
+    var rootRels = XML_DECL
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+      + '</Relationships>';
+    var workbook = XML_DECL
+      + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      + '<sheets><sheet name="报价单" sheetId="1" r:id="rId1"/></sheets>'
+      + '</workbook>';
+    var workbookRels = XML_DECL
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+      + '</Relationships>';
+    files[0].data = quoteXlsxBytes(contentTypes);
+    files[1].data = quoteXlsxBytes(rootRels);
+    files[2].data = quoteXlsxBytes(workbook);
+    files[3].data = quoteXlsxBytes(workbookRels);
+    var zip = quoteXlsxZip(files);
+    return new Blob([zip], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  function quoteXlsxBytes(text) {
+    return new TextEncoder().encode(text);
+  }
+  function quoteExportExcelBlob(data, onProgress) {
+    var total = Math.max(1, data.rows.length);
+    var chain = Promise.resolve();
+    var imageBytes = [];
+    data.rows.forEach(function (item, idx) {
+      chain = chain.then(function () {
+        return quoteXlsxImageBytes(item.image).then(function (bytes) {
+          imageBytes.push(bytes);
+          if (onProgress) onProgress((idx + 1) / total);
+        });
+      });
+    });
+    return chain.then(function () {
+      return quoteXlsxBuild(data, imageBytes);
+    });
+  }
+  function formatDateTimeSlash(date) {
+    var d = date || new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
   function quoteLoadImage(src) {
     return new Promise(function (resolve) {
@@ -2202,7 +2460,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       }
       function openQuoteExportModal(format, previewCtxRef, cleanupPreviewFn) {
         var label = QUOTE_EXPORT_FORMAT_LABELS[format] || 'Excel';
-        var fileName = quoteExportSafeName(state.title) + (format === 'pdf' ? '.pdf' : '.xls');
+        var fileName = quoteExportSafeName(state.title) + (format === 'pdf' ? '.pdf' : '.xlsx');
         var lastBlob = null;
         function tick(ms) {
           return new Promise(function (resolve) { window.setTimeout(resolve, ms || 120); });
@@ -2281,8 +2539,12 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
                   });
                 }
                 return tick(220).then(function () {
-                  var blob = quoteExportExcelBlob(data);
-                  setProgress(80);
+                  setProgress(40);
+                  return quoteExportExcelBlob(data, function (ratio) {
+                    setProgress(40 + ratio * 45);
+                  });
+                }).then(function (blob) {
+                  setProgress(90);
                   return tick(220).then(function () {
                     quoteExportDownload(blob, fileName);
                     lastBlob = blob;
