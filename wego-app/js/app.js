@@ -410,11 +410,19 @@
     };
   }
 
+  /* GitHub Pages 预览环境对场景资源有 10 分钟浏览器缓存，迭代推送后用户会拿到旧脚本
+     （表现为新功能点不出来、旧占位提示仍在）。仅在 github.io 线上环境对场景
+     script/style 追加加载时间戳穿透缓存；本地服务不受影响，保持正常缓存。 */
+  function bustSceneAssetUrl(src) {
+    if (!/github\.io$/.test(window.location.hostname)) return src;
+    return src + (src.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now();
+  }
+
   function ensureStyle(href) {
     if (!href || loadedStyles.has(href)) return;
     var link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = href;
+    link.href = bustSceneAssetUrl(href);
     link.dataset.sceneStyle = href;
     document.head.appendChild(link);
     loadedStyles.add(href);
@@ -425,7 +433,7 @@
     if (loadingScripts.has(src)) return loadingScripts.get(src);
     var promise = new Promise(function (resolve, reject) {
       var script = document.createElement('script');
-      script.src = src;
+      script.src = bustSceneAssetUrl(src);
       script.defer = true;
       script.onload = resolve;
       script.onerror = function () { reject(new Error('scene script load failed: ' + src)); };
