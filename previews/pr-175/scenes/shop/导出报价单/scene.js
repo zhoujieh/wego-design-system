@@ -2074,7 +2074,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           ctx.toast('继续选择要追加的产品');
         });
         previewRoot.querySelector('[data-dom-id="quote-share-main"]').addEventListener('click', function () {
-          openQuoteShareSheet(previewCtx, cleanupPreview);
+          openQuoteExportModal(state.exportFormat, previewCtx, cleanupPreview);
         });
         if (window.WegoPopmenu && languageButton && languageMenu) {
           /* app 浮层基座（app-overlay-layer）带 transform，会改变 fixed 定位坐标基准
@@ -2199,42 +2199,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           + '</div>'
           + '<button type="button" class="link link--14 quote-export-continue" data-component-slug="link" data-dom-id="quote-export-continue">继续编辑</button>'
           + '</div>';
-      }
-      function openQuoteShareSheet(previewCtxRef, cleanupPreviewFn) {
-        var optionsHtml = quoteChoiceStackHtml('quote-export-option', 'data-quote-export-format', 'excel', 'Excel', state.exportFormat !== 'pdf')
-          + quoteChoiceStackHtml('quote-export-option', 'data-quote-export-format', 'pdf', 'PDF', state.exportFormat === 'pdf');
-        var html = '<div class="modal modal--frame-x quote-export-sheet" data-component-slug="modal" role="dialog" aria-modal="true" aria-label="选择导出格式" data-state="open">'
-          + '<div class="modal__panel">'
-          + '<div class="modal__title modal__title--default">'
-          + '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body"><div class="navbar__left"><button type="button" class="navbar__left-btn navbar__left-btn--circle" data-dom-id="quote-export-sheet-close" aria-label="关闭"><i class="wego-iconfont-s icon-xiajiantou16" aria-hidden="true"></i></button></div><div class="navbar__center"><span class="navbar__title">选择导出格式</span></div><div class="navbar__right"></div></div></nav>'
-          + '</div>'
-          + '<div class="modal__body modal__body--safe-bottom quote-export-sheet__body">'
-          + '<div class="quote-export-sheet__options">' + optionsHtml + '</div>'
-          + '<p class="quote-export-sheet__hint">生成后文件将直接下载到本机</p>'
-          + '</div>'
-          + '</div>'
-          + '</div>';
-        ctx.openSheet(html, {
-          label: '选择导出格式',
-          init: function (sheetCtx) {
-            var sheetRoot = sheetCtx.root;
-            var close = sheetRoot.querySelector('[data-dom-id="quote-export-sheet-close"]');
-            if (close) close.addEventListener('click', function () { ctx.closeOverlay(); });
-            Array.prototype.forEach.call(sheetRoot.querySelectorAll('[data-quote-export-format]'), function (option) {
-              option.addEventListener('click', function () {
-                var format = option.getAttribute('data-quote-export-format') === 'pdf' ? 'pdf' : 'excel';
-                state.exportFormat = format;
-                Array.prototype.forEach.call(previewCtxRef.root.querySelectorAll('.quote-format-stack'), function (tab) {
-                  var selected = (tab.getAttribute('data-format') === format);
-                  tab.classList.toggle('stack--selected', selected);
-                  tab.setAttribute('aria-pressed', selected ? 'true' : 'false');
-                });
-                ctx.closeOverlay();
-                window.setTimeout(function () { openQuoteExportModal(format, previewCtxRef, cleanupPreviewFn); }, 80);
-              });
-            });
-          }
-        });
       }
       function openQuoteExportModal(format, previewCtxRef, cleanupPreviewFn) {
         var label = QUOTE_EXPORT_FORMAT_LABELS[format] || 'Excel';
