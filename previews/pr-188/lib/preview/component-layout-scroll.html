@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout Scroll - 主纵向滚动区</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../components.css">
+<style>
+/* @component-css-start */
+
+/* Layout Scroll 是页面唯一主纵向滚动区：提供主 overflow-y，禁止横向溢出，
+   隔离滚动链，并预留基础底部安全空间。底部遮挡由 WegoScrollLayout 实测叠加。 */
+.layout-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-block-end: var(--safe-area-bottom-content);
+  box-sizing: border-box;
+}
+
+.layout-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* @component-css-end */
+
+body { margin: 0; background: var(--bg-page); }
+.ls-demo { height: 360px; display: flex; }
+.ls-demo .layout-scroll { background: var(--bg-surface); }
+.ls-demo__section { padding: var(--spacer-12); color: var(--text-default); border-bottom: 1px solid var(--border-neutral-l2); }
+.ls-demo__hint { padding: var(--spacer-8); color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="ls-demo">
+  <div class="layout-scroll" data-component-slug="layout-scroll">
+    <div class="ls-demo__section">大型信息分区一</div>
+    <div class="ls-demo__section">大型信息分区二</div>
+    <div class="ls-demo__section">大型信息分区三</div>
+    <div class="ls-demo__hint">向下滚动验证主纵向滚动；底部预留安全空间。</div>
+  </div>
+</div>
+</body>
+</html>
