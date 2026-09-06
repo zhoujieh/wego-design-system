@@ -1632,6 +1632,24 @@
 }
 
 /* ===== 阶段F：报价记录 ===== */
+/* 记录页为内容二级页：面板从右侧推入、返回向右滑出（覆盖 fullscreen 默认的纵向进出） */
+.quote-records-modal .modal__panel {
+  transform: translateX(100%);
+  transition: transform var(--duration-normal) var(--ease-enter);
+}
+.quote-records-modal[data-state="open"] .modal__panel {
+  transform: translateX(0);
+}
+.quote-records-modal[data-state="closed"] .modal__panel {
+  transform: translateX(100%);
+  transition: transform var(--duration-normal) var(--ease-exit);
+}
+@media (prefers-reduced-motion: reduce) {
+  .quote-records-modal .modal__panel {
+    transition: none;
+    transform: none;
+  }
+}
 .quote-records-modal [hidden] {
   display: none;
 }

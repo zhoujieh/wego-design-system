@@ -987,7 +987,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
     if (index >= 0) records[index] = record; else records.unshift(record);
     quoteWriteRecords(records);
     state.recordId = record.id;
-    state.dirty = false;
     return record;
   }
   function quoteRecordCardHtml(record, deleteMode, checked) {
@@ -1060,7 +1059,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         filterSearch: { category: '', source: '' },
         filterSearchOpen: '',
         sourceVisibleCount: SOURCE_PAGE_SIZE,
-        dirty: false,
         recordId: null,
         recordRestore: null,
         translateRunId: 0,
@@ -1652,7 +1650,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (!id || !row) return;
         state.quoteRows = state.quoteRows.filter(function (r) { return r.id !== id; });
         if (row.sourceKey && state.selected[row.sourceKey]) delete state.selected[row.sourceKey];
-        state.dirty = true;
         if (!state.quoteRows.length) {
           refreshPreviewTable(previewRoot);
           return;
@@ -1774,7 +1771,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       }
       function applyLanguage(previewRoot, code) {
         state.language = code;
-        state.dirty = true;
         state.translateRunId += 1;
         var runId = state.translateRunId;
         syncLanguageMenu(previewRoot);
@@ -1922,7 +1918,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           row.priceMax = byId[row.id].priceMax;
         });
         state.batchPriceRestoreSnapshot = null;
-        state.dirty = true;
         refreshPreviewTable(previewRoot);
         sheetCtx.close();
         sheetCtx.toast('已恢复改价前价格');
@@ -1997,7 +1992,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           item.row.priceMin = item.priceMin;
           item.row.priceMax = item.priceMax;
         });
-        state.dirty = true;
         refreshPreviewTable(previewRoot);
         sheetCtx.close();
         sheetCtx.toast('已批量调整' + nextRows.length + '款商品');
@@ -2492,7 +2486,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         state.language = record.language || 'zh-CN';
         state.quoteRows = JSON.parse(JSON.stringify(record.rows || []));
         state.batchPriceRestoreSnapshot = null;
-        state.dirty = false;
         state.appendMode = false;
         setAppendMode(false);
         window.scrollTo(0, 0);
@@ -2505,7 +2498,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         state.recordId = null;
         state.appendMode = false;
         setAppendMode(false);
-        state.dirty = false;
         var restore = state.recordRestore || null;
         state.recordRestore = null;
         if (restore) {
@@ -2521,19 +2513,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         if (cleanupPreviewFn) cleanupPreviewFn();
         previewCtx.close();
         finalizePreviewSession();
-      }
-      function promptSaveBeforeExit(previewCtx, cleanupPreviewFn) {
-        ctx.dialog({
-          title: '是否保存当前修改？',
-          buttons: [
-            { label: '不保存', tone: 'dismiss', onClick: function () { closePreviewSession(previewCtx, cleanupPreviewFn); } },
-            { label: '保存', tone: 'confirm', onClick: function () {
-                quoteSaveRecordFromState(state);
-                ctx.toast('已保存到报价记录');
-                closePreviewSession(previewCtx, cleanupPreviewFn);
-              } }
-          ]
-        });
       }
       function bindPreview(previewCtx) {
         var previewRoot = previewCtx.root;
@@ -2566,13 +2545,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         bindPreviewTableControls(previewRoot);
         titleInput.addEventListener('input', function () {
           state.title = titleInput.value;
-          state.dirty = true;
         });
         previewRoot.querySelector('[data-dom-id="quote-preview-back"]').addEventListener('click', function () {
-          if (state.dirty) {
-            promptSaveBeforeExit(previewCtx, cleanupPreview);
-            return;
-          }
           closePreviewSession(previewCtx, cleanupPreview);
         });
         previewRoot.querySelector('[data-dom-id="quote-add-more"]').addEventListener('click', function () {
@@ -2658,7 +2632,6 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           } else {
             row[field] = e.target.value;
           }
-          state.dirty = true;
         });
       }
       function openQuotePreview() {
@@ -2732,6 +2705,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               if (wrap) wrap.setAttribute('aria-valuenow', String(Math.round(percent)));
             }
             function showDone() {
+              /* 报价记录只在真正分享导出成功后写入/更新（记录=导出历史） */
+              quoteSaveRecordFromState(state);
               bodyEl().innerHTML = quoteExportBodyHtml('done', format, 100, fileName, '');
               var again = exportRoot.querySelector('[data-dom-id="quote-export-again"]');
               var done = exportRoot.querySelector('[data-dom-id="quote-export-done"]');

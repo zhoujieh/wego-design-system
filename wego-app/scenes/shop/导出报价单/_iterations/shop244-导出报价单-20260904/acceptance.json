@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "scope_revision": 1,
-  "updated_at": "2026-09-04T19:01:53.762Z",
+  "updated_at": "2026-09-06T14:16:32.020Z",
   "items": [
     {
       "dimension": "entry_points",
@@ -12,8 +12,8 @@
     },
     {
       "dimension": "entry_points",
-      "label": "选品页顶部「报价记录」：点击进入报价记录页；首次进入选品时该入口带引导气泡「你的报价单都在这」。",
-      "anchor": "3e00541c5c3d0b1e1231b311072009d51288fbf696363c59d60fc3f5bbf83ae4",
+      "label": "选品页顶部「报价记录」：点击进入报价记录页（从右侧滑入的二级页）；首次进入选品时该入口带引导气泡「你的报价单都在这」。",
+      "anchor": "ed94cdadcb77a29b704f3942ade176ad4c450fafdd9f6f9fae2e5de0ebbd6981",
       "status": "unverified",
       "evidence": ""
     },
@@ -40,8 +40,8 @@
     },
     {
       "dimension": "critical_paths",
-      "label": "[P2] 预览编辑退出（有改动）→ 弹「是否保存当前修改？」→ 保存 → 报价记录列表出现该记录 → 点开记录可继续编辑 → 再分享。",
-      "anchor": "1d893b409f0f7db67faad4cb7e2a51c03b31dad6d7a7f6a0ad402b40b3ad6758",
+      "label": "[P2] 报价记录仅随导出产生：预览返回直接关闭（无保存拦截、不写记录）；分享导出成功（完成页出现）→ 报价记录自动写入 → 点开记录可继续编辑 → 再次导出更新同一条记录。",
+      "anchor": "ea94e5d82aaf5c92ccb8d84f6b2db5d9f05fb56d8765f6c1923b1b1ccefb860e",
       "status": "unverified",
       "evidence": ""
     },
