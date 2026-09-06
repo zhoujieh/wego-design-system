@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout Split - 双区主次分栏</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../scaffold.css">
+<link rel="stylesheet" href="../components.css">
+<style>
+/* @component-css-start */
+
+/* Layout Split 是双区主次分栏：按 ratio 分配主次区宽度，
+   collapse=vertical 时转为上下排列，gap 接收正式 Spacer Token。 */
+.layout-split {
+  --layout-split-gap: var(--spacer-0);
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  gap: var(--layout-split-gap);
+}
+
+.layout-split[data-ratio="1-1"] > .layout-split__main { flex: 1 1 0; }
+.layout-split[data-ratio="1-1"] > .layout-split__aside { flex: 1 1 0; }
+.layout-split[data-ratio="2-1"] > .layout-split__main { flex: 2 1 0; }
+.layout-split[data-ratio="2-1"] > .layout-split__aside { flex: 1 1 0; }
+.layout-split[data-ratio="1-2"] > .layout-split__main { flex: 1 1 0; }
+.layout-split[data-ratio="1-2"] > .layout-split__aside { flex: 2 1 0; }
+
+.layout-split[data-align="start"] { align-items: flex-start; }
+.layout-split[data-align="center"] { align-items: center; }
+.layout-split[data-align="end"] { align-items: flex-end; }
+.layout-split[data-align="stretch"] { align-items: stretch; }
+
+.layout-split[data-collapse="vertical"] { flex-direction: column; }
+.layout-split[data-collapse="vertical"] > .layout-split__main,
+.layout-split[data-collapse="vertical"] > .layout-split__aside { flex: 0 0 auto; width: 100%; }
+
+/* @component-css-end */
+
+body { margin: 0; background: var(--bg-page); }
+.lsp-demo { max-width: 393px; margin-inline: auto; padding: var(--spacer-12); background: var(--bg-surface); }
+.lsp-demo__section + .lsp-demo__section { margin-top: var(--spacer-12); }
+.lsp-demo__label { color: var(--text-secondary); margin-bottom: var(--spacer-8); }
+.lsp-demo__main { padding: var(--spacer-8); background: var(--bg-page); border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-8); color: var(--text-default); }
+.lsp-demo__aside { padding: var(--spacer-8); background: var(--bg-page); border: 1px solid var(--border-neutral-l2); border-radius: var(--radius-8); color: var(--text-default); }
+</style>
+</head>
+<body>
+<div class="lsp-demo">
+  <div class="lsp-demo__section">
+    <div class="lsp-demo__label">2:1 主次（gap=8）</div>
+    <div class="layout-split" data-component-slug="layout-split" data-ratio="2-1" data-align="stretch" style="--layout-split-gap:var(--spacer-8)">
+      <div class="layout-split__main lsp-demo__main">主区</div>
+      <div class="layout-split__aside lsp-demo__aside">次区</div>
+    </div>
+  </div>
+  <div class="lsp-demo__section">
+    <div class="lsp-demo__label">collapse=vertical 上下排列</div>
+    <div class="layout-split" data-component-slug="layout-split" data-ratio="1-2" data-align="stretch" data-collapse="vertical" style="--layout-split-gap:var(--spacer-8)">
+      <div class="layout-split__main lsp-demo__main">主区（上）</div>
+      <div class="layout-split__aside lsp-demo__aside">次区（下）</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
