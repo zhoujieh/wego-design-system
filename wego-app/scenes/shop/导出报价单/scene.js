@@ -4,7 +4,8 @@
  * 选品页支持：按产品报价 / 按图报价 两种模式切换、商品搜索（名称/货号/搜索码）、
  * 列表/宫格视图、商品勾选、底部批量栏（全选/已选计数下拉/查看已选/下一步）、分页滚动加载。
  * 筛选面板、预览编辑、分享导出（Excel/PDF 浏览器端真实生成，Web 端直接下载不走系统分享）已在
- * 阶段 C/D/E 接入；报价记录在后续阶段接入。
+ * 阶段 C/D/E 接入；阶段 F 接入报价记录：localStorage 持久化、记录页（搜索/删除模式/空态）、
+ * 预览退出保存弹窗与记录再次编辑。
  */
 const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id="quote-export" data-route-id="quote-export" data-layout-mode="composed" data-bg="page" data-component-slug="layout-page">
   <div class="layout-page__top">
@@ -958,6 +959,77 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       + '</tr>';
   }
 
+  /* ===== 阶段F：报价记录（localStorage 持久化 + 记录页管理） ===== */
+  function quoteReadRecords() {
+    var list = safeReadJSON(STORAGE_KEYS.records, []);
+    return Array.isArray(list) ? list : [];
+  }
+  function quoteWriteRecords(list) {
+    safeWriteJSON(STORAGE_KEYS.records, Array.isArray(list) ? list : []);
+  }
+  function quoteRecordFromState(state) {
+    return {
+      id: state.recordId || ('qr-' + Date.now()),
+      title: String(state.title || defaultQuoteTitle()),
+      createdAt: state.createdAt,
+      updatedAt: Date.now(),
+      language: state.language,
+      total: quoteTotals(state.quoteRows).cny,
+      rowCount: state.quoteRows.length,
+      rows: JSON.parse(JSON.stringify(state.quoteRows))
+    };
+  }
+  function quoteSaveRecordFromState(state) {
+    var records = quoteReadRecords();
+    var record = quoteRecordFromState(state);
+    var index = -1;
+    records.forEach(function (item, i) { if (item.id === record.id) index = i; });
+    if (index >= 0) records[index] = record; else records.unshift(record);
+    quoteWriteRecords(records);
+    state.recordId = record.id;
+    state.dirty = false;
+    return record;
+  }
+  function quoteRecordCardHtml(record, deleteMode, checked) {
+    var thumbs = (record.rows || []).slice(0, 3).map(function (row) {
+      return '<span class="quote-record-thumbs__item"><img class="wg-image__src" src="' + escapeHtml(row.image) + '" alt="" loading="lazy"></span>';
+    }).join('');
+    return '<div class="cell cell--double cell--bg-white quote-record-card" data-component-slug="cell"'
+      + (deleteMode ? '' : ' data-quote-record-open="' + escapeHtml(record.id) + '"')
+      + ' data-quote-record-card="' + escapeHtml(record.id) + '">'
+      + (deleteMode ? '<div class="cell__select quote-record-card__select">' + checkboxHtml(checked, ' data-role="quote-record-check"') + '</div>' : '')
+      + '<div class="cell__body">'
+      + '<div class="quote-record-thumbs">' + thumbs + '</div>'
+      + '<div class="cell__content quote-record-card__info">'
+      + '<div class="cell__title-row"><span class="cell__title quote-record-card__title">' + escapeHtml(record.title) + '</span></div>'
+      + '<div class="cell__subtitle quote-record-card__meta">' + escapeHtml(String(record.rowCount || 0)) + ' 项 · ' + escapeHtml(record.total || '') + '</div>'
+      + '<div class="quote-record-card__time">更新时间 ' + escapeHtml(formatDateTimeSlash(new Date(record.updatedAt || record.createdAt))) + '</div>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  }
+  function quoteRecordsTemplate() {
+    return '<div class="modal modal--fullscreen quote-records-modal" data-component-slug="modal" data-state="open" role="dialog" aria-modal="true" aria-label="报价记录" style="--modal-panel-bg: var(--bg-page)">'
+      + '<div class="modal__panel">'
+      + '<div class="modal__title modal__title--default">'
+      + '<nav class="navbar" data-component-slug="navbar"><div class="navbar__body">'
+      + '<div class="navbar__left"><button type="button" class="navbar__left-btn" data-dom-id="quote-records-back" aria-label="返回"><i class="wego-iconfont-s icon-fanhui" aria-hidden="true"></i></button>'
+      + '<button type="button" class="navbar__left-text" data-dom-id="quote-records-cancel" aria-label="取消删除" hidden>取消</button></div>'
+      + '<div class="navbar__center"><span class="navbar__title">报价记录</span></div>'
+      + '<div class="navbar__right navbar__right--button"><button type="button" class="navbar__left-text quote-records-manage" data-dom-id="quote-records-delete-toggle">删除</button></div>'
+      + '</div></nav>'
+      + '</div>'
+      + '<div class="modal__body quote-records-body">'
+      + '<div class="quote-records-toolbar" data-role="quote-records-toolbar">'
+      + '<div class="searchbox searchbox--md searchbox--white" data-component-slug="search"><span class="searchbox__icon wego-iconfont-s icon-sousuo" aria-hidden="true"></span><div class="searchbox__input"><input class="searchbox__field" data-dom-id="quote-records-search-input" type="search" placeholder="搜索报价单标题" aria-label="搜索报价单标题"></div><div class="searchbox__actions"><button class="searchbox__action searchbox__clear wego-iconfont-s icon-yuancha-mian" data-dom-id="quote-records-search-clear" type="button" aria-label="清除搜索" hidden></button></div></div>'
+      + '</div>'
+      + '<div class="layout-scroll quote-records-scroll" data-component-slug="layout-scroll" data-role="quote-records-scroll"><div class="layout-flow quote-records-list" data-component-slug="layout-flow" data-direction="vertical" data-align="stretch" data-role="quote-records-list"></div><div class="quote-records-empty" data-role="quote-records-empty" hidden></div></div>'
+      + '</div>'
+      + '<div class="modal__actions" data-role="quote-records-actions" hidden><div class="bottom-action-bar bottom-action-bar--primary-secondary quote-records-delete-bar" data-component-slug="bottom-action-bar"><div class="bottom-action-bar__inner"><div class="bottom-action-bar__leading"><span class="quote-records-delete-count" data-role="quote-records-delete-count">已选 0 项</span></div><div class="bottom-action-bar__trailing"><button type="button" class="btn btn--danger btn--md" data-component-slug="button" data-dom-id="quote-records-delete-confirm" disabled aria-label="删除所选报价记录">删除</button></div></div></div></div>'
+      + '</div>'
+      + '</div>';
+  }
+
   window.WegoApp.registerScene({
     routeId: 'quote-export',
     template: quoteSelectTemplate,
@@ -989,6 +1061,8 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         filterSearchOpen: '',
         sourceVisibleCount: SOURCE_PAGE_SIZE,
         dirty: false,
+        recordId: null,
+        recordRestore: null,
         translateRunId: 0,
         translateScrollLock: null,
         selected: {}          /* 按产品模式：{ product_id: true }；按图模式：{ product_id + ':' + idx: true } */
@@ -1700,6 +1774,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
       }
       function applyLanguage(previewRoot, code) {
         state.language = code;
+        state.dirty = true;
         state.translateRunId += 1;
         var runId = state.translateRunId;
         syncLanguageMenu(previewRoot);
@@ -2284,6 +2359,182 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
         });
         bindControls();
       }
+      /* ===== 阶段F：报价记录页（搜索/删除模式/空态）与记录再次编辑 ===== */
+      function openQuoteRecordsPage() {
+        ctx.openFullScreenModal(quoteRecordsTemplate(), {
+          label: '报价记录',
+          init: bindQuoteRecords
+        });
+      }
+      function bindQuoteRecords(recordsCtx) {
+        var pageRoot = recordsCtx.root;
+        var listElR = pageRoot.querySelector('[data-role="quote-records-list"]');
+        var emptyElR = pageRoot.querySelector('[data-role="quote-records-empty"]');
+        var toolbarR = pageRoot.querySelector('[data-role="quote-records-toolbar"]');
+        var scrollR = pageRoot.querySelector('[data-role="quote-records-scroll"]');
+        var actionsR = pageRoot.querySelector('[data-role="quote-records-actions"]');
+        var countElR = pageRoot.querySelector('[data-role="quote-records-delete-count"]');
+        var searchInputR = pageRoot.querySelector('[data-dom-id="quote-records-search-input"]');
+        var searchClearR = pageRoot.querySelector('[data-dom-id="quote-records-search-clear"]');
+        var backBtnR = pageRoot.querySelector('[data-dom-id="quote-records-back"]');
+        var cancelBtnR = pageRoot.querySelector('[data-dom-id="quote-records-cancel"]');
+        var deleteToggleR = pageRoot.querySelector('[data-dom-id="quote-records-delete-toggle"]');
+        var deleteConfirmR = pageRoot.querySelector('[data-dom-id="quote-records-delete-confirm"]');
+        var queryR = '';
+        var deleteModeR = false;
+        var deleteSelectedR = {};
+        function recordsFiltered() {
+          var q = queryR.trim().toLowerCase();
+          var records = quoteReadRecords();
+          if (!q) return records;
+          return records.filter(function (r) { return String(r.title || '').toLowerCase().indexOf(q) >= 0; });
+        }
+        function syncDeleteModeUi() {
+          var hasRecords = quoteReadRecords().length > 0;
+          if (toolbarR) toolbarR.hidden = !hasRecords;
+          if (deleteToggleR) deleteToggleR.hidden = !hasRecords || deleteModeR;
+          if (cancelBtnR) cancelBtnR.hidden = !deleteModeR;
+          if (backBtnR) backBtnR.hidden = deleteModeR;
+          if (actionsR) actionsR.hidden = !deleteModeR;
+        }
+        function renderRecords() {
+          syncDeleteModeUi();
+          var records = recordsFiltered();
+          var hasRecords = quoteReadRecords().length > 0;
+          listElR.innerHTML = records.map(function (r) {
+            return quoteRecordCardHtml(r, deleteModeR, Boolean(deleteSelectedR[r.id]));
+          }).join('');
+          activateImages(listElR);
+          emptyElR.hidden = records.length !== 0;
+          emptyElR.innerHTML = records.length === 0
+            ? '<div class="quote-empty__result"><div class="result" data-component-slug="result" role="group" aria-label="空状态"><div class="result__title">' + (hasRecords ? '暂无相关结果' : '暂无报价记录') + '</div></div></div>'
+            : '';
+          var count = Object.keys(deleteSelectedR).length;
+          if (countElR) countElR.textContent = '已选 ' + count + ' 项';
+          if (deleteConfirmR) {
+            deleteConfirmR.disabled = count === 0;
+            deleteConfirmR.classList.toggle('btn--disabled', count === 0);
+            if (count === 0) deleteConfirmR.setAttribute('aria-disabled', 'true');
+            else deleteConfirmR.removeAttribute('aria-disabled');
+          }
+        }
+        function exitDeleteMode() {
+          deleteModeR = false;
+          deleteSelectedR = {};
+          renderRecords();
+        }
+        function confirmDeleteSelected() {
+          var ids = Object.keys(deleteSelectedR);
+          if (!ids.length) return;
+          ctx.dialog({
+            title: '确认删除',
+            content: '删除后不可恢复，确定删除选中的 ' + ids.length + ' 条报价记录？',
+            buttons: [
+              { label: '取消', tone: 'dismiss' },
+              { label: '删除', tone: 'danger', onClick: function () {
+                  var kept = quoteReadRecords().filter(function (r) { return !deleteSelectedR[r.id]; });
+                  quoteWriteRecords(kept);
+                  exitDeleteMode();
+                  ctx.toast('已删除 ' + ids.length + ' 条报价记录');
+                } }
+            ]
+          });
+        }
+        backBtnR.addEventListener('click', function () { recordsCtx.close(); });
+        cancelBtnR.addEventListener('click', exitDeleteMode);
+        deleteToggleR.addEventListener('click', function () {
+          deleteModeR = true;
+          deleteSelectedR = {};
+          renderRecords();
+        });
+        deleteConfirmR.addEventListener('click', confirmDeleteSelected);
+        searchInputR.addEventListener('input', function () {
+          queryR = searchInputR.value;
+          searchClearR.hidden = !queryR;
+          renderRecords();
+        });
+        searchClearR.addEventListener('click', function () {
+          searchInputR.value = '';
+          queryR = '';
+          searchClearR.hidden = true;
+          renderRecords();
+          searchInputR.focus();
+        });
+        scrollR.addEventListener('click', function (e) {
+          var card = e.target.closest('[data-quote-record-card]');
+          if (!card) return;
+          var id = card.getAttribute('data-quote-record-card');
+          if (deleteModeR) {
+            if (deleteSelectedR[id]) delete deleteSelectedR[id]; else deleteSelectedR[id] = true;
+            renderRecords();
+            return;
+          }
+          var record = quoteReadRecords().filter(function (r) { return r.id === id; })[0];
+          if (record) openQuoteRecordPreview(record);
+        });
+        renderRecords();
+      }
+      function openQuoteRecordPreview(record) {
+        if (!record || !(record.rows || []).length) {
+          ctx.toast('该记录没有报价商品');
+          return;
+        }
+        state.recordRestore = {
+          quoteRows: state.quoteRows,
+          title: state.title,
+          createdAt: state.createdAt,
+          language: state.language,
+          batchPriceRestoreSnapshot: state.batchPriceRestoreSnapshot
+        };
+        state.recordId = record.id;
+        state.title = String(record.title || defaultQuoteTitle());
+        state.createdAt = record.createdAt || Date.now();
+        state.language = record.language || 'zh-CN';
+        state.quoteRows = JSON.parse(JSON.stringify(record.rows || []));
+        state.batchPriceRestoreSnapshot = null;
+        state.dirty = false;
+        state.appendMode = false;
+        setAppendMode(false);
+        window.scrollTo(0, 0);
+        ctx.openFullScreenModal(quotePreviewTemplate(state), {
+          label: '报价单预览',
+          init: bindPreview
+        });
+      }
+      function finalizePreviewSession() {
+        state.recordId = null;
+        state.appendMode = false;
+        setAppendMode(false);
+        state.dirty = false;
+        var restore = state.recordRestore || null;
+        state.recordRestore = null;
+        if (restore) {
+          state.quoteRows = restore.quoteRows;
+          state.title = restore.title;
+          state.createdAt = restore.createdAt;
+          state.language = restore.language;
+          state.batchPriceRestoreSnapshot = restore.batchPriceRestoreSnapshot;
+        }
+        syncVisibleSelectionStates();
+      }
+      function closePreviewSession(previewCtx, cleanupPreviewFn) {
+        if (cleanupPreviewFn) cleanupPreviewFn();
+        previewCtx.close();
+        finalizePreviewSession();
+      }
+      function promptSaveBeforeExit(previewCtx, cleanupPreviewFn) {
+        ctx.dialog({
+          title: '是否保存当前修改？',
+          buttons: [
+            { label: '不保存', tone: 'dismiss', onClick: function () { closePreviewSession(previewCtx, cleanupPreviewFn); } },
+            { label: '保存', tone: 'confirm', onClick: function () {
+                quoteSaveRecordFromState(state);
+                ctx.toast('已保存到报价记录');
+                closePreviewSession(previewCtx, cleanupPreviewFn);
+              } }
+          ]
+        });
+      }
       function bindPreview(previewCtx) {
         var previewRoot = previewCtx.root;
         var languageButton = previewRoot.querySelector('[data-dom-id="quote-language-button"]');
@@ -2318,11 +2569,11 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
           state.dirty = true;
         });
         previewRoot.querySelector('[data-dom-id="quote-preview-back"]').addEventListener('click', function () {
-          state.appendMode = false;
-          setAppendMode(false);
-          cleanupPreview();
-          previewCtx.close();
-          syncVisibleSelectionStates();
+          if (state.dirty) {
+            promptSaveBeforeExit(previewCtx, cleanupPreview);
+            return;
+          }
+          closePreviewSession(previewCtx, cleanupPreview);
         });
         previewRoot.querySelector('[data-dom-id="quote-add-more"]').addEventListener('click', function () {
           setAppendMode(true);
@@ -2490,11 +2741,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
               });
               if (done) done.addEventListener('click', function () {
                 exportCtx.close();
-                if (previewCtxRef) {
-                  if (cleanupPreviewFn) cleanupPreviewFn();
-                  previewCtxRef.close();
-                  syncVisibleSelectionStates();
-                }
+                if (previewCtxRef) closePreviewSession(previewCtxRef, cleanupPreviewFn);
               });
               if (cont) cont.addEventListener('click', function () { exportCtx.close(); });
             }
@@ -2638,7 +2885,7 @@ const quoteSelectTemplate = `<div class="layout-page quote-page" data-surface-id
 
       /* 交互 data-dom-id 显式绑定 */
       root.querySelector('[data-dom-id="quote-back"]').addEventListener('click', function () { ctx.navigate('my'); });
-      root.querySelector('[data-dom-id="quote-records-entry"]').addEventListener('click', function () { ctx.toast('报价记录将在后续阶段接入'); });
+      root.querySelector('[data-dom-id="quote-records-entry"]').addEventListener('click', function () { openQuoteRecordsPage(); });
       modeButton.addEventListener('click', function () {
         syncModeMenuSelection();
         toggleMenu(modeButton, modeMenu, modeMenu.hidden);
