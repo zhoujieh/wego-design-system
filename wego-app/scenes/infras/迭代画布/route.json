@@ -1,0 +1,9 @@
+{
+  "routeId": "iteration-canvas",
+  "entry": {
+    "type": "cell-entry",
+    "label": "迭代画布",
+    "group": "workspace-tools",
+    "tab": "workspace"
+  }
+}

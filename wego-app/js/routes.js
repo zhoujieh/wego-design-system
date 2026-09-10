@@ -52,6 +52,17 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/customer/好友列表/scene.js'
 },
 {
+  routeId: 'iteration-canvas',
+  entry: {
+    type: 'cell-entry',
+    label: '迭代画布',
+    group: 'workspace-tools',
+    tab: 'workspace'
+  },
+  style: './scenes/infras/迭代画布/scene.css',
+  script: './scenes/infras/迭代画布/scene.js'
+},
+{
   routeId: 'my',
   entry: {
     type: 'host-tab',

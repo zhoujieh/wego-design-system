@@ -8487,6 +8487,10 @@ const ICON_SVG = 'width="16" height="16" viewBox="0 0 256 256" fill="currentColo
               <span>场景管理</span>
               <span class="subpanel-arrow">${ICONS.chevronRight}</span>
             </button>
+            <button class="subpanel-item" data-nav="iteration-canvas">
+              <span>迭代画布</span>
+              <span class="subpanel-arrow">${ICONS.chevronRight}</span>
+            </button>
             <button class="subpanel-item" data-nav="component-preview">
               <span>组件库</span>
               <span class="subpanel-arrow">${ICONS.chevronRight}</span>

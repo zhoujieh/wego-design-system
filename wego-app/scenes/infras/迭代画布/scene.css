@@ -1,0 +1,795 @@
+.iter-canvas-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+}
+
+.iter-canvas-page__navbar {
+  flex: 0 0 auto;
+}
+
+.iter-canvas-page__toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-8);
+  padding: var(--spacer-6) var(--spacer-12);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-neutral-l2);
+  position: relative;
+  z-index: 5;
+  flex-wrap: wrap;
+}
+
+.iter-canvas-page__zoomctl {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-4);
+}
+
+.iter-canvas-page__zb {
+  min-width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-6);
+  background: var(--bg-surface);
+  color: var(--text-default);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  padding: 0 var(--spacer-8);
+  cursor: pointer;
+}
+
+.iter-canvas-page__zval {
+  min-width: 44px;
+  text-align: center;
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-secondary);
+}
+
+.iter-canvas-page__hint {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+}
+
+/* 无限画布视口：契约上的唯一主纵向滚动区；实际浏览由手势 transform 接管，
+   原生滚动条隐藏、横向溢出裁掉，底部留安全区 */
+.iter-canvas-page__viewport {
+  flex: 1;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--safe-area-bottom-content);
+  box-sizing: border-box;
+  touch-action: none;
+  cursor: grab;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.iter-canvas-page__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.iter-canvas-page__viewport:active {
+  cursor: grabbing;
+}
+
+.iter-canvas-page__world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4000px;
+  transform-origin: 0 0;
+  padding: 0 var(--spacer-16) var(--spacer-40);
+  box-sizing: border-box;
+}
+
+/* ── 通用卡片 ── */
+.iter-canvas-page__card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+  padding: var(--spacer-12);
+  margin: var(--spacer-8) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.iter-canvas-page__card-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.iter-canvas-page__card-title {
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__card-subtitle {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacer-8);
+}
+
+.iter-canvas-page__status {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  padding: var(--spacer-2) var(--spacer-8);
+  border-radius: var(--radius-full);
+}
+
+.iter-canvas-page__status--prototyping {
+  background: var(--status-warning-surface-l1);
+  color: var(--status-warning-default);
+}
+
+.iter-canvas-page__status--in-development {
+  background: var(--status-info-surface-l1);
+  color: var(--status-info-default);
+}
+
+.iter-canvas-page__status--frozen {
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.iter-canvas-page__idline {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+  margin-top: var(--spacer-2);
+}
+
+.iter-canvas-page__goal {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-secondary);
+  margin-top: var(--spacer-8);
+}
+
+.iter-canvas-page__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-4) var(--spacer-16);
+  margin-top: var(--spacer-10);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-secondary);
+}
+
+.iter-canvas-page__meta b {
+  color: var(--text-default);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ── 范围区 ── */
+.iter-canvas-page__scope-cols {
+  display: flex;
+  gap: var(--spacer-12);
+}
+
+.iter-canvas-page__scope-col {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.iter-canvas-page__scope-head {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacer-6);
+}
+
+.iter-canvas-page__scope-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-6);
+}
+
+.iter-canvas-page__scope-list li {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-default);
+  padding-left: var(--spacer-10);
+  position: relative;
+}
+
+.iter-canvas-page__scope-col--inc .iter-canvas-page__scope-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--status-success-default);
+}
+
+.iter-canvas-page__scope-col--exc .iter-canvas-page__scope-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--status-warning-default);
+}
+
+/* ── 入口区 ── */
+.iter-canvas-page__entry-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacer-8);
+  padding: var(--spacer-6) 0;
+}
+
+.iter-canvas-page__entry-idx {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--bg-brand);
+  color: var(--text-inverse);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(1px);
+}
+
+.iter-canvas-page__entry-text {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-default);
+}
+
+/* ── 流程链 ── */
+.iter-canvas-page__flow {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+  padding: var(--spacer-12);
+  margin: var(--spacer-40) 0;
+}
+
+.iter-canvas-page__flow-head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+  margin-bottom: var(--spacer-24);
+}
+
+.iter-canvas-page__flow-priority {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacer-2) var(--spacer-8);
+  border-radius: var(--radius-6);
+}
+
+.iter-canvas-page__flow-priority--p1 {
+  background: var(--bg-brand-surface-l1);
+  color: var(--text-brand);
+}
+
+.iter-canvas-page__flow-priority--p0 {
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.iter-canvas-page__flow-title {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__flow-desc {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+  margin: var(--spacer-4) 0 var(--spacer-10);
+}
+
+.iter-canvas-page__flow-chain {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  width: max-content;
+  max-width: none;
+  overflow-x: visible;
+}
+
+/* 一段连续的里程碑节点横排成行 */
+.iter-canvas-page__flow-chain-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacer-40);
+}
+
+/* 段与 cell 矩阵之间的纵向承接箭头（右箭头旋转 90°） */
+.iter-canvas-page__flow-stepdown {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: calc(var(--spacer-72) * 2 + var(--spacer-48));
+  margin: var(--spacer-8) 0;
+  color: var(--text-tertiary);
+  font-size: var(--body-md-font-size);
+  line-height: var(--body-md-line-height);
+}
+
+.iter-canvas-page__flow-stepdown .wego-iconfont-s {
+  transform: rotate(90deg);
+}
+
+.iter-canvas-page__node {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-16);
+}
+
+/* 一个节点（功能点）= 多个状态块横排 */
+.iter-canvas-page__node-states {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacer-24);
+}
+
+.iter-canvas-page__state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  min-width: 0;
+}
+
+.iter-canvas-page__state-label {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  padding: 0 var(--spacer-2);
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-6);
+}
+
+.iter-canvas-page__state-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-brand);
+  flex: 0 0 auto;
+}
+
+.iter-canvas-page__frame-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  width: 393px;
+  min-width: 393px;
+  box-sizing: border-box;
+}
+
+.iter-canvas-page__frame-label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacer-6);
+  padding: 0 var(--spacer-2);
+}
+
+.iter-canvas-page__frame-name {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__frame-sub {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-secondary);
+}
+
+/* ── 场景渲染容器（真实 DOM 平铺）──
+   默认视口 iPhone 15 Pro：393 × 852（高度可拖拽调整）。
+   宽高是设备视口尺寸，不属于设计 Token 管辖，保留像素值 */
+.iter-canvas-page__scene-host {
+  width: 393px;
+  height: 852px;
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  position: relative;
+  /* 让本画板成为内部浮层（弹窗/蒙层/键盘/toast）的定位基准：
+     fixed 元素相对当前画板定位，只覆盖本画板，不会漂到整张画布 */
+  transform: translateZ(0);
+  /* 浏览态默认锁定交互：画布可自由拖拽/缩放，不误触页面 */
+  pointer-events: none;
+}
+
+/* host-tab 页面（如动态流）底部补全局导航：相对本画板底部定位 */
+.iter-canvas-page__scene-host--tabbed .bottom-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0 0 var(--radius-12) var(--radius-12);
+}
+
+/* 画板内浮层的基础容器已由 transform 限定在画板内；显式兜底再限定一次 */
+.iter-canvas-page__scene-host .modal,
+.iter-canvas-page__scene-host .actionsheet,
+.iter-canvas-page__scene-host .app-toast-host {
+  position: absolute;
+  inset: 0;
+}
+
+/* 未渲染（懒加载 pending）/ 渲染中：骨架占位（纯色 + 呼吸，不用裸色渐变） */
+.iter-canvas-page__scene-host--pending,
+.iter-canvas-page__scene-host--loading {
+  background: var(--bg-skeleton);
+  animation: iter-canvas-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes iter-canvas-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.iter-canvas-page__scene-host--ready {
+  pointer-events: none;
+}
+
+/* 编辑态：点选页面后解锁交互（页面内可点击/滚动/输入） */
+.iter-canvas-page__scene-host--active {
+  pointer-events: auto;
+  border-color: var(--border-brand);
+  box-shadow: var(--shadow-md);
+  overflow: auto;
+}
+
+/* 高度拖拽把手：仅编辑态可见 */
+.iter-canvas-page__resize-handle {
+  height: 16px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-6);
+  cursor: ns-resize;
+  color: var(--text-tertiary);
+  background: var(--status-info-surface-l1);
+  border-radius: var(--radius-6);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  user-select: none;
+  touch-action: none;
+}
+
+.iter-canvas-page__resize-handle i {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+}
+
+.iter-canvas-page__resize-handle::after {
+  content: '';
+  width: 32px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--status-info-default);
+}
+
+.iter-canvas-page__frame-wrap--active .iter-canvas-page__resize-handle {
+  display: flex;
+}
+
+/* 页面容器内：浮层根节点相对本画板定位（absolute），由 host 的 transform 限定在画板内；
+   .modal__panel 保持组件原生 relative，由 .modal 的 flex 布局承载，不额外改写定位，
+   局部块靠移动场景根 + 裁矮 host 聚焦，整页块内容超出时在画板内滚动，需要更多空间可拖高 */
+
+.iter-canvas-page__frame-route {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+  padding: 0 var(--spacer-2);
+}
+
+.iter-canvas-page__link {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  align-self: center;
+  color: var(--text-tertiary);
+}
+
+.iter-canvas-page__link i {
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+}
+
+/* ── 状态块类型小徽标（局部 / 规格缺口）── */
+.iter-canvas-page__frame-tag {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacer-2) var(--spacer-6);
+  border-radius: var(--radius-4);
+  margin-left: var(--spacer-2);
+}
+
+.iter-canvas-page__frame-tag--local {
+  background: var(--status-info-surface-l1);
+  color: var(--status-info-default);
+}
+
+.iter-canvas-page__frame-tag--gap {
+  background: var(--status-warning-surface-l1);
+  color: var(--status-warning-default);
+}
+
+/* 规格缺口状态：状态名圆点用警告色 */
+.iter-canvas-page__state--gap .iter-canvas-page__state-label::before {
+  background: var(--status-warning-default);
+}
+
+/* ── 规格占位卡：spec 声明但业务场景未实现 UI，不伪造内容 ── */
+.iter-canvas-page__placeholder {
+  width: 393px;
+  min-width: 393px;
+  min-height: 260px;
+  box-sizing: border-box;
+  border: 1.5px dashed var(--border-warning);
+  border-radius: var(--radius-12);
+  background: var(--status-warning-surface-l1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-10);
+  padding: var(--spacer-20) var(--spacer-24);
+  text-align: center;
+}
+
+.iter-canvas-page__placeholder-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--status-warning-default);
+  color: var(--status-warning-default);
+  font-size: var(--body-lg-font-size);
+  line-height: var(--body-lg-line-height);
+  font-weight: var(--font-weight-semibold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iter-canvas-page__placeholder-badge {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--status-warning-default);
+  padding: var(--spacer-2) var(--spacer-10);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-warning);
+  background: var(--bg-surface);
+}
+
+.iter-canvas-page__placeholder-ref {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+}
+
+.iter-canvas-page__placeholder-note {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-secondary);
+}
+
+/* ── 局部状态块：宿主恒为完整设备高度，外层裁剪窗只露出 clip 目标区域 ──
+   （弹窗类场景贴底 + 内部滚动，若直接裁矮宿主会令内部布局重排错位，故裁剪与布局分离） */
+.iter-canvas-page__frame-clip {
+  width: 393px;
+  overflow: hidden;
+  border-radius: var(--radius-12);
+}
+
+.iter-canvas-page__frame-wrap--local .iter-canvas-page__scene-host--clip {
+  border-color: var(--status-info-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.iter-canvas-page__scene-host > * {
+  will-change: transform;
+}
+
+/* clip 选择器未命中：显性危险色警示，不静默留白 */
+.iter-canvas-page__scene-host--clip-miss {
+  border: 1.5px dashed var(--status-danger-default) !important;
+  background: var(--status-danger-surface-l1);
+}
+
+.iter-canvas-page__scene-host--clip-miss::after {
+  content: '未找到局部聚焦目标，选择器可能已失效';
+  position: absolute;
+  top: var(--spacer-8);
+  left: var(--spacer-8);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--status-danger-default);
+}
+
+/* ── UI 缺口清单卡（占位卡汇总，兼作缺口排查清单）── */
+.iter-canvas-page__gap-card {
+  border-color: var(--border-warning);
+  background: var(--status-warning-surface-l1);
+}
+
+.iter-canvas-page__gap-title {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__gap-count {
+  margin-left: auto;
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--status-warning-default);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-warning);
+  padding: var(--spacer-2) var(--spacer-10);
+  border-radius: var(--radius-full);
+}
+
+.iter-canvas-page__gap-list {
+  list-style: none;
+  margin: var(--spacer-8) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-6);
+}
+
+.iter-canvas-page__gap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacer-8);
+}
+
+.iter-canvas-page__gap-idx {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--status-warning-default);
+  color: var(--text-inverse);
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(1px);
+}
+
+.iter-canvas-page__gap-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-2);
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__gap-body b {
+  font-weight: var(--font-weight-semibold);
+}
+
+.iter-canvas-page__gap-meta {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+}
+
+/* ── cell 状态矩阵：复杂页面节点下钻一层，矩阵节点独占一行，内部按分组纵向、组内状态横排换行 ── */
+.iter-canvas-page__node--matrix {
+  width: 1560px;
+  max-width: 1560px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-12);
+  padding: var(--spacer-16);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+}
+
+.iter-canvas-page__matrix-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-4);
+  padding: 0 var(--spacer-2);
+}
+
+.iter-canvas-page__matrix-title {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__matrix-lead {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+}
+
+.iter-canvas-page__cell-group {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-neutral-l2);
+  border-radius: var(--radius-12);
+  padding: var(--spacer-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-10);
+  box-sizing: border-box;
+}
+
+.iter-canvas-page__cell-group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-8);
+}
+
+.iter-canvas-page__cell-group-name {
+  font-size: var(--body-sm-font-size);
+  line-height: var(--body-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-default);
+}
+
+.iter-canvas-page__cell-group-count {
+  font-size: var(--body-xs-font-size);
+  line-height: var(--body-xs-line-height);
+  color: var(--text-tertiary);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-full);
+  padding: var(--spacer-2) var(--spacer-8);
+}
+
+.iter-canvas-page__cell-group-states {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--spacer-16) var(--spacer-20);
+}
+
+/* host-tab 页面补了底部导航后，把场景内悬浮发布按钮上抬一个导航位，避免被底栏遮挡 */
+.iter-canvas-page__scene-host--tabbed .wego-fab {
+  bottom: calc(var(--size-56) + var(--spacer-16));
+}
