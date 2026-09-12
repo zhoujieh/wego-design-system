@@ -45,8 +45,30 @@
     };
   }
 
+  /* 报价导出场景商品增强元数据（shop244 已与业务确认）：
+     系列归属：西装外套=002/006/007/008；衬衫=003/011；上衣=001/009/010/015；短外套=005；套装=004/012/013/014
+     来源归属：云朵=001/010；青禾=002/006/008；微光=003/011/005；南风=007/009/015；漫川=004/013；拾光=012/014
+     货号/搜索码为数字风格演示数据，仅用于报价搜索与表格展示。 */
+  var QUOTE_ENRICH = {
+    'prod-clothing-001': { itemNo: '1001', searchCode: 'HEYE01', series: '上衣', source: '云朵服饰商行' },
+    'prod-clothing-002': { itemNo: '1002', searchCode: 'MHXZ02', series: '西装外套', source: '青禾女装档口' },
+    'prod-clothing-003': { itemNo: '1003', searchCode: 'LGWC03', series: '衬衫', source: '微光面料商行' },
+    'prod-clothing-004': { itemNo: '1004', searchCode: 'KQGC04', series: '套装', source: '漫川生活集合店' },
+    'prod-clothing-005': { itemNo: '1005', searchCode: 'HSZW05', series: '短外套', source: '微光面料商行' },
+    'prod-clothing-006': { itemNo: '1006', searchCode: 'ZLXZ06', series: '西装外套', source: '青禾女装档口' },
+    'prod-clothing-007': { itemNo: '1007', searchCode: 'HJXZ07', series: '西装外套', source: '南风衣局服饰店' },
+    'prod-clothing-008': { itemNo: '1008', searchCode: 'MYXZ08', series: '西装外套', source: '青禾女装档口' },
+    'prod-clothing-009': { itemNo: '1009', searchCode: 'HYDY09', series: '上衣', source: '南风衣局服饰店' },
+    'prod-clothing-010': { itemNo: '1010', searchCode: 'JCZZ10', series: '上衣', source: '云朵服饰商行' },
+    'prod-clothing-011': { itemNo: '1011', searchCode: 'FSXC11', series: '衬衫', source: '微光面料商行' },
+    'prod-clothing-012': { itemNo: '1012', searchCode: 'QNGT12', series: '套装', source: '拾光买手店' },
+    'prod-clothing-013': { itemNo: '1013', searchCode: 'TYNZ13', series: '套装', source: '漫川生活集合店' },
+    'prod-clothing-014': { itemNo: '1014', searchCode: 'LGWT14', series: '套装', source: '拾光买手店' },
+    'prod-clothing-015': { itemNo: '1015', searchCode: 'MSZM15', series: '上衣', source: '南风衣局服饰店' }
+  };
   function product(id, assetId, title, price, attributes, specs, sellingPoints, detailSections, feedText) {
     var linkedAsset = assets.find(function (item) { return item.asset_id === assetId; });
+    var enrich = QUOTE_ENRICH[id] || { itemNo: '', searchCode: '', series: '服装', source: '' };
     var imageList = [];
     if (linkedAsset) {
       /* mock 数据按资产图库取 1–4 张，覆盖四宫格组件的全部分支：1 图撑满 / 2 图两列 / 3 图左大右小 / 4 图 2×2。
@@ -62,12 +84,16 @@
     return {
       product_id: id,
       asset_id: assetId,
-      category: 'clothing',
+      category: enrich.series,
       title: title,
       name: title,
       price: price,
       currency: 'CNY',
       unit: '件',
+      item_no: enrich.itemNo,
+      search_code: enrich.searchCode,
+      source: enrich.source,
+      specification: specs.sizes.join('/') + ' ' + specs.fit,
       attributes: attributes,
       specs: specs,
       sku_options: specs.sizes.concat([specs.fit]),
