@@ -1,0 +1,151 @@
+/* 升级弹窗样式（业务组件 upgrade-popup 全局加载）
+   居中卡片弹窗（覆盖 modal fullscreen 默认底部对齐）、蒙层、强制型 */
+
+/* ═══════════════════════════════════════════════════════════════
+   灰度弹窗（基于 modal fullscreen 变体覆盖为居中淡入弹窗）
+   ═══════════════════════════════════════════════════════════════ */
+/* 居中布局（覆盖 modal 默认的底部对齐） */
+.modal.gray-popup-modal {
+  align-items: center;
+  z-index: var(--z-modal, 600);
+}
+/* 恢复蒙层（fullscreen 变体默认 ::before 为 display:none） */
+.gray-popup-modal::before {
+  display: block;
+  background: var(--bg-mask-light, rgba(0, 0, 0, 0.5));
+}
+/* 面板：覆盖 fullscreen 的全屏样式为居中卡片，动画改为 scale+opacity 淡入 */
+.gray-popup-modal .modal__panel.gray-popup__panel {
+  width: 268px;
+  max-width: 80vw;
+  height: auto;
+  min-height: 0;
+  background: #fff;
+  border-radius: 16px;
+  overflow: visible;
+  position: relative;
+  margin: auto;
+  display: block;
+  --modal-panel-width: 268px;
+  max-width: none;
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+}
+.gray-popup-modal[data-state="closed"] .modal__panel.gray-popup__panel {
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 0.25s ease-in, opacity 0.25s ease-in;
+}
+
+.gray-popup__header {
+  position: relative;
+  height: 130px;
+  overflow: visible;
+}
+
+/* 叉号关闭按钮（仅可关闭型显示）
+   - 位置：弹窗面板底部下方居中（absolute 不占位），弹窗内容整体保持屏幕居中
+   - 样式（对齐设计稿）：默认白色半透明圆底 + 深色叉，点击时背景透明色加深 */
+.gray-popup__close {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  color: #2a2a2a;
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 3;
+  transition: background 0.15s ease;
+}
+.gray-popup__close:active {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.gray-popup__header-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  position: relative;
+  top: -30px;
+}
+
+.gray-popup__body {
+  padding: 8px 24px;
+  margin-top: -30px;
+  background: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.gray-popup__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: gray-popup-counter;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.gray-popup__list li {
+  counter-increment: gray-popup-counter;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  padding-left: 22px;
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.gray-popup__list li:last-child {
+  margin-bottom: 0;
+}
+
+.gray-popup__list li::before {
+  content: counter(gray-popup-counter) '、';
+  position: absolute;
+  left: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.gray-popup__actions {
+  padding: 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+/* 强制型弹窗（无近期不再提醒按钮）底部间距 24px */
+.gray-popup-modal--forced .gray-popup__actions {
+  padding-bottom: 24px;
+}
+
+/* 主按钮：btn 组件（btn--strong 品牌绿、btn--md 40px）基础上弹窗内全宽 */
+.btn.gray-popup__confirm {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+/* 次按钮：link 组件基础上覆盖为弹窗内居中文字链接（设计稿还原）
+   - 高度随组件默认（auto）、宽度内容自适应（align-self:center 覆盖 actions 的 stretch）
+   - 颜色用设计系统 token --text-link；与主按钮间距由 actions 的 gap 承担 */
+.link.gray-popup__later {
+  align-self: center;
+  color: var(--text-link);
+  font-size: 14px;
+  border-radius: 0;
+}
+

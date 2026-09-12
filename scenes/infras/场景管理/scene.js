@@ -17,7 +17,10 @@ const sceneManagerTemplate = `
 (function () {
   // 需走查的业务场景入口清单
   var scenes = [
-    { routeId: 'agent-resale', name: '帮卖弹窗', desc: '代理商帮卖分销弹窗' }
+    { routeId: 'agent-resale', name: '帮卖弹窗', desc: '代理商帮卖分销弹窗' },
+    { routeId: 'upgrade-popup-demo', name: '升级弹窗', desc: '可关闭 / 强制两种形态' },
+    { routeId: 'product-share-demo', name: '产品分享面板', desc: '渠道分组 / 指示器 / 面板配置' },
+    { routeId: 'product-editor-demo', name: '产品编辑', desc: '发布 / 转发 / 编辑三模式' }
   ];
 
   function esc(value) {

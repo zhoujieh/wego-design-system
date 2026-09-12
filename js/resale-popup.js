@@ -1,6 +1,6 @@
-/* 帮卖弹窗（代理商帮卖 / 加价卖 / 赚佣金）全局业务运行时（wego-app/js/）
+/* 帮卖弹窗（代理商帮卖 / 加价卖 / 赚佣金）可复用组件
    - 抽出自 wego-app/scenes/bcg/帮卖分销/scene.js，改为全局加载，供任意业务场景拉起。
-   - 暴露 window.WegoApp.openAgentResalePopup(ctx, options)
+   - 暴露 window.WegoApp.openResalePopup(ctx, options)
        options.sample: 帮卖样例数据（与帮卖分销 SCENE_SAMPLES 同契约）
          { product_id, distribution_type(1=自由定价/2=固定佣金), distribution_config,
            supply_price(数字 或 [min,max] 区间), skus, my_item, current_price,
@@ -17,8 +17,8 @@
   var WegoApp = (window.WegoApp = window.WegoApp || {});
 
   var STORAGE_KEYS = {
-    customAddPrice: 'agent-resale-custom-add-price',
-    showEditFreeTip: 'agent-resale-show-edit-free-tip'
+    customAddPrice: 'resale-custom-add-price',
+    showEditFreeTip: 'resale-show-edit-free-tip'
   };
 
   // ── 工具函数 ──
@@ -512,7 +512,7 @@
         var root = overlayCtx.root;
         var closeBtn = root.querySelector('[data-help-close]');
         if (closeBtn) {
-          closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          closeBtn.addEventListener('click', function () { overlayCtx.close(); });
         }
       }
     });
@@ -649,7 +649,7 @@
           },
           onConfirm: function (value, inputMode) {
             if (commitValue(value, inputMode)) {
-              ctx.closeOverlay();
+              overlayCtx.close();
             }
           }
         });
@@ -681,7 +681,7 @@
               }
             }
           }
-          ctx.closeOverlay();
+          overlayCtx.close();
         });
       }
     });
@@ -695,11 +695,11 @@
         init: function (overlayCtx) {
           var root = overlayCtx.root;
           root.addEventListener('click', function (e) {
-            if (!e.target.closest('.modal__panel')) ctx.closeOverlay();
+            if (!e.target.closest('.modal__panel')) overlayCtx.close();
           });
           var closeBtn = root.querySelector('[data-popup-close]');
           if (closeBtn) {
-            closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+            closeBtn.addEventListener('click', function () { overlayCtx.close(); });
           }
         }
       });
@@ -712,11 +712,11 @@
         init: function (overlayCtx) {
           var root = overlayCtx.root;
           root.addEventListener('click', function (e) {
-            if (!e.target.closest('.modal__panel')) ctx.closeOverlay();
+            if (!e.target.closest('.modal__panel')) overlayCtx.close();
           });
           var closeBtn = root.querySelector('[data-popup-close]');
           if (closeBtn) {
-            closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+            closeBtn.addEventListener('click', function () { overlayCtx.close(); });
           }
           var retryLink = root.querySelector('[data-action="retry"]');
           if (retryLink) {
@@ -765,13 +765,13 @@
 
         root.addEventListener('click', function (e) {
           if (!e.target.closest('.modal__panel')) {
-            ctx.closeOverlay();
+            overlayCtx.close();
           }
         });
 
         var closeBtn = root.querySelector('[data-popup-close]');
         if (closeBtn) {
-          closeBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          closeBtn.addEventListener('click', function () { overlayCtx.close(); });
         }
 
         var resaleTitle = root.querySelector('[data-resale-title]');
@@ -794,7 +794,7 @@
           } else if (action === 'share') {
             ctx.toast('分享面板已拉起');
           }
-          ctx.closeOverlay();
+          overlayCtx.close();
         }
 
         var saveBtn = root.querySelector('[data-action="save"]');
@@ -818,7 +818,7 @@
         }
         var confirmBtn = root.querySelector('[data-action="confirm"]');
         if (confirmBtn) {
-          confirmBtn.addEventListener('click', function () { ctx.closeOverlay(); });
+          confirmBtn.addEventListener('click', function () { overlayCtx.close(); });
         }
 
         var bubble = root.querySelector('[data-edit-bubble]');
@@ -878,7 +878,7 @@
   }
 
   // ── 对外 API ──
-  WegoApp.openAgentResalePopup = function (ctx, options) {
+  WegoApp.openResalePopup = function (ctx, options) {
     options = options || {};
     var sample = options.sample || {};
     var mode = options.mode || 'resale';
