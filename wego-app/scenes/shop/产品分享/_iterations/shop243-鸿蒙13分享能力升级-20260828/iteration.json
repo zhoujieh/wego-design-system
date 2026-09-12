@@ -8,7 +8,7 @@
     "related_scenes": []
   },
   "status": "prototyping",
-  "scope_revision": 4,
+  "scope_revision": 5,
   "brief_file": "shop243-鸿蒙1.3分享能力升级-20260827.md",
   "prototype_brief": {
     "goal": "构建通用化组件化分享面板，统一相册云分散的分享入口，扩展第三方平台分享（视频号/闲鱼/小红书/快手/抖音/微博/转转）、小程序链接分享、保存图片和系统分享能力。组件设计支持多内容类型扩展（产品/列表页/个人主页/单据/海报/订单等），本次迭代以产品分享为主实现，提升商家跨平台分发内容的效率和体验。\n\n---",
@@ -256,20 +256,24 @@
   },
   "brief_submission": {
     "at": "2026-09-02T07:26:16.251Z",
-    "scope_revision": 4,
-    "scope_sha256": "6364492e2b822dfee5625299b1c2bd837b658cac8cce877b591215bacb2fc3c2"
+    "scope_revision": 5,
+    "scope_sha256": "a878d7d38036dfdbc21a075993abdc46bf108ab85f6eda773d70d0f9bc19da92"
   },
   "brief_confirmation": {
     "at": "2026-09-02T07:26:21.708Z",
-    "scope_revision": 4,
-    "scope_sha256": "6364492e2b822dfee5625299b1c2bd837b658cac8cce877b591215bacb2fc3c2"
+    "scope_revision": 5,
+    "scope_sha256": "a878d7d38036dfdbc21a075993abdc46bf108ab85f6eda773d70d0f9bc19da92"
   },
   "prototype_submission": null,
   "prototype_confirmation": null,
   "affected_scenes": [
     "产品分享",
     "产品编辑",
-    "升级弹窗"
+    "升级弹窗",
+    "动态",
+    "发布产品",
+    "我的",
+    "帮卖分销"
   ],
   "affected_runtime": [],
   "stage_outputs": {
