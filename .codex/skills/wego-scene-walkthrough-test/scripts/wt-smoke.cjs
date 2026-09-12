@@ -116,10 +116,11 @@ function check(name, ok, detail = '') {
     });
     check('② 渐变编辑器+色标条', gradEditor.editor && gradEditor.stopbar, JSON.stringify(gradEditor));
 
-    // ③ 数值字段：点击全选 + 输入回显（完整撤销闭环见 test-steps.md）
+    // ③ 数值字段：合并 padding 输入点击全选 + 四边同步（完整撤销闭环见 test-steps.md）
     const num = await page.evaluate(() => {
-      const sp = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel').shadowRoot;
-      const input = sp.querySelector('input[data-field="paddingLeft"]');
+      const panel = document.querySelector('wego-walkthrough').shadowRoot.querySelector('wego-wt-style-panel');
+      const sp = panel.shadowRoot;
+      const input = sp.querySelector('input[data-field="paddingAll"]');
       if (!input) return null;
       const v0 = input.value;
       input.focus();
@@ -128,9 +129,13 @@ function check(name, ok, detail = '') {
       input.value = '30';
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.dispatchEvent(new Event('change', { bubbles: true }));
+      const cs = getComputedStyle(panel._targetEl);
+      selInfo.padding = [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft];
       return selInfo;
     });
-    check('③ 数值字段点击全选', num && num.len > 0 && num.selStart === 0 && num.selEnd === num.len, num ? `len=${num.len}` : '字段未找到');
+    check('③ 合并 padding 点击全选并同步四边',
+      num && num.len > 0 && num.selStart === 0 && num.selEnd === num.len && num.padding.every(v => v === '30px'),
+      num ? `len=${num.len} padding=${num.padding.join('/')}` : '字段未找到');
 
     // ④a 连点上移（鼠标不动连续点击当前选中元素 → 逐级上移父级）：
     // 当前已选中 album-feed__head，同位置（head 中心 p）再点击 → 上移到父级 card

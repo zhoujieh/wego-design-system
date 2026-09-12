@@ -1025,6 +1025,60 @@
         "README 和技能入口恢复本地链接与在线 PR 链接的分阶段说明"
       ],
       "novelty": "ev-056 记录的是隧道默认化方案，本事件记录该方案经实际任务失败后被撤回，形成默认交付不得依赖临时隧道的反向规则。"
+    },
+    {
+      "id": "ev-058",
+      "date": "2026-09-04",
+      "summary": "全局业务运行时挂载 window.WegoApp 时，app.js 导出能力必须合并已有对象而非重建覆盖",
+      "source": "rework",
+      "scene": "报价单导出-全局运行时挂载",
+      "tags": [
+        "runtime",
+        "WegoApp",
+        "script-order",
+        "browser-error",
+        "wego-app"
+      ],
+      "kind": "experience",
+      "observation": "报价单场景内多个全局业务运行时模块按序挂载到 window.WegoApp，某次 app.js 直接对 WegoApp 赋值重建对象，导致先加载模块导出的方法在默认场景初始化时丢失、页面报错。",
+      "mechanism": "多个脚本挂载到同一个 window 命名空间，后执行者若用赋值（WegoApp = {...}）替代合并（Object.assign/扩展），会把先前模块已挂载的能力整体覆盖丢失，取决于脚本加载顺序。",
+      "rule": "全局业务运行时向 window.WegoApp 挂载导出能力时必须合并已有对象，禁止重建覆盖；新增模块用 Object.assign 或解构合并到现对象上。",
+      "scope": [
+        "wego-app/js 全局业务运行时",
+        "app.js",
+        "多模块脚本加载顺序"
+      ],
+      "verification": [
+        "改为合并导出后，先加载模块的方法在默认场景初始化仍可用，页面无报错",
+        "同一命名空间多模块叠加时方法保留，不依赖加载顺序"
+      ],
+      "novelty": "ev-015 只规定全局业务运行时文件放置位置（wego-app/js），不涉及同一 window 命名空间内多模块导出如何合并，本条补充导出合并机制。"
+    },
+    {
+      "id": "ev-059",
+      "date": "2026-09-04",
+      "summary": "hash 路由页面做 cache-busting 时参数必须放 hash 前的 search 部分，放 hash 后会被宿主解析成错误 routeId 导致回归误判",
+      "source": "rework",
+      "scene": "报价单导出-自动化回归",
+      "tags": [
+        "hash-route",
+        "cache-busting",
+        "playwright",
+        "测试"
+      ],
+      "kind": "experience",
+      "observation": "对 hash 路由页面加 cache-busting 参数绕缓存做回归断言，参数写进 # 之后，宿主把整段当成 routeId，直链/overlay 进入错误的页面或回归误判为失败。",
+      "mechanism": "hash 路由把 # 后内容解析为 routeId；cache-busting 参数若放在 # 后会被当作路由段参与匹配，改变实际路由而断言仍按预期 route 校验，产生假象或误判。",
+      "rule": "hash 路由页面做 cache-busting 时，参数必须放在 hash 前的 URL search（?...）部分，不能写进 # 之后；断言前确认实际 routeId 与预期一致。",
+      "scope": [
+        "hash 路由（#/route）页面",
+        "自动化回归/验收断言"
+      ],
+      "verification": [
+        "参数放 search 后直链与 overlay 进入预期 route，断言稳定",
+        "参数放 hash 后 routeId 被污染，回归误判；修复后复测通过"
+      ],
+      "novelty": "ev-026/ev-028 只解决 JS/浏览器缓存绕过手段与 CDP 不可用，本条补充 cache-busting 参数在 hash 路由中的位置约束，避免 routeId 被污染。"
     }
   ]
 }

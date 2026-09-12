@@ -41,6 +41,7 @@ const sceneCategoryMap = new Map([
   // shop 相册云：内容发布、商品展示、个人中心
   ['动态', 'shop'],
   ['发布产品', 'shop'],
+  ['导出报价单', 'shop'],
   ['我的', 'shop'],
   // bcg 生意云：生意经营、交易相关
   ['帮卖分销', 'bcg'],

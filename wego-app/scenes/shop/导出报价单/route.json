@@ -1,0 +1,12 @@
+{
+  "routeId": "quote-export",
+  "pattern": "composed",
+  "entry": {
+    "type": "cell-entry",
+    "label": "导出报价单",
+    "group": "quote-export",
+    "tab": "my"
+  },
+  "style": "scenes/shop/导出报价单/scene.css",
+  "script": "scenes/shop/导出报价单/scene.js"
+}

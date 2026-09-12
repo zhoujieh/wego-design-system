@@ -19,6 +19,10 @@
 §
 [结构] 业务场景功能不入技能目录/设计系统权威源，全局业务运行时放 wego-app/js 与 wego-app/css，由 runtime.business_file 守卫拦截。[ev-015] ×1，最近 2026-09-03
 §
+[结构] 全局业务运行时挂载 window.WegoApp 用合并非重建，安排脚本加载顺序以免覆盖先加载模块导出。[ev-058] ×1，最近 2026-09-04
+§
+[测试] hash 路由页面 cache-busting 参数放 hash 前 search，放 # 后会污染 routeId 致回归误判。[ev-059] ×1，最近 2026-09-04
+§
 [走查] App 场景走查流程见 wego-scene-app-test。[ev-026, ev-029, ev-030, ev-032] ×8，最近 2026-09-03
 §
 [走查] 走查工具交互验收见 wego-scene-walkthrough-test。[ev-017, ev-020, ev-024, ev-044, ev-045, ev-046, ev-047, ev-048, ev-049, ev-050, ev-051, ev-052, ev-053, ev-054] ×1，最近 2026-09-04

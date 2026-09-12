@@ -954,6 +954,57 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
       /* 发布面板与悬浮入口已抽为公共组件 WegoApp.createPublishFab（见 js/publish-fab.js），
          此处仅通过 onPublish 注入我的页的发布落点（写入内容管理 state.published） */
 
+      /* 内容管理「批量」：拉起批量操作 actionsheet（五项），批量导出进入报价流程，其余占位提示 */
+      function openBatchActionSheet(ctx) {
+        var batchItems = [
+          { label: '批量分享', action: 'share' },
+          { label: '批量编辑', action: 'edit' },
+          { label: '批量导出', action: 'export' },
+          { label: '批量上下架', action: 'shelf' },
+          { label: '批量删除 · 云空间清理', action: 'delete' }
+        ];
+        var itemsHtml = batchItems.map(function (item) {
+          return '<div class="actionsheet__item" data-batch-action="' + item.action + '">'
+            + '<div class="actionsheet__item-main"><div class="actionsheet__item-title">' + item.label + '</div></div>'
+            + '</div>';
+        }).join('');
+        var html = '<div class="actionsheet actionsheet--action" data-component-slug="actionsheet" role="dialog" aria-modal="true" data-state="open">'
+          + '<div class="actionsheet__panel">'
+          + '<div class="actionsheet__list">' + itemsHtml + '</div>'
+          + '<div class="actionsheet__cancel-gap"></div>'
+          + '<div class="actionsheet__cancel" data-dom-id="my-batch-cancel" data-close-batch-sheet>取消</div>'
+          + '</div>'
+          + '</div>';
+        var pendingAction = null;
+        ctx.openSheet(html, {
+          label: '批量操作',
+          onDestroy: function () {
+            if (!pendingAction) return;
+            var action = pendingAction;
+            pendingAction = null;
+            if (action === 'export') {
+              window.WegoApp.navigate('quote-export');
+            } else {
+              ctx.toast('本期暂不展开');
+            }
+          },
+          init: function (sheetCtx) {
+            var sheetRoot = sheetCtx.root;
+            Array.prototype.forEach.call(sheetRoot.querySelectorAll('[data-batch-action]'), function (item) {
+              item.addEventListener('click', function () {
+                pendingAction = item.getAttribute('data-batch-action');
+                ctx.closeOverlay();
+              });
+            });
+            var cancel = sheetRoot.querySelector('[data-close-batch-sheet]');
+            if (cancel) cancel.addEventListener('click', function () { ctx.closeOverlay(); });
+            sheetRoot.addEventListener('click', function (e) {
+              if (e.target === sheetCtx.root) ctx.closeOverlay();
+            });
+          }
+        });
+      }
+
       function onRootClick(event) {
         var groupToggle = event.target.closest('[data-group-toggle]');
         if (groupToggle) {
@@ -1028,7 +1079,11 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         }
         var managementAction = event.target.closest('[data-management-action]');
         if (managementAction) {
-          var labels = { sort: '排序', category: '分类', batch: '批量', collection: '合集' };
+          if (managementAction.dataset.managementAction === 'batch') {
+            openBatchActionSheet(ctx);
+            return;
+          }
+          var labels = { sort: '排序', category: '分类', collection: '合集' };
           ctx.toast((labels[managementAction.dataset.managementAction] || '管理') + '入口，本期暂不展开');
           return;
         }

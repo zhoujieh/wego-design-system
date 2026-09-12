@@ -72,6 +72,17 @@ window.WEGO_APP_ROUTES = [
   script: './scenes/shop/发布产品/scene.js'
 },
 {
+  routeId: 'quote-export',
+  entry: {
+    type: 'cell-entry',
+    label: '导出报价单',
+    group: 'quote-export',
+    tab: 'my'
+  },
+  style: './scenes/shop/导出报价单/scene.css',
+  script: './scenes/shop/导出报价单/scene.js'
+},
+{
   routeId: 'scene-manager',
   entry: {
     type: 'cell-entry',
