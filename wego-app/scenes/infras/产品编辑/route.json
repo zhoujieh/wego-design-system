@@ -1,0 +1,9 @@
+{
+  "routeId": "product-editor-demo",
+  "entry": {
+    "type": "cell-entry",
+    "label": "产品编辑",
+    "group": "workspace-tools",
+    "tab": "workspace"
+  }
+}

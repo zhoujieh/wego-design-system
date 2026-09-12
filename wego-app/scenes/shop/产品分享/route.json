@@ -1,0 +1,9 @@
+{
+  "routeId": "product-share-demo",
+  "entry": {
+    "type": "cell-entry",
+    "label": "产品分享面板",
+    "group": "workspace-tools",
+    "tab": "workspace"
+  }
+}

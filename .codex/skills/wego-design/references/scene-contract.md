@@ -50,6 +50,17 @@ wego-app/scenes/{分类}/{中文业务场景}/scene.css
 <!-- rule-id: overlay-component-consumption-binding -->
 传给 overlay API 的 HTML 必须使用对应 Preview 的完整组件根、面板和子内容；默认允许 mask/cancel 关闭的组件必须实际调用关闭 API。守卫直接检查 API、组件 DOM 和关闭逻辑，不要求另写交互或组件绑定清单。
 
+## 业务组件复用
+
+<!-- rule-id: business-component-first -->
+场景涉及可复用业务能力（帮卖、产品分享、产品编辑/发布/转发、升级引导等）时，先按适用业务场景查业务组件清单（`references/library-map.md` 业务组件分类 + `runtime/`），命中即复用，不重复实现。
+
+<!-- rule-id: business-component-consumption-api -->
+业务组件经 `window.WegoApp.open{Component}` 全局 API 消费，调用前用 `window.WegoApp && window.WegoApp.open{Component}` 判空防御；业务组件由 `index.html` 全局加载，不注册场景路由，不从 `scene.js` 懒加载。
+
+<!-- rule-id: business-component-new-entry -->
+业务组件清单无命中才新做，新做组件归入 `runtime/`（同步至 `lib/js/`），头部注释按统一范式写明【业务场景】【适用场景】【消费方式】，并登记回 `library-map.md` 与 `library-consumption.json` 的业务组件层。
+
 ## scene.css
 
 <!-- rule-id: business-state-class-scoped-prefix -->

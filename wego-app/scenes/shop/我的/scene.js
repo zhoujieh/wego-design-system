@@ -672,10 +672,31 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         });
       }
 
+      /* 转发的产品（shop243 分享能力升级，写入 wego.product.forwarded）回显到我的页产品 tab */
+      function forwardedProducts() {
+        if (!window.WegoApp || !window.WegoApp.getForwardedProducts) return [];
+        return window.WegoApp.getForwardedProducts().map(function (fp) {
+          var p = fp.productData && fp.productData.product ? fp.productData.product : {};
+          return {
+            id: fp.productId,
+            type: 'product',
+            title: p.name || '转发商品',
+            images: (p.image_list || []).slice(0, 4),
+            price: p.price,
+            shareLabel: '已转发 · 来自' + (fp.forwardFromName || '商家'),
+            promos: [],
+            seckill: false,
+            attrs: '转发自 ' + (fp.forwardFromName || ''),
+            updatedAt: fp.forwardedAt || '刚刚',
+            isForwarded: true
+          };
+        });
+      }
+
       function contentFor(type) {
         var defaults = type === 'product' ? productContent() : type === 'note' ? noteContent() : liveContent();
         var base = (state.published[type] || []).concat(defaults);
-        if (type === 'product') base = base.concat(realPublishedProducts());
+        if (type === 'product') base = base.concat(realPublishedProducts()).concat(forwardedProducts());
         var items = base.filter(function (item) { return !state.removedContentIds.includes(item.id); });
         return items.sort(function (left, right) {
           return Number(state.pinnedContentIds.includes(right.id)) - Number(state.pinnedContentIds.includes(left.id));
@@ -891,7 +912,7 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
         /* 发布产品：作为 overlay 模态打开发布场景（与动态页一致，来源页保持挂载，
            写入动态流 + 回写我的页产品 tab），不再内联演示 */
         if (type === 'product') {
-          window.WegoApp.openPublishProductModal(ctx);
+          window.WegoApp.openProductEditor(ctx);
           return;
         }
         /* 笔记 / 直播：内联演示，写入我的页内容管理 */
@@ -946,6 +967,25 @@ const myTabTemplate = `<div class="layout-page my-tab-page" data-surface-id="my"
           state.cartItemCount += 1;
           renderApps();
           ctx.toast('已加入采购单');
+          return;
+        }
+        if (action === 'share') {
+          /* 调用通用分享面板 */
+          var items = contentFor(state.activeType);
+          var item = items.find(function (it) { return it.id === itemId; });
+          if (window.WegoApp && window.WegoApp.openProductShare && item) {
+            window.WegoApp.openProductShare(ctx, {
+              content: {
+                id: item.id,
+                title: item.title,
+                images: item.images || [],
+                videos: [],
+                isOwn: true
+              }
+            });
+          } else {
+            ctx.toast('分享已完成');
+          }
           return;
         }
         ctx.toast((labels[action] || '操作') + '已完成');

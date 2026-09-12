@@ -1,0 +1,437 @@
+/* 产品分享样式（业务组件 product-share 全局加载）
+   分享面板、分享结果弹窗、下载进度、已转发标记 */
+
+/* ═══════════════════════════════════════════════════════════════
+   分享面板（复用 .modal 组件，背景色通过 --modal-panel-bg 内联设置为 --bg-panel）
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 面板容器 */
+.share-panel__panel {
+  width: 100%;
+  background: var(--bg-panel, #f6f6f6);
+  border-radius: 16px 16px 0 0;
+  padding-top: 0px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 标题栏 */
+.share-panel__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 4px 0 16px;
+  height: 64px;
+}
+
+/* 标题栏/配置栏下方分割线：0.5px、左侧缩进16px不到边、右侧到边 */
+.share-panel__header::after,
+.share-panel__config::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 0;
+  border-bottom: 0.5px solid var(--border-neutral-l2);
+  pointer-events: none;
+}
+
+.share-panel__title {
+  flex: 1 1 0%;
+  font-size: var(--body-lg-font-size);
+  font-weight: 600;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-panel__header-actions {
+  display: flex;
+  height: 100%;
+  gap: 0px;
+}
+
+.share-panel__header-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #666);
+  font-size: 18px;
+  padding: 0 4px;
+  height: auto;
+  border-radius: 8px;
+  transition: background var(--duration-fast, 0.15s) ease;
+}
+
+.share-panel__header-btn:active {
+  opacity: 0.6;
+}
+
+.share-panel__header-btn-text {
+  font-size: var(--body-xs-font-size);
+  color: var(--text-default);
+  line-height: 1.2;
+}
+
+/* 头部入口图标统一 20px + 默认文字色（对齐导航栏 action 组件） */
+.share-panel__header-btn .wego-iconfont-s {
+  font-size: 20px;
+  color: var(--text-default);
+}
+
+/* 配置栏 */
+.share-panel__config {
+  position: relative;
+  height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.share-panel__config-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.share-panel__config-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.share-panel__config-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-default, #1a1a1a);
+  cursor: pointer;
+  padding: 4px 0;
+  border-radius: 6px;
+  transition: background var(--duration-fast, 0.15s) ease;
+}
+
+.share-panel__config-option .checkbox-field__text.is-active {
+  color: var(--text-brand, #07c160);
+}
+
+.share-panel__config-link {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--text-default);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  border-radius: 6px;
+  transition: opacity var(--duration-fast, 0.15s) ease;
+  flex-shrink: 0;
+}
+
+.share-panel__config-link > span {
+  font-size: var(--body-md-font-size);
+}
+
+.share-panel__config-link:active {
+  opacity: 0.6;
+}
+
+.share-panel__config-link i {
+  font-size: 12px;
+}
+
+/* 渠道栏（复用 .layout-scroll-row 横向滚动）：上方间距 20px，与指示器间距 20px */
+.share-panel__channels {
+  padding: 20px 8px 20px;
+  gap: 0;
+}
+
+.share-panel__channel-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 20px 0;
+  padding: 0;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+.share-panel__channel-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding-top: 0;
+  padding-right: 4px;
+  padding-bottom: 0;
+  padding-left: 4px;
+  width: 68px;
+  flex: 0 0 68px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  transition: background var(--duration-fast, 0.15s) ease;
+}
+
+.share-panel__channel-item:active,
+.share-panel__channel-item.is-pressed {
+  background: transparent;
+}
+
+/* 点击态仅反馈到图标方框背景，用设计系统 pressed token */
+.share-panel__channel-item:active .share-panel__channel-icon,
+.share-panel__channel-item.is-pressed .share-panel__channel-icon {
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
+}
+
+.share-panel__channel-icon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--bg-surface, #ffffff);
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.share-panel__channel-svg {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+.share-panel__channel-icon .wego-iconfont-s {
+  font-size: 28px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-panel__channel-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  background: linear-gradient(135deg, #ff9500, #ff6b00);
+  color: #fff;
+  font-size: 9px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.share-panel__channel-name {
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+  line-height: 1.2;
+  text-align: center;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* 滚动指示器：容器宽 32px，thumb 宽度按分组数动态（两组 50%、三组 33.3%），仅多组时显示 */
+.share-panel__indicator {
+  width: 32px;
+  height: 2px;
+  margin: 0 auto 20px;
+  border-radius: 1px;
+  background: var(--border-light, #e0e0e0);
+  position: relative;
+  overflow: hidden;
+}
+
+.share-panel__indicator-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--text-secondary, #999);
+  transition: transform 0.15s ease;
+}
+
+/* 其他操作栏：单行横向滚动，样式与分享渠道一致（52px 图标框 + 下方文字），上方由指示器间距承接 */
+.share-panel__actions {
+  padding: 0 8px 20px;
+  gap: 0;
+}
+
+.share-panel__action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  width: 68px;
+  flex: 0 0 68px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  transition: background var(--duration-fast, 0.15s) ease;
+}
+
+/* 点击态仅反馈到图标方框背景，与分享渠道一致 */
+.share-panel__action-item:active .share-panel__action-icon,
+.share-panel__action-item.is-pressed .share-panel__action-icon {
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
+}
+
+.share-panel__action-icon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface, #ffffff);
+  border-radius: 12px;
+  box-sizing: border-box;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-panel__action-icon .wego-iconfont-s {
+  font-size: 28px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-panel__action-name {
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 取消按钮 */
+.share-panel__cancel {
+  width: 100%;
+  padding: 14px;
+  padding-bottom: calc(14px + var(--safe-area-bottom));
+  border: none;
+  border-top: 1px solid var(--border-light, #f0f0f0);
+  background: transparent;
+  font-size: 16px;
+  color: var(--text-default, #1a1a1a);
+  cursor: pointer;
+  text-align: center;
+  transition: background var(--duration-fast, 0.15s) ease;
+}
+
+.share-panel__cancel:active {
+  background: var(--bg-state-pressed, rgba(32, 47, 100, 0.06));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   分享至 XX 弹窗
+   ═══════════════════════════════════════════════════════════════ */
+.share-result-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  padding: 32px;
+}
+
+.share-result-modal__panel {
+  width: 100%;
+  max-width: 320px;
+  background: var(--bg-surface, #fff);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.share-result-modal__title {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-result-modal__body {
+  margin-bottom: 20px;
+}
+
+.share-result-modal__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--text-default, #1a1a1a);
+}
+
+.share-result-modal__check {
+  color: var(--brand-primary, #07c160);
+  font-size: 16px;
+}
+
+.share-result-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.share-result-modal__goto {
+  width: 100%;
+}
+
+.share-result-modal__clean {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   灰度弹窗（基于 modal fullscreen 变体覆盖为居中淡入弹窗）
+   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   动态页产品卡片：已分享/已转发标识
+   ═══════════════════════════════════════════════════════════════ */
+.album-feed__share-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  background: rgba(7, 193, 96, 0.1);
+  color: var(--brand-primary, #07c160);
+  margin-left: 8px;
+}
+
+.album-feed__share-badge--forwarded {
+  background: rgba(255, 149, 0, 0.1);
+  color: #ff9500;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   发布页导航栏分享/快捷分享按钮
+
+/* ═══════════════════════════════════════════════════════════════
+   Loading 浮层右上角中断按钮（保存图片/视频下载进度浮层）
+   ═══════════════════════════════════════════════════════════════ */
+/* 说明：Loading 浮层遮罩阻断、右上角叉叉中断按钮、页面滚动锁定已沉淀为 Loading 组件默认能力（components.css），业务不再维护场景级覆盖 */
