@@ -11,7 +11,8 @@
  *   2. 表述一致性：经验描述不得与对应事实存在明显矛盾
  *   3. 格式合规：用 § 分隔，每条非空，头部说明完整
  *   4. 容量检查：核心摘要总字符数不超过 CHAR_LIMIT（细节应毕业到场景技能）
- *   5. 场景技能：.codex/skills/wego-scene-* 必须具备合规 frontmatter，
+ *   5. 经验质量门：qualityGateSince 起的新事实必须具备结构化因果与验证字段
+ *   6. 场景技能：.codex/skills/wego-scene-* 必须具备合规 frontmatter，
  *      且正文中引用的 evidence ID 必须存在
  *
  * 另提供只读查询，供沉淀时按关键词取相关事实、避免全量读取 evidence.json：
@@ -66,6 +67,11 @@ function runRelated(keywords) {
   for (const e of matched) {
     console.log(`- ${e.id}｜${e.date}｜${e.source}｜scene: ${e.scene || '-'}`);
     console.log(`  ${e.summary}`);
+    if (e.mechanism) console.log(`  机制: ${e.mechanism}`);
+    if (e.rule) console.log(`  规则: ${e.rule}`);
+    if (e.scope?.length) console.log(`  边界: ${e.scope.join(', ')}`);
+    if (e.verification?.length) console.log(`  验证: ${e.verification.join('；')}`);
+    if (e.novelty) console.log(`  去重: ${e.novelty}`);
     if (e.tags?.length) console.log(`  tags: ${e.tags.join(', ')}`);
     console.log('');
   }
@@ -94,8 +100,9 @@ const report = {
   valid: true,
   errors: [],
   warnings: [],
-  stats: { evidenceCount: 0, experienceCount: 0, charCount: 0, sceneSkillCount: 0 },
+  stats: { evidenceCount: 0, qualityGatedCount: 0, experienceCount: 0, charCount: 0, sceneSkillCount: 0 },
 };
+let evidenceDocument = null;
 
 function fail(message) {
   report.valid = false;
@@ -113,6 +120,7 @@ function loadEvidence() {
   }
   try {
     const doc = JSON.parse(fs.readFileSync(evidencePath, 'utf8'));
+    evidenceDocument = doc;
     const events = Array.isArray(doc.events) ? doc.events : [];
     report.stats.evidenceCount = events.length;
     return events;
@@ -120,6 +128,82 @@ function loadEvidence() {
     fail(`evidence.json 解析失败：${error.message}`);
     return null;
   }
+}
+
+function eventOrdinal(id) {
+  const match = String(id || '').match(/^ev-(\d+)$/);
+  return match ? Number(match[1]) : null;
+}
+
+function experienceQualityIssues(event) {
+  const issues = [];
+  if (event.kind !== 'experience') issues.push('kind 必须为 experience，需求/普通缺陷不得进入 evidence');
+  for (const field of ['observation', 'mechanism', 'rule', 'novelty']) {
+    if (typeof event[field] !== 'string' || event[field].trim().length < 8) issues.push(`缺少有效质量字段 ${field}`);
+  }
+  for (const field of ['scope', 'verification']) {
+    if (!Array.isArray(event[field]) || event[field].length === 0 || event[field].some(item => typeof item !== 'string' || !item.trim())) {
+      issues.push(`缺少有效质量字段 ${field}[]`);
+    }
+  }
+  return issues;
+}
+
+/** qualityGateSince 起只接受可验证的结构化因果经验；脚本校验字段，不代替 AI 的语义判断。 */
+function checkExperienceQuality(events) {
+  const ids = new Set();
+  for (const event of events) {
+    if (!event.id || ids.has(event.id)) fail(`evidence ID 缺失或重复：${event.id || '(empty)'}`);
+    ids.add(event.id);
+  }
+  const sinceId = evidenceDocument && evidenceDocument.qualityGateSince;
+  if (!sinceId) {
+    warn('evidence.json 未设置 qualityGateSince；历史 schema 兼容，但新经验不会执行结构化质量门');
+    return;
+  }
+  const since = eventOrdinal(sinceId);
+  if (since === null || !ids.has(sinceId)) {
+    fail(`qualityGateSince 无效或未命中事件：${sinceId}`);
+    return;
+  }
+  const gated = events.filter(event => {
+    const ordinal = eventOrdinal(event.id);
+    return ordinal !== null && ordinal >= since;
+  });
+  report.stats.qualityGatedCount = gated.length;
+  gated.forEach(event => {
+    const label = event.id || '(unknown)';
+    experienceQualityIssues(event).forEach(issue => fail(`${label} ${issue}`));
+  });
+}
+
+function runQualitySelfTest() {
+  const valid = {
+    kind: 'experience',
+    observation: '同类失败在独立任务中可以被观察和复现',
+    mechanism: '失败由稳定且可解释的机制触发',
+    rule: '命中该条件时必须执行可操作的预防动作',
+    scope: ['跨任务测试场景'],
+    verification: ['修复前失败且修复后通过'],
+    novelty: '已查询现有权威源且没有同义规则',
+  };
+  const requirementOnly = { ...valid, kind: 'requirement' };
+  const missingMechanism = { ...valid, mechanism: '' };
+  const failures = [];
+  if (experienceQualityIssues(valid).length !== 0) failures.push('合格结构化经验被错误拒绝');
+  if (experienceQualityIssues(requirementOnly).length === 0) failures.push('需求记录未被拒绝');
+  if (experienceQualityIssues(missingMechanism).length === 0) failures.push('缺少机制的记录未被拒绝');
+  if (jsonOutput) {
+    console.log(JSON.stringify({
+      errors: failures.map(message => ({ code: 'experience.quality_self_test', message })),
+      warnings: [],
+      info: [],
+      metrics: { cases: 3, passed: 3 - failures.length },
+    }, null, 2));
+  } else {
+    console.log(failures.length ? `✗ 经验质量门自测失败：${failures.join('；')}` : '✓ 经验质量门自测通过（合格经验放行、需求记录与缺失机制记录拒绝）');
+  }
+  process.exit(failures.length ? 1 : 0);
 }
 
 function loadExperience() {
@@ -299,6 +383,7 @@ function main() {
     checkConsistency(entries, events);
   }
 
+  checkExperienceQuality(events);
   checkCapacity(content);
   checkSceneSkills(new Set(events.map((e) => e.id)));
   checkSceneSkillDownshift(entries);
@@ -317,7 +402,7 @@ function finish(code) {
     }, null, 2));
   } else {
     if (report.valid) {
-      console.log(`✓ 经验校验通过（${report.stats.experienceCount} 条摘要，${report.stats.evidenceCount} 条事实，${report.stats.sceneSkillCount} 个场景技能，${report.stats.charCount} 字符）`);
+      console.log(`✓ 经验校验通过（${report.stats.experienceCount} 条摘要，${report.stats.evidenceCount} 条事实，其中 ${report.stats.qualityGatedCount} 条通过结构化质量门，${report.stats.sceneSkillCount} 个场景技能，${report.stats.charCount} 字符）`);
     } else {
       console.log(`✗ 经验校验失败（${report.errors.length} 个错误）`);
       report.errors.forEach((e) => console.log(`  - ${e}`));
@@ -330,4 +415,5 @@ function finish(code) {
   process.exit(code);
 }
 
+if (args.has('--self-test-quality')) runQualitySelfTest();
 main();

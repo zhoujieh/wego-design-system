@@ -2,7 +2,7 @@
    - 动态页与我的页共用同一套悬浮按钮 + 「选择发布类型」面板
    - 面板内容（发布产品 / 发布笔记 / 发起直播）与交互（点击 FAB → 弹面板 → 选类型 → 回调）完全一致
    - 各页通过 onPublish(type) 自行决定发布结果落点，实现「组件与交互同步、发布结果各页面维护」
-   依赖：window.WegoApp（ctx.openSheet / ctx.closeOverlay），需在 app.js 之后加载 */
+   依赖：window.WegoApp；app.js 会合并已挂载能力，允许本模块先于 app.js 加载 */
 (function () {
   'use strict';
 

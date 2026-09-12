@@ -20,6 +20,10 @@ import path from 'node:path';
 const repositoryRoot = path.resolve(process.cwd());
 const artifactRoots = ['.uploads', 'output', '.tasks', '.playwright-cli'];
 const defaultOlderThanHours = 24;
+const protectedTaskArtifacts = [
+  '.tasks/experience-inbox.json',
+  '.tasks/preview-servers/'
+];
 
 function parseArgs(argv) {
   const [command, ...flags] = argv;
@@ -55,6 +59,13 @@ function artifactPath(baseRoot, relative) {
   return target;
 }
 
+function isProtectedTaskArtifact(baseRoot, target) {
+  const relative = path.relative(baseRoot, target).split(path.sep).join('/');
+  return protectedTaskArtifacts.some(marker => (
+    marker.endsWith('/') ? relative.startsWith(marker) : relative === marker
+  ));
+}
+
 function listLeaves(target) {
   if (!fs.existsSync(target)) return [];
   const stat = fs.lstatSync(target);
@@ -87,14 +98,16 @@ function inspectArtifacts({ baseRoot, all, olderThanHours, now = Date.now() }) {
   for (const relativeRoot of artifactRoots) {
     const root = artifactPath(baseRoot, relativeRoot);
     if (!fs.existsSync(root)) continue;
-    const leaves = listLeaves(root);
+    const leaves = listLeaves(root).filter(leaf => !isProtectedTaskArtifact(baseRoot, leaf.target));
     if (all) {
-      matched.push({
-        path: relativeRoot,
-        type: 'root',
-        files: leaves.length,
-        bytes: leaves.reduce((sum, item) => sum + item.stat.size, 0),
-      });
+      for (const leaf of leaves) {
+        matched.push({
+          path: path.relative(baseRoot, leaf.target),
+          type: leaf.stat.isSymbolicLink() ? 'symlink' : 'file',
+          files: 1,
+          bytes: leaf.stat.size,
+        });
+      }
       continue;
     }
     for (const leaf of leaves) {
@@ -113,24 +126,18 @@ function inspectArtifacts({ baseRoot, all, olderThanHours, now = Date.now() }) {
 function cleanArtifacts({ baseRoot, all, olderThanHours, now = Date.now() }) {
   const matched = inspectArtifacts({ baseRoot, all, olderThanHours, now });
   const removedDirectories = [];
-  if (all) {
-    for (const relativeRoot of artifactRoots) {
+  for (const item of matched) {
+    const target = path.resolve(baseRoot, item.path);
+    const allowed = artifactRoots.some(relativeRoot => {
       const root = artifactPath(baseRoot, relativeRoot);
-      if (fs.existsSync(root)) fs.rmSync(root, { recursive: true, force: true });
-    }
-  } else {
-    for (const item of matched) {
-      const target = path.resolve(baseRoot, item.path);
-      const allowed = artifactRoots.some(relativeRoot => {
-        const root = artifactPath(baseRoot, relativeRoot);
-        return target === root || target.startsWith(`${root}${path.sep}`);
-      });
-      if (!allowed) throw new Error(`任务产物文件越界：${target}`);
-      fs.rmSync(target, { force: true });
-    }
-    for (const relativeRoot of artifactRoots) {
-      removedDirectories.push(...removeEmptyDirectories(artifactPath(baseRoot, relativeRoot), baseRoot));
-    }
+      return target === root || target.startsWith(`${root}${path.sep}`);
+    });
+    if (!allowed) throw new Error(`任务产物文件越界：${target}`);
+    if (isProtectedTaskArtifact(baseRoot, target)) throw new Error(`受保护的交付状态不得由通用清理删除：${item.path}`);
+    fs.rmSync(target, { recursive: item.type === 'root', force: true });
+  }
+  for (const relativeRoot of artifactRoots) {
+    removedDirectories.push(...removeEmptyDirectories(artifactPath(baseRoot, relativeRoot), baseRoot));
   }
   return { matched, removedDirectories };
 }
@@ -154,7 +161,9 @@ function runSelfTest() {
     const oldUpload = path.join(fixture, '.uploads', 'old-input.png');
     const oldSnapshot = path.join(fixture, '.playwright-cli', 'nested', 'old.yml');
     const recentOutput = path.join(fixture, 'output', 'recent.png');
-    for (const target of [oldUpload, oldSnapshot, recentOutput]) {
+    const experienceInbox = path.join(fixture, '.tasks', 'experience-inbox.json');
+    const previewRecord = path.join(fixture, '.tasks', 'preview-servers', 'active.json');
+    for (const target of [oldUpload, oldSnapshot, recentOutput, experienceInbox, previewRecord]) {
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, target);
     }
@@ -178,9 +187,9 @@ function runSelfTest() {
     assert.ok(fs.existsSync(recentOutput), '24 小时内产物必须保留');
 
     cleanArtifacts({ baseRoot: fixture, all: true, olderThanHours: 24 });
-    for (const relativeRoot of artifactRoots) {
-      assert.ok(!fs.existsSync(path.join(fixture, relativeRoot)), '--all 必须清理完整产物目录');
-    }
+    assert.ok(fs.existsSync(experienceInbox), '经验草稿不得被通用清理删除');
+    assert.ok(fs.existsSync(previewRecord), '受管预览记录不得被通用清理删除');
+    assert.ok(!fs.existsSync(path.join(fixture, '.uploads')), '--all 必须清理非保护任务产物');
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }

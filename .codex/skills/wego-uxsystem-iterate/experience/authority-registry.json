@@ -14,7 +14,7 @@
     "token": { "paths": [".codex/skills/wego-design/colors_and_type.css"] },
     "preview": { "paths": [".codex/skills/wego-design/preview/component-*.html"] },
     "agents": { "paths": ["AGENTS.md"] },
-    "script": { "paths": ["scripts/validate-*.mjs", "scripts/sync-*.mjs", "scripts/iteration-record.mjs"] },
+    "script": { "paths": ["scripts/*.mjs"] },
     "test": { "paths": ["scripts/test-*.mjs"] }
   }
 }
